@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/LogoutButton";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -32,6 +33,9 @@ export default function DashboardLayout({
             </Link>
           ))}
         </nav>
+        <div className="px-3 py-4 border-t border-gray-100">
+          <LogoutButton />
+        </div>
       </aside>
 
       {/* Main content */}
