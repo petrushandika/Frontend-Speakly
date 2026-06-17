@@ -30,7 +30,6 @@ export default function HomePage() {
   const { data: recent = [] } = trpc.progress.getRecentProgress.useQuery();
   const updateStreak = trpc.progress.updateStreak.useMutation({
     onSuccess: () => refetchSummary(),
-    onError:   () => {},
   });
 
   useEffect(() => { updateStreak.mutate(); }, []); // eslint-disable-line react-hooks/exhaustive-deps

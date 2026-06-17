@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { createClient } from "@/lib/supabase/client";
 import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
@@ -17,12 +17,14 @@ type Theme = "business" | "technology" | "travel" | "daily_life" | "science" | "
 
 interface ReadingText {
   title: string;
+  genre?: string;
   theme: string;
   cefrLevel: string;
   paragraphs: string[];
   wordCount: number;
   keyVocabulary: Array<{ word: string; definition: string; indonesian: string; ipa: string }>;
   readingTips: string;
+  pronunciationChallenges?: string[];
 }
 
 interface WordResult {
@@ -46,6 +48,19 @@ const PARAGRAPH_OPTIONS = [
   { value: 1, label: "1 paragraph", sub: "~175 words · Quick practice" },
   { value: 2, label: "2 paragraphs", sub: "~350 words · Standard" },
   { value: 3, label: "3 paragraphs", sub: "~560 words · Full session" },
+];
+
+const GENRES = [
+  { id: "narrative",   label: "Short Story" },
+  { id: "article",     label: "Magazine Article" },
+  { id: "opinion",     label: "Opinion Piece" },
+  { id: "travel_log",  label: "Travel Journal" },
+  { id: "interview",   label: "Interview" },
+  { id: "how_to",      label: "How-To Guide" },
+  { id: "review",      label: "Review" },
+  { id: "letter",      label: "Personal Letter" },
+  { id: "news",        label: "News Report" },
+  { id: "blog",        label: "Blog Post" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -107,12 +122,15 @@ function calcScore(results: WordResult[]) {
 function SelectStep({
   theme, setTheme,
   paragraphs, setParagraphs,
+  genre, setGenre,
   onGenerate, isGenerating,
 }: {
   theme: Theme;
   setTheme: (t: Theme) => void;
   paragraphs: number;
   setParagraphs: (n: number) => void;
+  genre: string;
+  setGenre: (g: string) => void;
   onGenerate: () => void;
   isGenerating: boolean;
 }) {
@@ -156,6 +174,32 @@ function SelectStep({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* Genre picker */}
+      <div className="space-y-3">
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Text format</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setGenre("")}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+              genre === "" ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "border-[var(--line)] bg-[var(--surface-strong)] text-[var(--foreground)]/60 hover:border-primary-300"
+            }`}
+          >
+            🎲 Random
+          </button>
+          {GENRES.map((g) => (
+            <button
+              key={g.id}
+              onClick={() => setGenre(g.id)}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+                genre === g.id ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "border-[var(--line)] bg-[var(--surface-strong)] text-[var(--foreground)]/60 hover:border-primary-300"
+              }`}
+            >
+              {g.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -386,13 +430,29 @@ function ResultStep({
   onTryAgain: () => void;
   onNewText: () => void;
 }) {
-  const fullText = text.paragraphs.join(" ");
+  const fullText   = text.paragraphs.join(" ");
   const wordResults = compareTranscript(fullText, transcript);
-  const score = calcScore(wordResults);
+  const score       = calcScore(wordResults);
   const paraResults = splitResultsByParagraph(wordResults, text.paragraphs);
 
   const correct   = wordResults.filter((r) => r.correct).length;
   const incorrect = wordResults.filter((r) => !r.correct).length;
+  const missedWords = wordResults.filter((r) => !r.correct).map((r) => r.expected).slice(0, 15);
+
+  const analyze = trpc.ai.analyzeReadingAloud.useMutation();
+
+  function triggerAnalysis() {
+    analyze.mutate({ expected: fullText, transcript, cefrLevel: text.cefrLevel, missedWords });
+  }
+
+  // Auto-trigger AI analysis once on mount
+  const hasTriggered = useRef(false);
+  useEffect(() => {
+    if (hasTriggered.current) return;
+    hasTriggered.current = true;
+    triggerAnalysis();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const scoreColor =
     score >= 85 ? "text-emerald-600 dark:text-emerald-400" :
@@ -474,12 +534,71 @@ function ResultStep({
         </div>
       </div>
 
-      {/* What we heard */}
+      {/* AI Deep Analysis */}
       <div className="space-y-2">
-        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">What we heard</p>
-        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 text-sm text-[var(--foreground)]/70 leading-relaxed italic">
-          {transcript || "No speech detected"}
-        </div>
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest flex items-center gap-1.5">
+          <Lightbulb className="w-3.5 h-3.5 text-amber-400" /> AI Coach Feedback
+        </p>
+        {analyze.isPending && (
+          <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl text-xs text-[var(--foreground)]/40">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analysing your pronunciation…
+          </div>
+        )}
+        {analyze.isError && (
+          <div className="flex items-center justify-between px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 dark:text-red-400">
+            <span>AI analysis failed.</span>
+            <button onClick={triggerAnalysis} className="font-bold underline hover:no-underline">Retry</button>
+          </div>
+        )}
+        {analyze.data && (
+          <div className="bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl p-4 space-y-4 text-sm">
+            {/* Overall */}
+            <p className="text-[var(--foreground)]/80 leading-relaxed">{analyze.data.overallFeedback}</p>
+
+            {/* Spelling / word errors */}
+            {analyze.data.spellingErrors?.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-red-500 uppercase tracking-wide">Word errors detected</p>
+                <div className="space-y-1.5">
+                  {analyze.data.spellingErrors.map((e: { said: string; expected: string; type: string; tip: string }, i: number) => (
+                    <div key={i} className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="px-2 py-0.5 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded line-through">{e.said}</span>
+                      <span className="text-[var(--foreground)]/40">→</span>
+                      <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded font-semibold">{e.expected}</span>
+                      <span className="text-[10px] text-[var(--foreground)]/50 italic">{e.tip}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pronunciation tips */}
+            {analyze.data.pronunciationTips?.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wide">Pronunciation tips</p>
+                <div className="space-y-2">
+                  {analyze.data.pronunciationTips.map((t: { word: string; ipa: string; commonMistake: string; tip: string }, i: number) => (
+                    <div key={i} className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-[var(--foreground)]">{t.word}</span>
+                        <span className="text-[10px] text-primary-500 font-mono">{t.ipa}</span>
+                      </div>
+                      <p className="text-xs text-[var(--foreground)]/60">{t.tip}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Top priority */}
+            {analyze.data.topPriority && (
+              <div className="flex items-start gap-2 px-3 py-2.5 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-xl">
+                <Star className="w-3.5 h-3.5 text-primary-500 shrink-0 mt-0.5" />
+                <p className="text-xs font-semibold text-primary-800 dark:text-primary-300">{analyze.data.topPriority}</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
@@ -509,6 +628,7 @@ export default function SpeakingPage() {
   const [step, setStep]             = useState<Step>("select");
   const [theme, setTheme]           = useState<Theme>("business");
   const [paragraphs, setParagraphs] = useState(2);
+  const [genre, setGenre]           = useState("");
   const [readingText, setReadingText] = useState<ReadingText | null>(null);
   const [transcript, setTranscript] = useState("");
 
@@ -520,7 +640,7 @@ export default function SpeakingPage() {
   });
 
   function handleGenerate() {
-    generateMutation.mutate({ theme, paragraphs });
+    generateMutation.mutate({ theme, paragraphs, genre: genre || undefined });
   }
 
   function handleRecordingDone(t: string) {
@@ -578,6 +698,8 @@ export default function SpeakingPage() {
           setTheme={setTheme}
           paragraphs={paragraphs}
           setParagraphs={setParagraphs}
+          genre={genre}
+          setGenre={setGenre}
           onGenerate={handleGenerate}
           isGenerating={generateMutation.isPending}
         />

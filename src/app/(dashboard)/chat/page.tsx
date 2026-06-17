@@ -170,14 +170,14 @@ export default function ChatPage() {
   }, [messages, isLoading]);
 
   function handleModeChange(newMode: ConversationMode) {
+    if (newMode === mode) { setShowModeMenu(false); return; }
+    // Clear conversation context so AI starts fresh in new mode
+    newSession();
     setMode(newMode);
     setShowModeMenu(false);
-    if (messages.length === 0) {
-      // Only auto-send starter if chat is empty
-      const modeData = CONVERSATION_MODES.find((m) => m.id === newMode);
-      if (modeData && newMode !== "free_talk") {
-        setTimeout(() => handleSend(modeData.starter), 50);
-      }
+    const modeData = CONVERSATION_MODES.find((m) => m.id === newMode);
+    if (modeData && newMode !== "free_talk") {
+      setTimeout(() => handleSend(modeData.starter), 100);
     }
   }
 

@@ -71,8 +71,19 @@ export default function VocabularyPage() {
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const [recSeconds, setRecSeconds] = useState(0);
-  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const recCapRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recTimerRef   = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recCapRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Unmount cleanup — clear all timers and stop any active recording
+  useEffect(() => {
+    return () => {
+      if (recTimerRef.current)   clearInterval(recTimerRef.current);
+      if (recCapRef.current)     clearTimeout(recCapRef.current);
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      if (mediaRef.current?.state === "recording") mediaRef.current.stop();
+    };
+  }, []);
 
   // Seed the queue when the study list loads
   useEffect(() => {
@@ -128,11 +139,17 @@ export default function VocabularyPage() {
     if (activeIndex !== null && activeIndex > 0) openWord(activeIndex - 1);
   }
 
-  // Auto-advance to next word after correct
+  // Auto-advance to next word after correct — use ref so only one timer runs at a time
   useEffect(() => {
     if (practiceState !== "correct") return;
-    const timer = setTimeout(() => goNext(), 1500);
-    return () => clearTimeout(timer);
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    advanceTimerRef.current = setTimeout(() => {
+      advanceTimerRef.current = null;
+      goNext();
+    }, 1500);
+    return () => {
+      if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null; }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [practiceState, activeIndex, queue]);
 

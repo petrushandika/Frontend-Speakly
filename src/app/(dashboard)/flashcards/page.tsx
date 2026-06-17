@@ -59,7 +59,12 @@ export default function FlashcardsPage() {
 
   async function handleQuality(quality: number) {
     if (!current) return;
-    await submitReview.mutateAsync({ cardId: current.id, quality });
+    try {
+      await submitReview.mutateAsync({ cardId: current.id, quality });
+    } catch {
+      toast.error("Failed to save review. Please try again.");
+      return;
+    }
 
     if (quality >= 3) setCorrect((n) => n + 1);
     else setIncorrect((n) => n + 1);

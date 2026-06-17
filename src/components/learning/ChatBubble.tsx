@@ -83,17 +83,49 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
   return <div className="space-y-1">{elements}</div>;
 }
 
-// Extract bold words (**word**) and quoted words ("word") from AI message
+// Common Indonesian words to exclude from vocab chips
+const ID_WORDS = new Set([
+  "yang","dan","di","ke","dari","ini","itu","dengan","untuk","tidak","ada","saya",
+  "kamu","dia","kami","kita","mereka","adalah","atau","juga","sudah","bisa","akan",
+  "karena","tapi","jadi","kalau","seperti","artinya","berarti","contoh","kata",
+  "kalimat","bahasa","inggris","indonesia","belajar","latihan","lebih","sangat",
+  "masih","sudah","belum","sering","selalu","kadang","pernah","jangan","harus",
+  "boleh","mau","perlu","ingat","tahu","lihat","bilang","pakai","sama","lagi",
+  "satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh",
+]);
+
+function isEnglishWord(w: string): boolean {
+  const lower = w.toLowerCase().trim();
+  // Must contain at least one letter
+  if (!/[a-z]/i.test(lower)) return false;
+  // Must be mostly ASCII (no Indonesian-specific chars, though Indonesian uses mostly ASCII too)
+  // Check against known Indonesian words list
+  const firstToken = lower.split(/\s+/)[0];
+  if (ID_WORDS.has(firstToken)) return false;
+  // Reject if ALL tokens are Indonesian words (multi-word phrases)
+  const tokens = lower.split(/\s+/);
+  if (tokens.length > 1 && tokens.every((t) => ID_WORDS.has(t))) return false;
+  // Reject pure numbers or punctuation
+  if (/^[\d\s.,!?]+$/.test(lower)) return false;
+  return true;
+}
+
+// Extract bold words (**word**) and quoted words ("word") from AI message — English only
 function extractWords(text: string): string[] {
-  const bold   = [...text.matchAll(/\*\*([^*\n]{1,60})\*\*/g)].map((m) => m[1].trim());
-  const quoted = [...text.matchAll(/"([^"\n]{2,60})"/g)].map((m) => m[1].trim());
+  // Remove the "Small note" correction section before extracting
+  const mainText = text.replace(/[—–-]\s*Small note:.*/i, "").trim();
+  const bold   = [...mainText.matchAll(/\*\*([^*\n]{1,60})\*\*/g)].map((m) => m[1].trim());
+  const quoted = [...mainText.matchAll(/"([^"\n]{2,60})"/g)].map((m) => m[1].trim());
   const seen   = new Set<string>();
   const result: string[] = [];
   for (const w of [...bold, ...quoted]) {
     const key = w.toLowerCase();
-    if (!seen.has(key)) { seen.add(key); result.push(w); }
+    if (!seen.has(key) && isEnglishWord(w)) {
+      seen.add(key);
+      result.push(w);
+    }
   }
-  return result.slice(0, 8); // cap at 8 chips
+  return result.slice(0, 8);
 }
 
 // ── Grammar correction chip ──────────────────────────────────────────────────
@@ -140,14 +172,15 @@ function CorrectionChip({ text, onDismiss }: { text: string; onDismiss: () => vo
 
 function WordChip({ word, onSaved }: { word: string; onSaved: () => void }) {
   const utils = trpc.useUtils();
-  const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
+  const [state, setState]   = useState<"idle" | "saving" | "saved">("idle");
+  const [definition, setDefinition] = useState<string | null>(null);
 
   const add = trpc.vocabulary.add.useMutation({
     onSuccess: () => {
       utils.vocabulary.getAll.invalidate();
       utils.vocabulary.getStudyList.invalidate();
       setState("saved");
-      toast.success(`"${word}" saved!`);
+      toast.success(`"${word}" saved to vocabulary!`);
       onSaved();
     },
     onError: () => {
@@ -158,13 +191,13 @@ function WordChip({ word, onSaved }: { word: string; onSaved: () => void }) {
 
   const classify = trpc.ai.classifyWord.useMutation({
     onSuccess: (data) => {
-      const definition = data?.definition ?? word;
+      const def        = data?.definition ?? word;
       const example    = data?.exampleSentence;
       const cefrLevel  = data?.cefrLevel;
-      add.mutate({ word, definition, example, cefrLevel });
+      setDefinition(def);
+      add.mutate({ word, definition: def, example, cefrLevel });
     },
     onError: () => {
-      // Fallback: save with placeholder definition so it still works
       add.mutate({ word, definition: word });
     },
   });
@@ -177,8 +210,13 @@ function WordChip({ word, onSaved }: { word: string; onSaved: () => void }) {
 
   if (state === "saved") {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold rounded-lg">
-        <BookmarkCheck className="w-3 h-3" /> {word}
+      <span className="inline-flex flex-col gap-0.5 px-2.5 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-lg max-w-[180px]">
+        <span className="flex items-center gap-1 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
+          <BookmarkCheck className="w-3 h-3 shrink-0" /> {word}
+        </span>
+        {definition && (
+          <span className="text-[10px] text-emerald-600/70 dark:text-emerald-400/60 leading-snug">{definition}</span>
+        )}
       </span>
     );
   }

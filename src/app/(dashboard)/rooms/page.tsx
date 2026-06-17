@@ -41,6 +41,13 @@ function RoomChat({
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Cleanup on unmount — stop any active recording
+  useEffect(() => {
+    return () => {
+      if (mediaRef.current?.state === "recording") mediaRef.current.stop();
+    };
+  }, []);
+
   // Load initial messages
   const { data: initialMessages = [] } = trpc.rooms.getMessages.useQuery({ roomId });
   useEffect(() => {
