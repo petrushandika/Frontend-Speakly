@@ -18,6 +18,7 @@ import {
   X,
   Sparkles,
   ChevronDown,
+  Flame,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -49,7 +50,8 @@ function TopBar() {
 
       {/* Streak */}
       <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-lg text-xs font-semibold text-orange-700">
-        🔥 {profile?.streakDays ?? 0} day streak
+        <Flame className="w-3.5 h-3.5" />
+        {profile?.streakDays ?? 0} day streak
       </div>
 
       {/* Profile dropdown */}
@@ -58,8 +60,10 @@ function TopBar() {
           onClick={() => setDropdownOpen((v) => !v)}
           className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-slate-50 transition-colors"
         >
-          <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-bold">
-            {initials}
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {profile?.avatarUrl
+              ? <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              : initials}
           </div>
           <span className="text-sm font-semibold text-slate-800">
             {profile?.displayName ?? "..."}

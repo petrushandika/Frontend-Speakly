@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { trpcClient } from "@/lib/trpc";
 
 export interface Message {
@@ -11,11 +11,102 @@ export interface Message {
   hasCorrection?: boolean;
 }
 
+export interface ChatSession {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  messages: Message[];
+}
+
 interface UseAIChatOptions {
   onError?: (error: string) => void;
 }
 
-// Parse "— Small note: we say 'X' not 'Y' because Z"
+const SESSIONS_KEY = "speakly-chat-sessions";
+const LEGACY_KEY   = "speakly-chat-history";
+const MAX_SESSIONS = 25;
+const MAX_MESSAGES = 60;
+
+function createSession(): ChatSession {
+  return {
+    id: crypto.randomUUID(),
+    title: "New Session",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    messages: [],
+  };
+}
+
+function autoTitle(messages: Message[]): string {
+  const first = messages.find((m) => m.role === "user");
+  if (!first) return "New Session";
+  const words = first.content.trim().split(/\s+/).slice(0, 6).join(" ");
+  return first.content.trim().split(/\s+/).length > 6 ? `${words}…` : words;
+}
+
+function loadSessions(): { sessions: ChatSession[]; activeId: string } {
+  if (typeof window === "undefined") {
+    const s = createSession();
+    return { sessions: [s], activeId: s.id };
+  }
+
+  try {
+    const raw = localStorage.getItem(SESSIONS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as ChatSession[];
+      const sessions = parsed.map((s) => ({
+        ...s,
+        messages: s.messages.map((m) => ({ ...m, isStreaming: false })),
+      }));
+      if (sessions.length > 0) {
+        return { sessions, activeId: sessions[sessions.length - 1].id };
+      }
+    }
+  } catch {
+    // fall through to legacy migration
+  }
+
+  // Migrate legacy flat history
+  try {
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const msgs = (JSON.parse(legacy) as Message[]).map((m) => ({ ...m, isStreaming: false }));
+      localStorage.removeItem(LEGACY_KEY);
+      if (msgs.length > 0) {
+        const session: ChatSession = {
+          id: crypto.randomUUID(),
+          title: autoTitle(msgs),
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          messages: msgs,
+        };
+        const fresh = createSession();
+        return { sessions: [session, fresh], activeId: fresh.id };
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  const s = createSession();
+  return { sessions: [s], activeId: s.id };
+}
+
+function saveSessions(sessions: ChatSession[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const toSave = sessions.slice(-MAX_SESSIONS).map((s) => ({
+      ...s,
+      messages: s.messages.filter((m) => !m.isStreaming).slice(-MAX_MESSAGES),
+    }));
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(toSave));
+  } catch {
+    // ignore quota errors
+  }
+}
+
+// Parse "— Small note: we say 'X' not 'Y' ..."
 function parseCorrections(text: string): Array<{
   errorCategory: string;
   originalText: string;
@@ -40,7 +131,6 @@ function parseCorrections(text: string): Array<{
       context: text.slice(0, 200),
     });
   }
-
   return corrections;
 }
 
@@ -54,9 +144,34 @@ function inferCategory(wrongText: string): string {
 }
 
 export function useAIChat({ onError }: UseAIChatOptions = {}) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const initial = loadSessions();
+  const [sessions, setSessions]     = useState<ChatSession[]>(initial.sessions);
+  const [activeId, setActiveId]     = useState<string>(initial.activeId);
+  const [isLoading, setIsLoading]   = useState(false);
   const abortRef = useRef<(() => void) | null>(null);
+
+  const activeSession = sessions.find((s) => s.id === activeId) ?? sessions[sessions.length - 1];
+  const messages = activeSession?.messages ?? [];
+
+  // Persist whenever sessions change (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => saveSessions(sessions), 300);
+    return () => clearTimeout(timer);
+  }, [sessions]);
+
+  // Helper to update messages in the active session
+  const updateMessages = useCallback(
+    (updater: (prev: Message[]) => Message[]) => {
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeId
+            ? { ...s, messages: updater(s.messages), updatedAt: Date.now() }
+            : s,
+        ),
+      );
+    },
+    [activeId],
+  );
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -67,7 +182,6 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
         role: "user",
         content: text.trim(),
       };
-
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -75,7 +189,20 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
         isStreaming: true,
       };
 
-      setMessages((prev) => [...prev, userMsg, aiMsg]);
+      // Auto-title on first user message
+      setSessions((prev) =>
+        prev.map((s) => {
+          if (s.id !== activeId) return s;
+          const isFirst = s.messages.length === 0 || s.title === "New Session";
+          return {
+            ...s,
+            title: isFirst ? autoTitle([userMsg]) : s.title,
+            messages: [...s.messages, userMsg, aiMsg],
+            updatedAt: Date.now(),
+          };
+        }),
+      );
+
       setIsLoading(true);
 
       const history = messages.map((m) => ({ role: m.role, content: m.content }));
@@ -85,7 +212,6 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
 
       try {
         const token = localStorage.getItem("sb-access-token") ?? "";
-
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/ai/stream`,
           {
@@ -98,9 +224,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
           },
         );
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const reader = response.body!.getReader();
         const decoder = new TextDecoder();
@@ -120,11 +244,18 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
               const data = JSON.parse(line.slice(6));
 
               if (data.type === "token") {
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === aiMsg.id
-                      ? { ...m, content: m.content + data.content }
-                      : m,
+                setSessions((prev) =>
+                  prev.map((s) =>
+                    s.id !== activeId
+                      ? s
+                      : {
+                          ...s,
+                          messages: s.messages.map((m) =>
+                            m.id === aiMsg.id
+                              ? { ...m, content: m.content + data.content }
+                              : m,
+                          ),
+                        },
                   ),
                 );
               }
@@ -133,15 +264,21 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
                 const fullResponse: string = data.fullResponse ?? "";
                 const hasCorrection = fullResponse.includes("Small note:");
 
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === aiMsg.id
-                      ? { ...m, isStreaming: false, hasCorrection }
-                      : m,
+                setSessions((prev) =>
+                  prev.map((s) =>
+                    s.id !== activeId
+                      ? s
+                      : {
+                          ...s,
+                          messages: s.messages.map((m) =>
+                            m.id === aiMsg.id
+                              ? { ...m, isStreaming: false, hasCorrection }
+                              : m,
+                          ),
+                        },
                   ),
                 );
 
-                // Save grammar corrections to DB (fire-and-forget)
                 if (hasCorrection) {
                   const corrections = parseCorrections(fullResponse);
                   if (corrections.length > 0) {
@@ -150,9 +287,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
                 }
               }
 
-              if (data.type === "error") {
-                throw new Error(data.message);
-              }
+              if (data.type === "error") throw new Error(data.message);
             } catch {
               // skip malformed SSE line
             }
@@ -161,15 +296,18 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
       } catch (err) {
         const message = err instanceof Error ? err.message : "Connection error";
         onError?.(message);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === aiMsg.id
-              ? {
-                  ...m,
-                  content: "Sorry, I couldn't connect. Please try again.",
-                  isStreaming: false,
-                }
-              : m,
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id !== activeId
+              ? s
+              : {
+                  ...s,
+                  messages: s.messages.map((m) =>
+                    m.id === aiMsg.id
+                      ? { ...m, content: "Sorry, I couldn't connect. Please try again.", isStreaming: false }
+                      : m,
+                  ),
+                },
           ),
         );
       } finally {
@@ -177,14 +315,64 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
         abortRef.current = null;
       }
     },
-    [messages, isLoading, onError],
+    [messages, isLoading, activeId, onError],
   );
 
-  const clearChat = useCallback(() => {
+  const newSession = useCallback(() => {
     abortRef.current?.();
-    setMessages([]);
     setIsLoading(false);
+    const s = createSession();
+    setSessions((prev) => {
+      // Don't create duplicate empty sessions
+      const last = prev[prev.length - 1];
+      if (last && last.messages.length === 0) {
+        setActiveId(last.id);
+        return prev;
+      }
+      setActiveId(s.id);
+      return [...prev, s];
+    });
   }, []);
 
-  return { messages, isLoading, sendMessage, clearChat };
+  const switchSession = useCallback((id: string) => {
+    abortRef.current?.();
+    setIsLoading(false);
+    setActiveId(id);
+  }, []);
+
+  const deleteSession = useCallback(
+    (id: string) => {
+      setSessions((prev) => {
+        const next = prev.filter((s) => s.id !== id);
+        if (next.length === 0) {
+          const s = createSession();
+          setActiveId(s.id);
+          return [s];
+        }
+        if (id === activeId) {
+          setActiveId(next[next.length - 1].id);
+        }
+        return next;
+      });
+    },
+    [activeId],
+  );
+
+  const clearCurrentSession = useCallback(() => {
+    abortRef.current?.();
+    setIsLoading(false);
+    updateMessages(() => []);
+  }, [updateMessages]);
+
+  return {
+    messages,
+    sessions,
+    activeSession,
+    isLoading,
+    sendMessage,
+    newSession,
+    switchSession,
+    deleteSession,
+    clearChat: clearCurrentSession,
+  };
 }

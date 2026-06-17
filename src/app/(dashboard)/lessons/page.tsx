@@ -2,14 +2,35 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import {
+  BookOpen,
+  BookMarked,
+  Mic2,
+  Headphones,
+  ScrollText,
+  PenLine,
+  FileText,
+  CheckCircle2,
+  Clock,
+  Play,
+} from "lucide-react";
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  grammar:    "📐",
-  vocabulary: "📝",
-  speaking:   "🗣️",
-  listening:  "👂",
-  reading:    "📖",
-  writing:    "✍️",
+const CATEGORY_ICON: Record<string, React.ElementType> = {
+  grammar:    ScrollText,
+  vocabulary: BookMarked,
+  speaking:   Mic2,
+  listening:  Headphones,
+  reading:    BookOpen,
+  writing:    PenLine,
+};
+
+const CATEGORY_COLOR: Record<string, string> = {
+  grammar:    "bg-indigo-50 text-indigo-600 border-indigo-100",
+  vocabulary: "bg-sky-50 text-sky-600 border-sky-100",
+  speaking:   "bg-violet-50 text-violet-600 border-violet-100",
+  listening:  "bg-teal-50 text-teal-600 border-teal-100",
+  reading:    "bg-emerald-50 text-emerald-600 border-emerald-100",
+  writing:    "bg-amber-50 text-amber-600 border-amber-100",
 };
 
 const STATUS_STYLE: Record<string, string> = {
@@ -33,36 +54,33 @@ export default function LessonsPage() {
 
   return (
     <div className="w-full p-6 md:p-8 space-y-6">
-      {/* Header and Progress panel */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Lessons Library</h1>
-          <p className="text-slate-500 text-sm">
-            Complete bite-sized tasks tailored specifically for your target skills.
-          </p>
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+            <BookOpen className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Lessons</h1>
+            <p className="text-sm text-slate-500">Structured bite-sized learning</p>
+          </div>
         </div>
-        
+
         {totalCount > 0 && (
-          <div className="flex items-center gap-4 shrink-0 md:w-80 w-full">
-            <div className="flex-1 space-y-1.5">
-              <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+          <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-sm">
+            <div className="w-28 space-y-1">
+              <div className="flex justify-between text-xs font-semibold text-slate-400">
                 <span>Progress</span>
                 <span className="text-primary-600">{percentage}%</span>
               </div>
-              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-primary-500 to-indigo-500 rounded-full transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
-              <p className="text-[11px] font-semibold text-slate-400 text-right">
-                {completed} of {totalCount} completed
-              </p>
             </div>
-            
-            <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center text-primary-600 text-xl font-black shrink-0 border border-primary-100">
-              {percentage}%
-            </div>
+            <span className="text-xs text-slate-400 whitespace-nowrap">{completed}/{totalCount} done</span>
           </div>
         )}
       </div>
@@ -78,10 +96,12 @@ export default function LessonsPage() {
 
       {/* Empty State */}
       {!isLoading && lessons.length === 0 && (
-        <div className="text-center py-16 bg-white border border-slate-100 rounded-3xl shadow-sm">
-          <p className="text-5xl mb-4 animate-float">📚</p>
-          <h3 className="font-extrabold text-slate-900 text-lg">No Lessons Available Yet</h3>
-          <p className="text-slate-400 text-sm mt-1">Please check back later, we are preparing new lessons for you.</p>
+        <div className="flex flex-col items-center gap-3 py-16 bg-white border border-slate-100 rounded-3xl shadow-sm text-center">
+          <div className="w-12 h-12 rounded-2xl bg-primary-50 flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-primary-400" />
+          </div>
+          <h3 className="font-bold text-slate-900">No Lessons Available Yet</h3>
+          <p className="text-slate-400 text-sm">Please check back later, we are preparing new lessons for you.</p>
         </div>
       )}
 
@@ -89,37 +109,37 @@ export default function LessonsPage() {
       <div className="grid grid-cols-1 gap-3">
         {lessons.map((lesson, i) => {
           const status = lesson.progress?.status ?? "not_started";
-          const emoji  = CATEGORY_EMOJI[lesson.category] ?? "📄";
+          const Icon   = CATEGORY_ICON[lesson.category] ?? FileText;
+          const color  = CATEGORY_COLOR[lesson.category] ?? "bg-slate-50 text-slate-500 border-slate-100";
+          const StatusIcon = status === "completed" ? CheckCircle2 : status === "in_progress" ? Clock : Play;
 
           return (
             <Link
               key={lesson.id}
               href={`/lessons/${lesson.id}`}
-              className="flex items-center gap-4 p-4.5 bg-white rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-lg hover:shadow-primary-500/5 hover:-translate-y-0.5 transition-all duration-300 group"
+              className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
             >
-              {/* Category Icon */}
-              <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl shrink-0 group-hover:bg-primary-50 group-hover:border-primary-100 group-hover:scale-105 transition-all">
-                {emoji}
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${color} group-hover:scale-105 transition-transform`}>
+                <Icon className="w-5 h-5" />
               </div>
-              
-              {/* Lesson details */}
-              <div className="flex-1 min-w-0 space-y-1">
+
+              <div className="flex-1 min-w-0 space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-slate-400">LESSON #{i + 1}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 border border-slate-200/40 text-slate-600 rounded-md">
+                  <span className="text-[10px] font-bold text-slate-400">#{i + 1}</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 border border-slate-200/40 text-slate-500 rounded">
                     {lesson.cefrLevel}
                   </span>
                 </div>
-                <p className="font-bold text-slate-800 text-sm md:text-base group-hover:text-primary-600 transition-colors truncate">
+                <p className="font-bold text-slate-800 text-sm group-hover:text-primary-600 transition-colors truncate">
                   {lesson.title}
                 </p>
                 {lesson.description && (
-                  <p className="text-xs text-slate-500 truncate leading-relaxed">{lesson.description}</p>
+                  <p className="text-xs text-slate-400 truncate">{lesson.description}</p>
                 )}
               </div>
-              
-              {/* Action Badge */}
-              <span className={`text-xs px-3.5 py-1.5 border rounded-xl font-bold shrink-0 shadow-sm active:scale-95 transition-all ${STATUS_STYLE[status]}`}>
+
+              <span className={`flex items-center gap-1.5 text-xs px-3 py-1.5 border rounded-xl font-bold shrink-0 ${STATUS_STYLE[status]}`}>
+                <StatusIcon className="w-3.5 h-3.5" />
                 {STATUS_LABEL[status]}
               </span>
             </Link>

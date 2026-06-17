@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { Mic2, User } from "lucide-react";
 
 export default function RoomsPage() {
   const utils = trpc.useUtils();
@@ -47,20 +48,22 @@ export default function RoomsPage() {
 
   return (
     <div className="w-full p-6 md:p-8 space-y-6">
-      {/* Header Panel */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Speaking Rooms</h1>
-          <p className="text-slate-500 text-sm font-medium">
-            Practice conversational English live with other students in peer rooms.
-          </p>
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+            <Mic2 className="w-5 h-5 text-violet-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Speaking Rooms</h1>
+            <p className="text-sm text-slate-500">Practice conversation with other learners</p>
+          </div>
         </div>
-        
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-95 cursor-pointer shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
         >
-          {showCreate ? "Close Panel" : "+ Create New Room"}
+          {showCreate ? "Cancel" : "New Room"}
         </button>
       </div>
 
@@ -111,7 +114,7 @@ export default function RoomsPage() {
               disabled={createRoom.isPending}
               className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
-              {createRoom.isPending ? "Creating..." : "Create Room"}
+              {createRoom.isPending ? "Creating…" : "Create Room"}
             </button>
           </div>
         </form>
@@ -125,11 +128,13 @@ export default function RoomsPage() {
           ))}
         </div>
       ) : rooms.length === 0 ? (
-        <div className="text-center py-16 bg-white border border-slate-100 rounded-3xl shadow-sm space-y-3">
-          <p className="text-5xl animate-float">🎙️</p>
-          <h3 className="font-extrabold text-slate-900 text-lg">No Active Rooms</h3>
-          <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">
-            There are currently no active speaking sessions. Host the first room to start practicing!
+        <div className="flex flex-col items-center gap-3 py-16 bg-white border border-slate-100 rounded-3xl shadow-sm text-center">
+          <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center">
+            <Mic2 className="w-6 h-6 text-violet-400" />
+          </div>
+          <h3 className="font-bold text-slate-900">No Active Rooms</h3>
+          <p className="text-slate-400 text-sm max-w-xs">
+            No active speaking sessions. Host the first room to start practicing!
           </p>
         </div>
       ) : (
@@ -166,7 +171,8 @@ export default function RoomsPage() {
                   )}
                   
                   <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-1 font-medium">
-                    <span>👤 Host:</span>
+                    <User className="w-3.5 h-3.5" />
+                    <span>Host:</span>
                     <span className="font-semibold text-slate-600">{host}</span>
                   </div>
                 </div>
