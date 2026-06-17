@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 const MASTERY_LABEL = ["New", "Learning", "Familiar", "Good", "Strong", "Mastered"];
@@ -20,6 +21,7 @@ export default function VocabularyPage() {
   const [word, setWord] = useState("");
   const [definition, setDefinition] = useState("");
   const [example, setExample] = useState("");
+  const [addedToFlashcard, setAddedToFlashcard] = useState<Set<string>>(new Set());
 
   const { data: vocab = [], isLoading } = trpc.vocabulary.getAll.useQuery();
   const { data: searchResults } = trpc.vocabulary.search.useQuery(
@@ -36,6 +38,15 @@ export default function VocabularyPage() {
 
   const remove = trpc.vocabulary.remove.useMutation({
     onSuccess: () => utils.vocabulary.getAll.invalidate(),
+  });
+
+  const addFlashcard = trpc.srs.addCard.useMutation({
+    onSuccess: (_, vars) => {
+      setAddedToFlashcard((prev) => new Set([...prev, vars.front]));
+      utils.progress.getDueFlashcardsCount.invalidate();
+      toast.success("Added to flashcards!");
+    },
+    onError: () => toast.error("Failed to add flashcard"),
   });
 
   const displayed = search.length >= 2 ? (searchResults ?? []) : vocab;
@@ -140,32 +151,55 @@ export default function VocabularyPage() {
       )}
 
       <div className="space-y-2">
-        {displayed.map((entry) => (
-          <div
-            key={entry.id}
-            className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-gray-100"
-          >
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="font-semibold text-gray-900">{entry.word}</span>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${MASTERY_COLOR[entry.mastery ?? 0]}`}>
-                  {MASTERY_LABEL[entry.mastery ?? 0]}
-                </span>
-              </div>
-              <p className="text-sm text-gray-500">{entry.definition}</p>
-              {entry.example && (
-                <p className="text-xs text-gray-400 italic mt-1">"{entry.example}"</p>
-              )}
-            </div>
-            <button
-              onClick={() => remove.mutate({ id: entry.id })}
-              disabled={remove.isPending}
-              className="text-gray-300 hover:text-red-400 transition-colors text-lg shrink-0 mt-0.5"
+        {displayed.map((entry) => {
+          const alreadyAdded = addedToFlashcard.has(entry.word);
+          return (
+            <div
+              key={entry.id}
+              className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-gray-100"
             >
-              ×
-            </button>
-          </div>
-        ))}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                  <span className="font-semibold text-gray-900">{entry.word}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${MASTERY_COLOR[entry.mastery ?? 0]}`}>
+                    {MASTERY_LABEL[entry.mastery ?? 0]}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500">{entry.definition}</p>
+                {entry.example && (
+                  <p className="text-xs text-gray-400 italic mt-1">"{entry.example}"</p>
+                )}
+              </div>
+              <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                <button
+                  onClick={() =>
+                    addFlashcard.mutate({
+                      front: entry.word,
+                      back: entry.definition,
+                      example: entry.example ?? undefined,
+                    })
+                  }
+                  disabled={addFlashcard.isPending || alreadyAdded}
+                  title={alreadyAdded ? "Added to flashcards" : "Add to flashcards"}
+                  className={`text-sm px-2.5 py-1 rounded-lg border transition-colors disabled:cursor-not-allowed ${
+                    alreadyAdded
+                      ? "border-green-200 text-green-600 bg-green-50"
+                      : "border-gray-200 text-gray-400 hover:border-primary-400 hover:text-primary-600"
+                  }`}
+                >
+                  {alreadyAdded ? "✓" : "🃏"}
+                </button>
+                <button
+                  onClick={() => remove.mutate({ id: entry.id })}
+                  disabled={remove.isPending}
+                  className="text-gray-300 hover:text-red-400 transition-colors text-xl leading-none px-1"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { trpcClient } from "@/lib/trpc";
 
 export interface Message {
   id: string;
@@ -12,6 +13,44 @@ export interface Message {
 
 interface UseAIChatOptions {
   onError?: (error: string) => void;
+}
+
+// Parse "— Small note: we say 'X' not 'Y' because Z"
+function parseCorrections(text: string): Array<{
+  errorCategory: string;
+  originalText: string;
+  correctedText: string;
+  context: string;
+}> {
+  const corrections: Array<{
+    errorCategory: string;
+    originalText: string;
+    correctedText: string;
+    context: string;
+  }> = [];
+
+  const noteRegex = /[—–-]\s*Small note:\s*we say ['"](.+?)['"]\s+not\s+['"](.+?)['"]/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = noteRegex.exec(text)) !== null) {
+    corrections.push({
+      correctedText: match[1].trim(),
+      originalText: match[2].trim(),
+      errorCategory: inferCategory(match[2].trim()),
+      context: text.slice(0, 200),
+    });
+  }
+
+  return corrections;
+}
+
+function inferCategory(wrongText: string): string {
+  const lower = wrongText.toLowerCase();
+  if (/\b(is|are|was|were|am)\b/.test(lower)) return "tense";
+  if (/\b(a|an|the)\b/.test(lower)) return "article";
+  if (/\b(in|on|at|by|for|with|to|of)\b/.test(lower)) return "preposition";
+  if (/\b(he|she|it|they|we|i|you)\b/.test(lower)) return "subject_verb";
+  return "vocabulary";
 }
 
 export function useAIChat({ onError }: UseAIChatOptions = {}) {
@@ -39,7 +78,6 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
       setMessages((prev) => [...prev, userMsg, aiMsg]);
       setIsLoading(true);
 
-      // Build history from current messages (exclude the new ones just added)
       const history = messages.map((m) => ({ role: m.role, content: m.content }));
 
       let cancelled = false;
@@ -92,8 +130,9 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
               }
 
               if (data.type === "done") {
-                // Detect if AI included a correction note
-                const hasCorrection = data.fullResponse?.includes("Small note:");
+                const fullResponse: string = data.fullResponse ?? "";
+                const hasCorrection = fullResponse.includes("Small note:");
+
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === aiMsg.id
@@ -101,6 +140,14 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
                       : m,
                   ),
                 );
+
+                // Save grammar corrections to DB (fire-and-forget)
+                if (hasCorrection) {
+                  const corrections = parseCorrections(fullResponse);
+                  if (corrections.length > 0) {
+                    trpcClient.grammar.saveBatch.mutate(corrections).catch(() => {});
+                  }
+                }
               }
 
               if (data.type === "error") {
