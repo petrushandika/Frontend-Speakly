@@ -16,26 +16,49 @@ import {
   Settings,
   Menu,
   X,
-  Sparkles,
-  ChevronDown,
-  Flame,
   PhoneCall,
   Zap,
   Users2,
+  Flame,
+  ChevronDown,
 } from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "/home",        label: "Home",           icon: LayoutDashboard },
-  { href: "/chat",        label: "Chat with Aria", icon: MessageSquare },
-  { href: "/call",  label: "Call",     icon: PhoneCall },
-  { href: "/speaking",    label: "Speaking",       icon: Mic2 },
-  { href: "/lessons",     label: "Lessons",        icon: BookOpen },
-  { href: "/vocabulary",  label: "Vocabulary",     icon: BookMarked },
-  { href: "/flashcards",  label: "Flashcards",     icon: Layers },
-  { href: "/rooms",       label: "Rooms",          icon: Users2 },
-  { href: "/progress",    label: "Progress",       icon: BarChart2 },
-  { href: "/settings",    label: "Settings",       icon: Settings },
-];
+// ── Nav structure with section labels ────────────────────────────────────────
+
+const NAV_SECTIONS = [
+  {
+    label: "Learn",
+    items: [
+      { href: "/home",      label: "Home",         icon: LayoutDashboard },
+      { href: "/chat",      label: "Chat with Aria", icon: MessageSquare },
+      { href: "/call",      label: "Voice Call",   icon: PhoneCall },
+      { href: "/speaking",  label: "Reading Aloud", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Library",
+    items: [
+      { href: "/lessons",   label: "Lessons",      icon: BookOpen },
+      { href: "/vocabulary",label: "Vocabulary",   icon: BookMarked },
+      { href: "/flashcards",label: "Flashcards",   icon: Layers },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { href: "/rooms",     label: "Speaking Rooms", icon: Mic2 },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { href: "/progress",  label: "Progress",     icon: BarChart2 },
+      { href: "/settings",  label: "Settings",     icon: Settings },
+    ],
+  },
+] as const;
+
+// ── TopBar ────────────────────────────────────────────────────────────────────
 
 function TopBar() {
   const { data: profile } = trpc.users.getProfile.useQuery();
@@ -46,52 +69,51 @@ function TopBar() {
     : "?";
 
   return (
-    <header className="hidden md:flex h-14 shrink-0 items-center justify-end gap-3 px-6 bg-white border-b border-slate-100 w-full">
+    <header className="hidden md:flex h-14 shrink-0 items-center justify-end gap-3 px-6 bg-[var(--surface)] border-b border-[var(--line)] w-full">
       {/* XP badge */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-xs font-semibold text-amber-700">
-        <Sparkles className="w-3.5 h-3.5" />
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] rounded-full text-xs font-bold text-stone-700">
+        <Zap className="w-3.5 h-3.5 text-amber-500" />
         {profile?.xpTotal?.toLocaleString() ?? 0} XP
       </div>
-
       {/* Streak */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-lg text-xs font-semibold text-orange-700">
-        <Flame className="w-3.5 h-3.5" />
-        {profile?.streakDays ?? 0} day streak
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] rounded-full text-xs font-bold text-stone-700">
+        <Flame className="w-3.5 h-3.5 text-orange-400" />
+        {profile?.streakDays ?? 0} days
       </div>
 
       {/* Profile dropdown */}
       <div className="relative">
         <button
           onClick={() => setDropdownOpen((v) => !v)}
-          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-slate-50 transition-colors"
+          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-cream-100 transition-colors border border-transparent hover:border-cream-200"
         >
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+          <div className="w-7 h-7 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
             {profile?.avatarUrl
               ? <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
               : initials}
           </div>
-          <span className="text-sm font-semibold text-slate-800">
-            {profile?.displayName ?? "..."}
+          <span className="text-sm font-semibold text-stone-800">
+            {profile?.displayName ?? "…"}
           </span>
-          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+          <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
         </button>
 
         {dropdownOpen && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-100 rounded-xl shadow-lg z-20 py-1 overflow-hidden">
-              <div className="px-4 py-2 border-b border-slate-100">
-                <p className="text-xs font-semibold text-slate-800 truncate">{profile?.displayName}</p>
-                <p className="text-xs text-slate-400">{profile?.cefrLevel} · {profile?.goal}</p>
+            <div className="absolute right-0 top-full mt-2 w-52 bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-stone-100">
+                <p className="text-xs font-bold text-stone-800 truncate">{profile?.displayName}</p>
+                <p className="text-[10px] text-stone-400 mt-0.5">{profile?.cefrLevel} · {profile?.goal}</p>
               </div>
               <Link
                 href="/settings"
                 onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 transition-colors"
               >
                 <Settings className="w-4 h-4" /> Settings
               </Link>
-              <div className="border-t border-slate-100 mt-1">
+              <div className="border-t border-stone-100 mt-1">
                 <LogoutButton compact />
               </div>
             </div>
@@ -102,32 +124,70 @@ function TopBar() {
   );
 }
 
+// ── Sidebar Stats ─────────────────────────────────────────────────────────────
+
 function SidebarStats() {
   const { data: profile } = trpc.users.getProfile.useQuery();
   const { data: dueCount } = trpc.progress.getDueFlashcardsCount.useQuery();
   return (
-    <div className="px-3 py-3 border-t border-slate-100 space-y-2">
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Today</p>
+    <div className="px-3 py-3 border-t border-[var(--line)]">
       <div className="grid grid-cols-3 gap-1.5">
-        <div className="flex flex-col items-center gap-0.5 py-2 bg-amber-50 rounded-xl">
+        <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--highlight)]/45 rounded-xl border border-[var(--line)]">
           <Zap className="w-3.5 h-3.5 text-amber-500" />
-          <p className="text-xs font-bold text-amber-700">{profile?.xpTotal?.toLocaleString() ?? 0}</p>
-          <p className="text-[9px] text-amber-500 font-semibold">XP</p>
+          <p className="text-xs font-black text-stone-800">{profile?.xpTotal?.toLocaleString() ?? 0}</p>
+          <p className="text-[9px] text-stone-400 font-semibold uppercase tracking-wider">XP</p>
         </div>
-        <div className="flex flex-col items-center gap-0.5 py-2 bg-orange-50 rounded-xl">
-          <Flame className="w-3.5 h-3.5 text-orange-500" />
-          <p className="text-xs font-bold text-orange-700">{profile?.streakDays ?? 0}</p>
-          <p className="text-[9px] text-orange-500 font-semibold">Streak</p>
+        <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--pink)]/35 rounded-xl border border-[var(--line)]">
+          <Flame className="w-3.5 h-3.5 text-orange-400" />
+          <p className="text-xs font-black text-stone-800">{profile?.streakDays ?? 0}</p>
+          <p className="text-[9px] text-stone-400 font-semibold uppercase tracking-wider">Streak</p>
         </div>
-        <div className="flex flex-col items-center gap-0.5 py-2 bg-violet-50 rounded-xl">
-          <Layers className="w-3.5 h-3.5 text-violet-500" />
-          <p className="text-xs font-bold text-violet-700">{dueCount?.count ?? 0}</p>
-          <p className="text-[9px] text-violet-500 font-semibold">Due</p>
+        <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--yellow)]/40 rounded-xl border border-[var(--line)]">
+          <Layers className="w-3.5 h-3.5 text-primary-500" />
+          <p className="text-xs font-black text-stone-800">{dueCount?.count ?? 0}</p>
+          <p className="text-[9px] text-stone-400 font-semibold uppercase tracking-wider">Due</p>
         </div>
       </div>
     </div>
   );
 }
+
+// ── Nav Items Builder ─────────────────────────────────────────────────────────
+
+function NavItems({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
+  return (
+    <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+      {NAV_SECTIONS.map((section) => (
+        <div key={section.label} className="space-y-0.5">
+          <p className="text-[9px] font-black uppercase tracking-widest text-stone-400 px-3 pb-1">
+            {section.label}
+          </p>
+          {section.items.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onClick}
+                className={`flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-150 ${
+                  active
+                    ? "bg-primary-100 border border-[var(--line)] text-primary-800"
+                    : "text-stone-600 hover:bg-[#ede6d5] hover:text-stone-900 border border-transparent"
+                }`}
+              >
+                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-primary-600" : "text-stone-400"}`} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+// ── Main Layout ───────────────────────────────────────────────────────────────
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -139,38 +199,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  const navLinks = NAV_ITEMS.map((item) => {
-    const active = pathname === item.href || pathname.startsWith(item.href + "/");
-    const Icon = item.icon;
-    return (
-      <Link
-        key={item.href}
-        href={item.href}
-        className={`flex items-center gap-3.5 w-full px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${
-          active
-            ? "bg-primary-600 text-white shadow-sm shadow-primary-500/20"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-        }`}
-      >
-        <Icon className={`w-4.5 h-4.5 shrink-0 ${active ? "text-white" : "text-slate-400"}`} />
-        <span>{item.label}</span>
-      </Link>
-    );
-  });
-
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden bg-[var(--background)] paper-grid">
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden md:flex w-60 shrink-0 bg-white border-r border-slate-100 flex-col h-full overflow-y-auto relative z-20">
-        <div className="px-5 h-14 border-b border-slate-100 flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+      <aside className="hidden md:flex w-56 shrink-0 bg-[var(--surface-strong)] border-r border-[var(--line)] flex-col h-full overflow-y-auto relative z-20">
+        {/* Logo */}
+        <div className="px-5 h-14 border-b border-[var(--line)] flex items-center gap-2.5 shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center border border-[var(--line)]">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900">Speakly</span>
+          <span className="text-base font-black tracking-tight text-stone-900">Speakly</span>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">{navLinks}</nav>
+
+        <NavItems pathname={pathname} />
         <SidebarStats />
-        <div className="p-3 border-t border-slate-100 shrink-0">
+        <div className="p-3 border-t border-[var(--line)] shrink-0 bg-[#efe7d4]">
           <LogoutButton />
         </div>
       </aside>
@@ -178,53 +223,54 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* ── Mobile overlay ── */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-stone-900/30 backdrop-blur-sm md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* ── Mobile drawer ── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-60 bg-white flex flex-col shadow-2xl transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[var(--surface-strong)] flex flex-col shadow-2xl transition-transform duration-300 ease-out md:hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+        <div className="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
+            <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center border border-[var(--line)]">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
             </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900">Speakly</span>
+            <span className="text-base font-black tracking-tight text-stone-900">Speakly</span>
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-50"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#efe9d9]"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">{navLinks}</nav>
+        <NavItems pathname={pathname} onClick={() => setOpen(false)} />
         <SidebarStats />
-        <div className="p-3 border-t border-slate-100 shrink-0">
+        <div className="p-3 border-t border-[var(--line)] shrink-0 bg-[#efe7d4]">
           <LogoutButton />
         </div>
       </aside>
 
       {/* ── Main area ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Desktop topbar */}
         <TopBar />
 
         {/* Mobile topbar */}
-        <header className="md:hidden sticky top-0 z-10 bg-white border-b border-slate-100 flex items-center justify-between px-4 h-14 shrink-0">
+        <header className="md:hidden sticky top-0 z-10 bg-[var(--surface-strong)] border-b border-[var(--line)] flex items-center justify-between px-4 h-14 shrink-0">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOpen(true)}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-50"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-stone-500 hover:bg-[#efe9d9]"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-base font-bold text-slate-900">Speakly</span>
+            <span className="text-base font-black text-stone-900">Speakly</span>
           </div>
         </header>
 
@@ -234,8 +280,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="md:hidden sticky bottom-0 z-10 bg-white border-t border-slate-100 flex items-center justify-around px-2 h-16 shrink-0">
-          {NAV_ITEMS.slice(0, 5).map((item) => {
+        <nav className="md:hidden sticky bottom-0 z-10 bg-[var(--surface-strong)] border-t border-[var(--line)] flex items-center justify-around px-2 h-16 shrink-0">
+          {[
+            { href: "/home",      icon: LayoutDashboard, label: "Home" },
+            { href: "/chat",      icon: MessageSquare,   label: "Chat" },
+            { href: "/call",      icon: PhoneCall,       label: "Call" },
+            { href: "/lessons",   icon: BookOpen,        label: "Lessons" },
+            { href: "/progress",  icon: BarChart2,       label: "Stats" },
+          ].map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
             return (
@@ -243,11 +295,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all ${
-                  active ? "text-primary-600" : "text-slate-400 hover:text-slate-700"
+                  active ? "text-primary-600" : "text-stone-400 hover:text-stone-700"
                 }`}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-semibold">{item.label.split(" ")[0]}</span>
+                <span className="text-[10px] font-semibold">{item.label}</span>
               </Link>
             );
           })}

@@ -72,7 +72,7 @@ function MicButton({
           ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 scale-110"
           : isBusy
             ? "bg-slate-200 hover:bg-slate-300 focus:ring-slate-200"
-            : "bg-primary-600 hover:bg-primary-700 focus:ring-primary-300"
+            : "bg-[#1f1d19] hover:bg-[#161411] focus:ring-primary-300"
         }
       `}
     >
@@ -100,10 +100,10 @@ function MessageBubble({ msg }: { msg: VoiceMessage }) {
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className="max-w-[78%] space-y-1">
         {!isUser && <p className="text-[11px] font-semibold text-slate-400 px-1">Aria</p>}
-        <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+        <div className={`px-4 py-2.5 rounded-[18px] text-sm leading-relaxed ${
           isUser
             ? "bg-primary-600 text-white rounded-tr-sm"
-            : "bg-white border border-slate-100 text-slate-800 rounded-tl-sm shadow-sm"
+            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-slate-800 rounded-tl-sm shadow-sm"
         }`}>
           {text}
         </div>
@@ -139,7 +139,7 @@ function HistorySidebar({
         <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">History</span>
         <button
           onClick={onNew}
-          className="w-7 h-7 rounded-lg bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+          className="w-7 h-7 rounded-lg bg-[#1f1d19] hover:bg-[#161411] text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
@@ -193,7 +193,7 @@ function HistorySidebar({
 
 export default function VoiceCallPage() {
   const { data: profile } = trpc.users.getProfile.useQuery();
-  const accent = (profile as any)?.accentPreference ?? "american";
+  const accent = profile?.accentPreference ?? "american";
 
   const [error, setError]           = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
@@ -212,7 +212,7 @@ export default function VoiceCallPage() {
   return (
     <div className="flex h-full w-full overflow-hidden">
       {/* ── History sidebar ── */}
-      <aside className={`shrink-0 flex flex-col border-r border-slate-100 bg-slate-50/60 overflow-hidden transition-all duration-200 ${showHistory ? "w-64" : "w-0"}`}>
+      <aside className={`shrink-0 flex flex-col border-r border-slate-100 bg-[var(--surface)]/60 overflow-hidden transition-all duration-200 ${showHistory ? "w-64" : "w-0"}`}>
         <HistorySidebar
           sessions={sessions}
           activeId={activeSession?.id ?? null}
@@ -225,7 +225,7 @@ export default function VoiceCallPage() {
       {/* ── Main content ── */}
       <div className="flex flex-col flex-1 p-6 md:p-8 min-w-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border border-slate-100 bg-white rounded-2xl shadow-sm mb-4 shrink-0 gap-3">
+        <div className="flex items-center justify-between px-4 py-3 border border-slate-100 bg-white rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setShowHistory(!showHistory)}
@@ -233,7 +233,7 @@ export default function VoiceCallPage() {
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                 showHistory
                   ? "bg-primary-50 border border-primary-200 text-primary-600"
-                  : "bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-600"
+                  : "bg-[var(--surface)] border border-slate-100 text-slate-400 hover:text-slate-600"
               }`}
             >
               <PanelLeft className="w-4 h-4" />
@@ -279,7 +279,7 @@ export default function VoiceCallPage() {
             <div className="flex justify-start">
               <div className="max-w-[78%] space-y-1">
                 <p className="text-[11px] font-semibold text-slate-400 px-1">Aria</p>
-                <div className="px-4 py-2.5 rounded-2xl rounded-tl-sm bg-white border border-slate-100 text-sm leading-relaxed text-slate-800 shadow-sm">
+                <div className="px-4 py-2.5 rounded-[18px] rounded-tl-sm bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-sm leading-relaxed text-slate-800 shadow-sm">
                   {streamingText}
                   <span className="inline-block w-1 h-4 bg-primary-400 ml-0.5 animate-pulse rounded" />
                 </div>
@@ -298,7 +298,7 @@ export default function VoiceCallPage() {
         )}
 
         {/* Controls */}
-        <div className="bg-white border border-slate-100 rounded-2xl shadow-sm px-6 py-5 flex flex-col items-center gap-4 shrink-0">
+        <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] shadow-sm px-6 py-5 flex flex-col items-center gap-4 shrink-0">
           <StateIndicator state={voiceState} />
           <MicButton
             state={voiceState}

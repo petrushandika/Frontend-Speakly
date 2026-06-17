@@ -11,7 +11,7 @@ export function LogoutButton({ compact }: { compact?: boolean }) {
     const supabase = createClient();
     await supabase.auth.signOut();
     localStorage.removeItem("sb-access-token");
-    router.push("/login");
+    router.push("/");
   }
 
   if (compact) {

@@ -7,7 +7,7 @@ const PUBLIC_ROUTES = ["/login", "/register", "/forgot", "/reset", "/verify"];
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (PUBLIC_ROUTES.some((r) => pathname.startsWith(r))) {
+  if (pathname === "/" || PUBLIC_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.next();
   }
 

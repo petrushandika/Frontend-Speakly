@@ -86,10 +86,10 @@ export default function FlashcardsPage() {
     const accuracy = total > 0 ? Math.round(((correct) / total) * 100) : 0;
     return (
       <div className="w-full p-6 md:p-8 space-y-6">
-        <div className="w-full bg-white border border-slate-100 rounded-3xl p-8 shadow-sm space-y-6">
+        <div className="w-full bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 shadow-sm space-y-6">
           {/* Title */}
           <div className="text-center space-y-1">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-3">
+            <div className="w-14 h-14 rounded-[18px] bg-emerald-50 flex items-center justify-center mx-auto mb-3">
               <CheckCircle2 className="w-7 h-7 text-emerald-500" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900">Session Complete!</h1>
@@ -98,15 +98,15 @@ export default function FlashcardsPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col items-center gap-1 p-4 bg-slate-50 border border-slate-100 rounded-2xl">
+            <div className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-slate-100 rounded-[18px]">
               <span className="text-2xl font-bold text-slate-900">{total}</span>
               <span className="text-xs text-slate-400 font-medium text-center">Cards reviewed</span>
             </div>
-            <div className="flex flex-col items-center gap-1 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl">
+            <div className="flex flex-col items-center gap-1 p-4 bg-emerald-50 border border-emerald-100 rounded-[18px]">
               <span className="text-2xl font-bold text-emerald-600">{correct}</span>
               <span className="text-xs text-emerald-500 font-medium text-center">Correct</span>
             </div>
-            <div className="flex flex-col items-center gap-1 p-4 bg-red-50 border border-red-100 rounded-2xl">
+            <div className="flex flex-col items-center gap-1 p-4 bg-red-50 border border-red-100 rounded-[18px]">
               <span className="text-2xl font-bold text-red-500">{incorrect}</span>
               <span className="text-xs text-red-400 font-medium text-center">To retry</span>
             </div>
@@ -135,7 +135,7 @@ export default function FlashcardsPage() {
 
           <button
             onClick={() => setState("idle")}
-            className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all shadow-sm active:scale-95"
+            className="w-full py-3 bg-[#1f1d19] hover:bg-[#161411] text-white font-bold rounded-xl text-sm transition-all shadow-sm active:scale-95"
           >
             Done
           </button>
@@ -151,7 +151,7 @@ export default function FlashcardsPage() {
       <div className="w-full p-6 md:p-8 space-y-5">
         <div className="w-full space-y-5">
           {/* Progress bar */}
-          <div className="flex items-center gap-3 bg-white px-4 py-3 border border-slate-100 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-3 bg-white px-4 py-3 border border-slate-100 rounded-[18px] shadow-sm">
             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-primary-500 to-indigo-500 rounded-full transition-all duration-300"
@@ -171,11 +171,11 @@ export default function FlashcardsPage() {
           {/* Card */}
           <div
             onClick={() => setFlipped(!flipped)}
-            className="cursor-pointer select-none min-h-[240px] bg-white border border-slate-100 rounded-3xl p-8 flex flex-col items-center justify-center gap-4 shadow-md hover:shadow-lg transition-all duration-200 group"
+            className="cursor-pointer select-none min-h-[240px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 flex flex-col items-center justify-center gap-4 shadow-md hover:shadow-lg transition-all duration-200 group"
           >
             {!flipped ? (
               <>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-full">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2.5 py-1 bg-[var(--surface)] border border-slate-100 rounded-full">
                   Tap to reveal answer
                 </span>
                 <p className="text-3xl font-bold text-slate-900 text-center leading-snug">
@@ -201,7 +201,7 @@ export default function FlashcardsPage() {
 
           {/* Action buttons */}
           {flipped ? (
-            <div className="bg-white border border-slate-100 rounded-2xl p-4 space-y-3 shadow-sm">
+            <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 space-y-3 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400 text-center">
                 How well did you recall?
               </p>
@@ -221,7 +221,7 @@ export default function FlashcardsPage() {
           ) : (
             <button
               onClick={() => setFlipped(true)}
-              className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] cursor-pointer"
+              className="w-full py-4 bg-[#1f1d19] hover:bg-[#161411] text-white font-bold text-sm rounded-[18px] transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] cursor-pointer"
             >
               Reveal Answer
             </button>
@@ -247,7 +247,7 @@ export default function FlashcardsPage() {
         </div>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95"
+          className="px-4 py-2.5 bg-[#1f1d19] hover:bg-[#161411] text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95"
         >
           {showAdd ? "Cancel" : "+ Card"}
         </button>
@@ -255,26 +255,26 @@ export default function FlashcardsPage() {
 
       {/* Add card form */}
       {showAdd && (
-        <form onSubmit={handleAddCard} className="bg-white border border-slate-100 rounded-2xl p-5 space-y-4 shadow-sm">
+        <form onSubmit={handleAddCard} className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-5 space-y-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Front</label>
-              <input value={front} onChange={(e) => setFront(e.target.value)} placeholder="Question or word" required className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+              <input value={front} onChange={(e) => setFront(e.target.value)} placeholder="Question or word" required className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Back</label>
-              <input value={back} onChange={(e) => setBack(e.target.value)} placeholder="Answer or definition" required className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+              <input value={back} onChange={(e) => setBack(e.target.value)} placeholder="Answer or definition" required className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
             <div className="space-y-1">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Example (optional)</label>
-              <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence" className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+              <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence" className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95">
+            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-slate-500 hover:bg-[var(--surface)] transition-all active:scale-95">
               Cancel
             </button>
-            <button type="submit" disabled={addCard.isPending} className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 shadow-sm">
+            <button type="submit" disabled={addCard.isPending} className="px-5 py-2 bg-[#1f1d19] hover:bg-[#161411] text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 shadow-sm">
               {addCard.isPending ? "Saving…" : "Add"}
             </button>
           </div>
@@ -283,9 +283,9 @@ export default function FlashcardsPage() {
 
       {/* CTA / status */}
       {isLoading ? (
-        <div className="h-32 rounded-3xl bg-white border border-slate-100 animate-pulse" />
+        <div className="h-32 rounded-[22px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
       ) : dueCards.length > 0 ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-[22px] p-6 flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex items-center gap-3 flex-1">
             <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
               <Layers className="w-5 h-5 text-amber-600" />
@@ -303,8 +303,8 @@ export default function FlashcardsPage() {
           </button>
         </div>
       ) : (
-        <div className="text-center py-16 bg-white border border-slate-100 rounded-3xl shadow-sm flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center">
+        <div className="text-center py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm flex flex-col items-center gap-3">
+          <div className="w-12 h-12 rounded-[18px] bg-emerald-50 flex items-center justify-center">
             <CheckCircle2 className="w-6 h-6 text-emerald-500" />
           </div>
           <h3 className="font-bold text-slate-900">All caught up!</h3>

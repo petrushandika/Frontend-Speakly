@@ -179,8 +179,6 @@ function ReadingStep({
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  const { data: profile } = trpc.users.getProfile.useQuery();
-
   const fullText = text.paragraphs.join(" ");
 
   async function startRecording() {

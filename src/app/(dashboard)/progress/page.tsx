@@ -1,28 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import {
-  RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, Cell, LineChart, Line,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { trpc } from "@/lib/trpc";
+
+const ChartsSection = dynamic(() => import("./ChartsSection"), {
+  ssr: false,
+  loading: () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="h-[280px] rounded-[22px] bg-slate-100 animate-pulse" />
+      ))}
+    </div>
+  ),
+});
 import {
   Trophy, Flame, TrendingUp, TrendingDown, Target, AlertTriangle,
-  History, BarChart2, BookOpen, Layers, Star, Minus,
+  History, BookOpen, Star, Minus,
   Lightbulb, ArrowRight, CheckCircle2, BookMarked,
 } from "lucide-react";
 
 const CEFR_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const CEFR_XP: Record<string, number> = {
   A1: 0, A2: 500, B1: 1500, B2: 3500, C1: 7000, C2: 12000,
-};
-const ERROR_COLOR: Record<string, string> = {
-  tense:        "#6366f1",
-  article:      "#a855f7",
-  preposition:  "#14b8a6",
-  subject_verb: "#f43f5e",
-  word_order:   "#eab308",
-  vocabulary:   "#3b82f6",
 };
 const ERROR_LABEL: Record<string, string> = {
   tense:        "Verb Tense",
@@ -32,12 +32,6 @@ const ERROR_LABEL: Record<string, string> = {
   word_order:   "Word Order",
   vocabulary:   "Vocabulary",
 };
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{children}</p>
-  );
-}
 
 function TrendBadge({ trend }: { trend: "improving" | "stable" | "needs_attention" }) {
   if (trend === "improving") return (
@@ -51,18 +45,19 @@ function TrendBadge({ trend }: { trend: "improving" | "stable" | "needs_attentio
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-500">
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-[var(--surface)] border border-[var(--line-soft)] text-slate-500">
       <Minus className="w-3 h-3" /> Stable
     </span>
   );
 }
 
 export default function ProgressPage() {
-  const { data: summary }                  = trpc.progress.getSummary.useQuery();
-  const { data: recent = [] }              = trpc.progress.getRecentProgress.useQuery();
-  const { data: analytics }               = trpc.ai.getErrorAnalytics.useQuery();
-  const { data: recommendations = [] }    = trpc.ai.getRecommendations.useQuery();
-  const { data: learningCtx }             = trpc.ai.getLearningContext.useQuery();
+  const FIVE_MIN = 5 * 60 * 1000;
+  const { data: summary }               = trpc.progress.getSummary.useQuery(undefined, { staleTime: 60_000 });
+  const { data: recent = [] }           = trpc.progress.getRecentProgress.useQuery(undefined, { staleTime: 60_000 });
+  const { data: analytics }             = trpc.ai.getErrorAnalytics.useQuery(undefined, { staleTime: FIVE_MIN });
+  const { data: recommendations = [] }  = trpc.ai.getRecommendations.useQuery(undefined, { staleTime: FIVE_MIN });
+  const { data: learningCtx }           = trpc.ai.getLearningContext.useQuery(undefined, { staleTime: FIVE_MIN });
 
   const xp     = summary?.xpTotal ?? 0;
   const streak = summary?.streakDays ?? 0;
@@ -124,7 +119,7 @@ export default function ProgressPage() {
           { icon: Flame,    bg: "bg-orange-50",   color: "text-orange-500",  label: "Day Streak",   value: `${streak} days` },
           { icon: BookOpen, bg: "bg-emerald-50",  color: "text-emerald-600", label: "Lessons Done", value: recent.length.toString() },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-slate-100 rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+          <div key={s.label} className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 flex items-center gap-3 shadow-sm">
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${s.bg}`}>
               <s.icon className={`w-4.5 h-4.5 ${s.color}`} />
             </div>
@@ -137,7 +132,7 @@ export default function ProgressPage() {
       </div>
 
       {/* ── CEFR Level Progression (full width) ── */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-5">
+      <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-6 shadow-sm space-y-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
@@ -159,7 +154,7 @@ export default function ProgressPage() {
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-semibold text-slate-500">
             <span className="px-2 py-0.5 bg-primary-50 border border-primary-100 text-primary-700 rounded-md font-bold">{cefr}</span>
-            {nextCefr && <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-md font-bold">{nextCefr}</span>}
+            {nextCefr && <span className="px-2 py-0.5 bg-slate-100 border border-[var(--line-soft)] text-slate-500 rounded-md font-bold">{nextCefr}</span>}
           </div>
           <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
             <div
@@ -183,7 +178,7 @@ export default function ProgressPage() {
               { label: "Grammar Errors", value: `${analytics?.totalThisWeek ?? 0}`, sub: "this week", icon: AlertTriangle, color: "text-rose-500", bg: "bg-rose-50" },
               { label: "Weak Area", value: analytics?.topCategory ? (ERROR_LABEL[analytics.topCategory] ?? analytics.topCategory) : "—", sub: "most frequent", icon: TrendingDown, color: "text-amber-500", bg: "bg-amber-50" },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 px-3 py-2.5 bg-slate-50 border border-slate-100 rounded-xl">
+              <div key={item.label} className="flex items-center gap-3 px-3 py-2.5 bg-[var(--surface)] border border-slate-100 rounded-xl">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${item.bg}`}>
                   <item.icon className={`w-4 h-4 ${item.color}`} />
                 </div>
@@ -199,126 +194,17 @@ export default function ProgressPage() {
       </div>
 
       {/* ── Charts row: Grammar | Radar | Trend ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        {/* Grammar Diagnostics */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-4.5 h-4.5 text-rose-500" />
-            </div>
-            <div>
-              <h2 className="font-bold text-slate-900 text-sm">Grammar Diagnostics</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Error frequency by category</p>
-            </div>
-          </div>
-          {errorData.length > 0 ? (
-            <div className="w-full h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={errorData} layout="vertical" margin={{ left: -10, right: 8 }}>
-                  <XAxis type="number" hide />
-                  <YAxis
-                    type="category" dataKey="label" width={105} tickLine={false} axisLine={false}
-                    tick={{ fontSize: 10, fontWeight: "bold", fill: "#64748b" }}
-                  />
-                  <Tooltip
-                    formatter={(v) => [`${v} times`, "Frequency"]}
-                    contentStyle={{ fontSize: 11, borderRadius: 10, border: "1px solid #f1f5f9" }}
-                  />
-                  <Bar dataKey="count" radius={[0, 5, 5, 0]} barSize={12}>
-                    {errorData.map((entry) => (
-                      <Cell key={entry.name} fill={ERROR_COLOR[entry.name] ?? "#6366f1"} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center gap-2 h-[200px] text-slate-300">
-              <BarChart2 className="w-10 h-10" />
-              <p className="text-xs text-slate-400 text-center">Chat with Aria to see your error patterns</p>
-            </div>
-          )}
-        </div>
-
-        {/* Skills Radar */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
-              <Layers className="w-4.5 h-4.5 text-indigo-600" />
-            </div>
-            <div>
-              <h2 className="font-bold text-slate-900 text-sm">Skills Balance</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Across 6 core skill areas</p>
-            </div>
-          </div>
-          <div className="w-full h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart data={radarData}>
-                <PolarGrid stroke="#f1f5f9" />
-                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10, fontWeight: "bold", fill: "#94a3b8" }} />
-                <Radar dataKey="value" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.12} strokeWidth={2} />
-              </RadarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Error Trend */}
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-                <TrendingDown className="w-4.5 h-4.5 text-emerald-600" />
-              </div>
-              <div>
-                <h2 className="font-bold text-slate-900 text-sm">Error Trend</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Last 14 days</p>
-              </div>
-            </div>
-            {analytics?.trend && (
-              <TrendBadge trend={analytics.trend as "improving" | "stable" | "needs_attention"} />
-            )}
-          </div>
-          {hasTrendData ? (
-            <>
-              <div className="w-full h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={trendData} margin={{ left: -20, right: 5 }}>
-                    <XAxis dataKey="date" tick={{ fontSize: 9, fill: "#94a3b8" }} tickLine={false} axisLine={false} interval={3} />
-                    <YAxis tick={{ fontSize: 9, fill: "#94a3b8" }} tickLine={false} axisLine={false} allowDecimals={false} />
-                    <Tooltip
-                      formatter={(v) => [`${v} errors`, ""]}
-                      contentStyle={{ fontSize: 11, borderRadius: 10, border: "1px solid #f1f5f9" }}
-                    />
-                    <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={2} dot={false} activeDot={{ r: 3, fill: "#6366f1" }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              {analytics && (
-                <div className="flex gap-4 text-[11px] text-slate-500 border-t border-slate-100 pt-3">
-                  <div>
-                    <span className="text-slate-400">This week</span>
-                    <p className="font-bold text-slate-800">{analytics.totalThisWeek}</p>
-                  </div>
-                  <div>
-                    <span className="text-slate-400">Last week</span>
-                    <p className="font-bold text-slate-800">{analytics.totalLastWeek}</p>
-                  </div>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center gap-2 h-[160px] text-slate-300">
-              <TrendingUp className="w-10 h-10" />
-              <p className="text-xs text-slate-400 text-center">No trend data yet</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <ChartsSection
+        errorData={errorData}
+        radarData={radarData}
+        trendData={trendData}
+        hasTrendData={hasTrendData}
+        analytics={analytics}
+      />
 
       {/* ── Recommendations (full width) ── */}
       {recommendations.length > 0 && (
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+        <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
               <Lightbulb className="w-4.5 h-4.5 text-amber-600" />
@@ -333,7 +219,7 @@ export default function ProgressPage() {
               <Link
                 key={r.id}
                 href={`/lessons/${r.id}`}
-                className="flex flex-col gap-2.5 p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-primary-200 hover:bg-white hover:shadow-sm transition-all group"
+                className="flex flex-col gap-2.5 p-4 bg-[var(--surface)] border border-slate-100 rounded-[18px] hover:border-primary-200 hover:bg-white hover:shadow-sm transition-all group"
               >
                 <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                   <BookOpen className="w-3.5 h-3.5 text-primary-500" />
@@ -352,7 +238,7 @@ export default function ProgressPage() {
       )}
 
       {/* ── Recent lessons (full width) ── */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+      <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
             <History className="w-4.5 h-4.5 text-slate-500" />
@@ -366,7 +252,7 @@ export default function ProgressPage() {
         {recent.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
             {recent.slice(0, 9).map((p) => (
-              <div key={p.id} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl">
+              <div key={p.id} className="flex items-center gap-3 p-3 bg-[var(--surface)] border border-slate-100 rounded-xl">
                 <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
                 </div>

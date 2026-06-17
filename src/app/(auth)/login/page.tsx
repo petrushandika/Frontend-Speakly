@@ -52,7 +52,7 @@ function LoginForm() {
             required
             autoComplete="email"
             placeholder="name@example.com"
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+            className="sk-input"
           />
         </div>
       </div>
@@ -74,7 +74,7 @@ function LoginForm() {
             required
             autoComplete="current-password"
             placeholder="••••••••"
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
+            className="sk-input pr-12"
           />
           <button
             type="button"
@@ -95,7 +95,7 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 hover:shadow-primary-500/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+        className="w-full py-3 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-semibold rounded-full border border-[#1f1d19] transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
       >
         {loading ? (
           <span className="flex items-center justify-center gap-2">
@@ -115,9 +115,9 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col md:flex-row-reverse bg-slate-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[var(--background)] paper-grid">
       {/* Right Pane - Brand Info & Marketing (Desktop only) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
+      <div className="hidden md:flex md:w-1/2 bg-[#1f1d19] text-white flex-col justify-between p-16 relative overflow-hidden border-r border-[var(--line)]">
         {/* Decorative background circles */}
         <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
         <div className="absolute w-[400px] h-[400px] bg-primary-500/20 rounded-full -bottom-20 -right-20 blur-3xl" />
@@ -166,26 +166,26 @@ export default function LoginPage() {
       </div>
 
       {/* Left Pane - Sign In Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+      <div className="flex-1 flex items-center justify-center p-8 bg-[var(--background)]">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
             <span className="text-4xl">🗣️</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-2">Speakly</h2>
-            <p className="text-slate-500 text-sm mt-1">Practice English with AI</p>
+            <h2 className="text-3xl font-extrabold text-[var(--foreground)] mt-2">Speakly</h2>
+            <p className="text-stone-600 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">
               Sign In
             </h2>
-            <p className="text-sm text-slate-500 mt-2">
+            <p className="text-sm text-stone-600 mt-2">
               Welcome back! Please enter your details below.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
-            <Suspense fallback={<div className="h-40 animate-pulse bg-slate-50 rounded-xl" />}>
+          <div className="sk-panel p-8 bg-[var(--surface-strong)]">
+            <Suspense fallback={<div className="h-40 animate-pulse bg-[#efe9d9] rounded-xl" />}>
               <LoginForm />
             </Suspense>
           </div>

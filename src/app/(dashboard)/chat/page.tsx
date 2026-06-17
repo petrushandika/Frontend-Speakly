@@ -134,7 +134,7 @@ export default function ChatPage() {
     <div className="flex h-full w-full overflow-hidden">
       {/* ── History Sidebar ── */}
       <aside
-        className={`shrink-0 flex flex-col border-r border-slate-100 bg-slate-50/60 overflow-hidden transition-all duration-200 ${
+        className={`shrink-0 flex flex-col border-r border-slate-100 bg-[var(--surface)]/60 overflow-hidden transition-all duration-200 ${
           showHistory ? "w-64" : "w-0"
         }`}
       >
@@ -147,7 +147,7 @@ export default function ChatPage() {
             <button
               onClick={newSession}
               title="New session"
-              className="w-7 h-7 rounded-lg bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+              className="w-7 h-7 rounded-lg bg-[#1f1d19] hover:bg-[#161411] text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
@@ -200,7 +200,7 @@ export default function ChatPage() {
       {/* ── Main Chat Area ── */}
       <div className="flex flex-col flex-1 p-6 md:p-8 min-w-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border border-slate-100 bg-white rounded-2xl shadow-sm mb-4 shrink-0 gap-3">
+        <div className="flex items-center justify-between px-4 py-3 border border-slate-100 bg-white rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setShowHistory(!showHistory)}
@@ -208,7 +208,7 @@ export default function ChatPage() {
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                 showHistory
                   ? "bg-primary-50 border border-primary-200 text-primary-600"
-                  : "bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-600"
+                  : "bg-[var(--surface)] border border-slate-100 text-slate-400 hover:text-slate-600"
               }`}
             >
               <PanelLeft className="w-4 h-4" />
@@ -241,7 +241,7 @@ export default function ChatPage() {
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                 ttsEnabled
                   ? "bg-primary-50 border border-primary-200 text-primary-600 shadow-sm"
-                  : "bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-600"
+                  : "bg-[var(--surface)] border border-slate-100 text-slate-400 hover:text-slate-600"
               }`}
             >
               {isSpeaking ? <Volume2 className="w-4 h-4" /> : ttsEnabled ? <Volume1 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -259,11 +259,11 @@ export default function ChatPage() {
         </div>
 
         {/* Messages Window */}
-        <div className="flex-1 overflow-y-auto px-4 py-5 rounded-2xl bg-white border border-slate-100 shadow-sm min-h-0">
+        <div className="flex-1 overflow-y-auto px-4 py-5 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] shadow-sm min-h-0">
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-md mx-auto py-8">
               <div className="space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary-50 to-indigo-50 border border-primary-100 flex items-center justify-center mx-auto">
+                <div className="w-14 h-14 rounded-[18px] bg-gradient-to-tr from-primary-50 to-indigo-50 border border-primary-100 flex items-center justify-center mx-auto">
                   <MessageSquare className="w-7 h-7 text-primary-400" />
                 </div>
                 <h2 className="text-lg font-bold text-slate-900">Chat with Aria</h2>
@@ -280,7 +280,7 @@ export default function ChatPage() {
                     <button
                       key={s.text}
                       onClick={() => handleSend(s.text)}
-                      className="w-full text-left px-4 py-3 rounded-xl bg-slate-50 border border-slate-100 text-sm text-slate-700 hover:border-primary-300 hover:bg-white hover:text-primary-600 hover:shadow-sm transition-all flex items-center gap-3 cursor-pointer"
+                      className="w-full text-left px-4 py-3 rounded-xl bg-[var(--surface)] border border-slate-100 text-sm text-slate-700 hover:border-primary-300 hover:bg-white hover:text-primary-600 hover:shadow-sm transition-all flex items-center gap-3 cursor-pointer"
                     >
                       <s.Icon className="w-4 h-4 shrink-0 text-slate-400" />
                       <span className="font-medium truncate">{s.text}</span>
@@ -316,7 +316,7 @@ export default function ChatPage() {
               <button
                 key={s}
                 onClick={() => handleSend(s)}
-                className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-semibold rounded-xl hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 transition-all cursor-pointer"
+                className="px-3 py-1.5 bg-white border border-[var(--line-soft)] text-slate-600 text-xs font-semibold rounded-xl hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 transition-all cursor-pointer"
               >
                 {s}
               </button>
@@ -326,14 +326,14 @@ export default function ChatPage() {
 
         {/* Input area */}
         <div className="pt-3 shrink-0">
-          <div className="flex gap-2 items-end bg-white border border-slate-200 p-2.5 rounded-2xl shadow-sm">
+          <div className="flex gap-2 items-end bg-white border border-[var(--line-soft)] p-2.5 rounded-[18px] shadow-sm">
             <button
               onClick={handleMic}
               title={isRecording ? "Stop recording" : "Record voice"}
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
                 isRecording
                   ? "bg-red-500 text-white animate-pulse shadow-sm shadow-red-500/30"
-                  : "bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-500"
+                  : "bg-[var(--surface)] hover:bg-slate-100 border border-slate-100 text-slate-500"
               }`}
             >
               {isRecording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -358,7 +358,7 @@ export default function ChatPage() {
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
-              className="w-10 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 cursor-pointer active:scale-95"
+              className="w-10 h-10 rounded-xl bg-[#1f1d19] hover:bg-[#161411] text-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 cursor-pointer active:scale-95"
             >
               {isLoading
                 ? <Loader2 className="w-4 h-4 animate-spin" />

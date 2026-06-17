@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f4f0e3;
+  --foreground: #1e1a14;
+  --surface: #f8f5ea;
+  --surface-strong: #fffdf6;
+  --line: #2d2922;
+  --line-soft: #b9b09d;
+  --highlight: #aee8ee;
+  --pink: #f7b4c4;
+  --yellow: #f7e6b2;
 }
 
 @theme inline {
@@ -11,16 +18,29 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 
-  /* Speakly primary — indigo */
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-200: #c7d2fe;
-  --color-primary-300: #a5b4fc;
-  --color-primary-400: #818cf8;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-800: #3730a3;
+  /* Speakly primary — Teal */
+  --color-primary-50:  #f0fdfa;
+  --color-primary-100: #ccfbf1;
+  --color-primary-200: #99f6e4;
+  --color-primary-300: #5eead4;
+  --color-primary-400: #2dd4bf;
+  --color-primary-500: #2cb7c3;
+  --color-primary-600: #1b98a3;
+  --color-primary-700: #1a7a84;
+  --color-primary-800: #1b666e;
+
+  /* Accent — Rose/Pink */
+  --color-accent-50:  #fff1f2;
+  --color-accent-100: #ffe4e6;
+  --color-accent-200: #fecdd3;
+  --color-accent-300: #fcc5d0;
+  --color-accent-400: #f5a5b7;
+  --color-accent-500: #ea8ea4;
+
+  /* Cream surface tokens */
+  --color-cream:      #F5F0E2;
+  --color-cream-100:  #EDE8D5;
+  --color-cream-200:  #E3DCCB;
 }
 
 body {
@@ -31,56 +51,106 @@ body {
   color-scheme: light;
 }
 
-/* Force light text on all inputs regardless of OS dark mode */
+@layer base {
+  * {
+    border-color: var(--line-soft);
+  }
+}
+
+@layer components {
+  .paper-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(45, 41, 34, 0.08) 1px, transparent 0);
+    background-size: 18px 18px;
+  }
+
+  .sk-panel {
+    background: var(--surface-strong);
+    border: 1.5px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 2px 0 rgba(45, 41, 34, 0.85);
+  }
+
+  .sk-panel-soft {
+    background: var(--surface);
+    border: 1.5px solid var(--line-soft);
+    border-radius: 16px;
+  }
+
+  .sk-pill {
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--surface-strong);
+  }
+
+  .sk-btn-primary {
+    background: #1f1d19;
+    color: #fff;
+    border: 1.5px solid #1f1d19;
+    border-radius: 999px;
+    padding: 0.62rem 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 160ms ease;
+  }
+
+  .sk-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 rgba(31, 29, 25, 0.3);
+  }
+
+  .sk-btn-ghost {
+    background: var(--surface-strong);
+    color: var(--foreground);
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    padding: 0.62rem 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 160ms ease;
+  }
+
+  .sk-btn-ghost:hover {
+    background: #efe9d9;
+  }
+
+  .sk-input {
+    width: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    background: #fffdf7;
+    padding: 0.7rem 0.85rem;
+    font-size: 0.88rem;
+    color: var(--foreground);
+  }
+
+  .sk-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(44, 183, 195, 0.35);
+  }
+}
+
 input, textarea, select {
-  color: #0f172a;
+  color: #1a1208;
   background-color: transparent;
 }
 
 /* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.2);
+  background: rgba(148, 163, 184, 0.25);
   border-radius: 999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(148, 163, 184, 0.45);
 }
 
-/* Glassmorphism Panels */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-}
-
-/* Premium Animations */
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
 }
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
+.animate-float { animation: float 6s ease-in-out infinite; }

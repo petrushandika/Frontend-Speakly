@@ -32,7 +32,7 @@ interface PronunciationScore {
 
 const MASTERY_LABEL = ["New", "Learning", "Familiar", "Good", "Strong", "Mastered"];
 const MASTERY_COLOR = [
-  "bg-slate-100 border-slate-200 text-slate-500",
+  "bg-slate-100 border-[var(--line-soft)] text-slate-500",
   "bg-blue-50 border-blue-200 text-blue-600",
   "bg-indigo-50 border-indigo-200 text-indigo-600",
   "bg-amber-50 border-amber-200 text-amber-600",
@@ -247,7 +247,7 @@ export default function VocabularyPage() {
           </p>
 
           {studyList.length === 0 && (
-            <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl flex flex-col items-center gap-2">
+            <div className="text-center py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] flex flex-col items-center gap-2">
               <BookMarked className="w-8 h-8 text-slate-200" />
               <p className="text-sm text-slate-400">No study words found for your level.</p>
             </div>
@@ -255,7 +255,7 @@ export default function VocabularyPage() {
 
           {/* Active practice card — shown at top when a word is selected */}
           {activeWord && activeIndex !== null && (
-            <div className="bg-white rounded-2xl border border-primary-300 shadow-md">
+            <div className="bg-white rounded-[18px] border border-primary-300 shadow-md">
               {/* Navigation header */}
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
                 <button
@@ -296,13 +296,13 @@ export default function VocabularyPage() {
                     })}
                     disabled={addedToFlashcard.has(activeWord.word)}
                     title={addedToFlashcard.has(activeWord.word) ? "Added" : "Add to flashcards"}
-                    className={`p-2 rounded-lg border transition-colors ${addedToFlashcard.has(activeWord.word) ? "border-green-200 bg-green-50 text-green-600" : "border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600"}`}
+                    className={`p-2 rounded-lg border transition-colors ${addedToFlashcard.has(activeWord.word) ? "border-green-200 bg-green-50 text-green-600" : "border-[var(--line-soft)] text-slate-400 hover:border-primary-400 hover:text-primary-600"}`}
                   >
                     <Layers className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => { setActiveIndex(null); setPracticeState("idle"); setSpokenText(""); }}
-                    className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 transition-colors"
+                    className="p-2 rounded-lg border border-[var(--line-soft)] text-slate-400 hover:bg-[var(--surface)] transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -310,7 +310,7 @@ export default function VocabularyPage() {
               </div>
 
               {/* Practice panel */}
-              <div className="border-t border-slate-100 px-4 pb-4 pt-3 bg-slate-50/50 rounded-b-2xl space-y-3">
+              <div className="border-t border-slate-100 px-4 pb-4 pt-3 bg-[var(--surface)]/50 rounded-b-2xl space-y-3">
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Say this word aloud:</p>
                 <div>
                   <p className="text-4xl font-bold text-primary-600 tracking-wide">{activeWord.word}</p>
@@ -392,8 +392,8 @@ export default function VocabularyPage() {
             return (
               <div
                 key={item.word}
-                className={`bg-white rounded-2xl border transition-all ${
-                  isActive ? "border-primary-200 opacity-60" : "border-slate-100 hover:border-slate-200"
+                className={`bg-white rounded-[18px] border transition-all ${
+                  isActive ? "border-primary-200 opacity-60" : "border-slate-100 hover:border-[var(--line-soft)]"
                 }`}
               >
                 <div className="p-4 flex items-start gap-4">
@@ -433,7 +433,7 @@ export default function VocabularyPage() {
                       className={`p-2 rounded-lg border transition-colors ${
                         addedToFlashcard.has(item.word)
                           ? "border-green-200 bg-green-50 text-green-600"
-                          : "border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600"
+                          : "border-[var(--line-soft)] text-slate-400 hover:border-primary-400 hover:text-primary-600"
                       }`}
                     >
                       <Layers className="w-3.5 h-3.5" />
@@ -479,12 +479,12 @@ export default function VocabularyPage() {
                 if (!word.trim() || !definition.trim()) return;
                 add.mutate({ word: word.trim(), definition: definition.trim(), example: example.trim() || undefined });
               }}
-              className="bg-white border border-slate-100 rounded-2xl p-5 space-y-3"
+              className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-5 space-y-3"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <input value={word} onChange={(e) => setWord(e.target.value)} placeholder="Word or phrase" required className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
-                <input value={definition} onChange={(e) => setDefinition(e.target.value)} placeholder="Definition" required className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
-                <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence (optional)" className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                <input value={word} onChange={(e) => setWord(e.target.value)} placeholder="Word or phrase" required className="px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                <input value={definition} onChange={(e) => setDefinition(e.target.value)} placeholder="Definition" required className="px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+                <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence (optional)" className="px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
               </div>
               <div className="flex justify-end">
                 <button type="submit" disabled={add.isPending} className="flex items-center gap-2 px-5 py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 disabled:opacity-50">
@@ -501,20 +501,20 @@ export default function VocabularyPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search words…"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--line-soft)] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
           </div>
 
           {isLoading && (
             <div className="space-y-2">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-16 rounded-2xl bg-slate-100 animate-pulse" />
+                <div key={i} className="h-16 rounded-[18px] bg-slate-100 animate-pulse" />
               ))}
             </div>
           )}
 
           {!isLoading && displayed.length === 0 && (
-            <div className="text-center py-16 bg-white border border-slate-100 rounded-2xl text-slate-400 flex flex-col items-center gap-2">
+            <div className="text-center py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] text-slate-400 flex flex-col items-center gap-2">
               <Search className="w-8 h-8 text-slate-200" />
               <p className="text-sm">{search.length >= 2 ? "No results found" : "No words yet — add your first word above"}</p>
             </div>
@@ -524,7 +524,7 @@ export default function VocabularyPage() {
             {displayed.map((entry) => {
               const alreadyAdded = addedToFlashcard.has(entry.word);
               return (
-                <div key={entry.id} className="flex items-start gap-3 p-4 bg-white rounded-2xl border border-slate-100">
+                <div key={entry.id} className="flex items-start gap-3 p-4 bg-white rounded-[18px] border border-slate-100">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-0.5">
                       <span className="font-semibold text-slate-900">{entry.word}</span>
@@ -541,7 +541,7 @@ export default function VocabularyPage() {
                       disabled={alreadyAdded}
                       title={alreadyAdded ? "Added to flashcards" : "Add to flashcards"}
                       className={`p-2 rounded-lg border transition-colors ${
-                        alreadyAdded ? "border-green-200 bg-green-50 text-green-600" : "border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600"
+                        alreadyAdded ? "border-green-200 bg-green-50 text-green-600" : "border-[var(--line-soft)] text-slate-400 hover:border-primary-400 hover:text-primary-600"
                       }`}
                     >
                       <Layers className="w-3.5 h-3.5" />
@@ -549,7 +549,7 @@ export default function VocabularyPage() {
                     <button
                       onClick={() => remove.mutate({ id: entry.id })}
                       disabled={remove.isPending}
-                      className="p-2 rounded-lg border border-slate-200 text-slate-300 hover:border-red-300 hover:text-red-400 transition-colors"
+                      className="p-2 rounded-lg border border-[var(--line-soft)] text-slate-300 hover:border-red-300 hover:text-red-400 transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>

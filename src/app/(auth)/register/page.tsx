@@ -104,9 +104,9 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row-reverse bg-slate-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[var(--background)] paper-grid">
       {/* Right Pane - Brand Info (Desktop only) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
+      <div className="hidden md:flex md:w-1/2 bg-[#1f1d19] text-white flex-col justify-between p-16 relative overflow-hidden border-r border-[var(--line)]">
         {/* Decorative background circles */}
         <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
         <div className="absolute w-[400px] h-[400px] bg-primary-500/20 rounded-full -bottom-20 -right-20 blur-3xl" />
@@ -154,33 +154,33 @@ export default function RegisterPage() {
       </div>
 
       {/* Left Pane - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+      <div className="flex-1 flex items-center justify-center p-8 bg-[var(--background)]">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
             <span className="text-4xl">🗣️</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-2">Speakly</h2>
-            <p className="text-slate-500 text-sm mt-1">Practice English with AI</p>
+            <h2 className="text-3xl font-extrabold text-[var(--foreground)] mt-2">Speakly</h2>
+            <p className="text-stone-600 text-sm mt-1">Practice English with AI</p>
           </div>
 
           {/* Heading */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+              <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">
                 {step === 1 ? "Sign Up" : "Personalize"}
               </h2>
               <span className="text-xs font-semibold px-2.5 py-1 bg-primary-100 text-primary-700 rounded-full">
                 Step {step} of 2
               </span>
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-stone-600">
               {step === 1 
                 ? "Let's create your account to get started." 
                 : "Help us tailor Speakly's AI lessons to your level."}
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+          <div className="sk-panel p-8 bg-[var(--surface-strong)]">
             {/* Step indicators */}
             <div className="flex items-center gap-2 mb-6">
               <div className="h-1.5 flex-1 rounded-full bg-primary-600" />

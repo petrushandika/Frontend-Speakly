@@ -36,7 +36,7 @@ const CATEGORY_COLOR: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   completed:   "bg-emerald-50 border-emerald-200 text-emerald-700",
   in_progress: "bg-indigo-50 border-indigo-200 text-indigo-700",
-  not_started: "bg-slate-50 border-slate-200 text-slate-500",
+  not_started: "bg-[var(--surface)] border-[var(--line-soft)] text-slate-500",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -67,7 +67,7 @@ export default function LessonsPage() {
         </div>
 
         {totalCount > 0 && (
-          <div className="flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-4 py-3 shadow-sm">
+          <div className="flex items-center gap-3 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] px-4 py-3 shadow-sm">
             <div className="w-28 space-y-1">
               <div className="flex justify-between text-xs font-semibold text-slate-400">
                 <span>Progress</span>
@@ -89,15 +89,15 @@ export default function LessonsPage() {
       {isLoading && (
         <div className="grid grid-cols-1 gap-3">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-20 rounded-2xl bg-white border border-slate-100 animate-pulse" />
+            <div key={i} className="h-20 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
           ))}
         </div>
       )}
 
       {/* Empty State */}
       {!isLoading && lessons.length === 0 && (
-        <div className="flex flex-col items-center gap-3 py-16 bg-white border border-slate-100 rounded-3xl shadow-sm text-center">
-          <div className="w-12 h-12 rounded-2xl bg-primary-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm text-center">
+          <div className="w-12 h-12 rounded-[18px] bg-primary-50 flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-primary-400" />
           </div>
           <h3 className="font-bold text-slate-900">No Lessons Available Yet</h3>
@@ -110,14 +110,14 @@ export default function LessonsPage() {
         {lessons.map((lesson, i) => {
           const status = lesson.progress?.status ?? "not_started";
           const Icon   = CATEGORY_ICON[lesson.category] ?? FileText;
-          const color  = CATEGORY_COLOR[lesson.category] ?? "bg-slate-50 text-slate-500 border-slate-100";
+          const color  = CATEGORY_COLOR[lesson.category] ?? "bg-[var(--surface)] text-slate-500 border-slate-100";
           const StatusIcon = status === "completed" ? CheckCircle2 : status === "in_progress" ? Clock : Play;
 
           return (
             <Link
               key={lesson.id}
               href={`/lessons/${lesson.id}`}
-              className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+              className="flex items-center gap-4 p-4 bg-white rounded-[18px] border border-slate-100 hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
             >
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${color} group-hover:scale-105 transition-transform`}>
                 <Icon className="w-5 h-5" />
@@ -126,7 +126,7 @@ export default function LessonsPage() {
               <div className="flex-1 min-w-0 space-y-0.5">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-slate-400">#{i + 1}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 border border-slate-200/40 text-slate-500 rounded">
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 border border-[var(--line-soft)]/40 text-slate-500 rounded">
                     {lesson.cefrLevel}
                   </span>
                 </div>

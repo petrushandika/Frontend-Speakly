@@ -30,6 +30,7 @@ export default function HomePage() {
   const { data: recent = [] } = trpc.progress.getRecentProgress.useQuery();
   const updateStreak = trpc.progress.updateStreak.useMutation({
     onSuccess: () => refetchSummary(),
+    onError:   () => {},
   });
 
   useEffect(() => { updateStreak.mutate(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -50,7 +51,7 @@ export default function HomePage() {
   return (
     <div className="w-full p-6 md:p-8 space-y-6">
       {/* Welcome banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-600 via-indigo-600 to-violet-700 text-white p-7 md:p-10 shadow-xl shadow-primary-500/10">
+      <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-r from-primary-600 via-indigo-600 to-violet-700 text-white p-7 md:p-10 shadow-xl shadow-primary-500/10">
         <div className="absolute w-64 h-64 bg-white/5 rounded-full -top-20 -right-16 blur-2xl" />
         <div className="relative z-10 space-y-2">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/15 backdrop-blur-md rounded-full text-xs font-semibold tracking-wide">
@@ -72,7 +73,7 @@ export default function HomePage() {
           { icon: Flame,  bg: "bg-orange-50",  color: "text-orange-500",  label: "Day Streak",  value: `${streak} days` },
           { icon: Layers, bg: "bg-amber-50",   color: "text-amber-600",   label: "Due Cards",   value: due > 0 ? `${due} cards` : "All done" },
         ].map((s) => (
-          <div key={s.label} className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
+          <div key={s.label} className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 flex flex-col gap-2 shadow-sm">
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.bg}`}>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
@@ -88,7 +89,7 @@ export default function HomePage() {
       {lastLesson?.id && (
         <Link
           href={`/lessons/${lastLesson.id}`}
-          className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-2xl hover:border-primary-200 hover:shadow-md transition-all group"
+          className="flex items-center gap-4 p-5 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] hover:border-primary-200 hover:shadow-md transition-all group"
         >
           <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0 group-hover:bg-primary-100 transition-colors">
             <PlayCircle className="w-5 h-5 text-primary-600" />
@@ -105,7 +106,7 @@ export default function HomePage() {
       {due > 0 && (
         <Link
           href="/flashcards"
-          className="flex items-center gap-4 p-5 bg-amber-50 border border-amber-200 rounded-2xl hover:border-amber-300 hover:bg-amber-100/50 transition-all group"
+          className="flex items-center gap-4 p-5 bg-amber-50 border border-amber-200 rounded-[18px] hover:border-amber-300 hover:bg-amber-100/50 transition-all group"
         >
           <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
             <Layers className="w-5 h-5 text-amber-600" />
@@ -128,7 +129,7 @@ export default function HomePage() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+                className="flex items-center gap-4 p-4 bg-white rounded-[18px] border border-slate-100 hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${action.color} group-hover:scale-110 transition-transform`}>
                   <Icon className="w-5 h-5" />
@@ -155,7 +156,7 @@ export default function HomePage() {
           </div>
           <div className="space-y-2">
             {recent.slice(0, 3).map((p) => (
-              <div key={p.id} className="flex items-center gap-3 p-3.5 bg-white border border-slate-100 rounded-xl">
+              <div key={p.id} className="flex items-center gap-3 p-3.5 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-xl">
                 <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                   <BookOpen className="w-4 h-4 text-primary-500" />
                 </div>

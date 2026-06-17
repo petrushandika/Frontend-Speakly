@@ -22,12 +22,34 @@ function parseInlineMarkdown(text: string) {
 
 function renderMarkdown(text: string) {
   const lines = text.split("\n");
-  let inList = false;
-  const listItems: string[] = [];
-
   const rendered: React.ReactNode[] = [];
+  
+  let codeBlockLines: string[] = [];
+  let inCodeBlock = false;
 
   lines.forEach((line, index) => {
+    // Code block boundary check
+    if (line.trim().startsWith("```")) {
+      if (inCodeBlock) {
+        const codeContent = codeBlockLines.join("\n");
+        rendered.push(
+          <pre key={`code-${index}`} className="font-mono bg-slate-950 text-slate-100 p-4 rounded-2xl whitespace-pre overflow-x-auto text-xs md:text-sm my-3 border border-slate-800 shadow-inner">
+            {codeContent}
+          </pre>
+        );
+        codeBlockLines = [];
+        inCodeBlock = false;
+      } else {
+        inCodeBlock = true;
+      }
+      return;
+    }
+
+    if (inCodeBlock) {
+      codeBlockLines.push(line);
+      return;
+    }
+
     // Headers
     if (line.startsWith("### ")) {
       rendered.push(
@@ -236,7 +258,9 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                   <ul className="grid grid-cols-1 gap-2.5">
                     {section.items.map((ex, j) => (
                       <li key={j} className="bg-slate-50 border border-slate-100/70 px-4 py-3.5 rounded-2xl hover:bg-white hover:border-primary-100 hover:shadow-sm transition-all duration-200">
-                        <p className="text-sm font-bold text-slate-900">{ex.en}</p>
+                        <p className={`text-sm font-bold text-slate-900 ${ex.en.includes("\n") ? "whitespace-pre font-mono leading-normal overflow-x-auto text-xs md:text-sm bg-slate-950 text-slate-100 p-4 rounded-xl shadow-inner border border-slate-800" : ""}`}>
+                          {ex.en}
+                        </p>
                         {showTranslations && ex.id && (
                           <p className={`text-xs font-semibold mt-1 italic ${isBeginnerLevel ? "text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md inline-block" : "text-slate-400"}`}>
                             {ex.id}
