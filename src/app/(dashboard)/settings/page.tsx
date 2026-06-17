@@ -35,21 +35,21 @@ const ACCENT_GROUPS = [
   {
     label: "Native English",
     accents: [
-      { value: "american",   label: "American",        abbr: "US" },
-      { value: "british",    label: "British",          abbr: "UK" },
-      { value: "australian", label: "Australian",       abbr: "AU" },
-      { value: "canadian",   label: "Canadian",         abbr: "CA" },
-      { value: "irish",      label: "Irish",            abbr: "IE" },
-      { value: "newzealand", label: "New Zealand",      abbr: "NZ" },
-      { value: "south_african", label: "South African", abbr: "ZA" },
+      { value: "american",      label: "American",        flag: "🇺🇸" },
+      { value: "british",       label: "British",         flag: "🇬🇧" },
+      { value: "australian",    label: "Australian",      flag: "🇦🇺" },
+      { value: "canadian",      label: "Canadian",        flag: "🇨🇦" },
+      { value: "irish",         label: "Irish",           flag: "🇮🇪" },
+      { value: "newzealand",    label: "New Zealand",     flag: "🇳🇿" },
+      { value: "south_african", label: "South African",   flag: "🇿🇦" },
     ],
   },
   {
     label: "Global English",
     accents: [
-      { value: "indian",      label: "Indian",          abbr: "IN" },
-      { value: "singaporean", label: "Singaporean",     abbr: "SG" },
-      { value: "neutral",     label: "Neutral / Global", abbr: "GL" },
+      { value: "indian",      label: "Indian",           flag: "🇮🇳" },
+      { value: "singaporean", label: "Singaporean",      flag: "🇸🇬" },
+      { value: "neutral",     label: "Neutral / Global", flag: "🌐" },
     ],
   },
 ] as const;
@@ -400,9 +400,7 @@ export default function SettingsPage() {
                           : "border-[var(--line)] bg-[var(--surface)]/10 text-[var(--foreground)]/70 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-[var(--surface-strong)]"
                       }`}
                     >
-                      <span className="w-7 h-5 rounded text-[10px] font-black bg-[var(--line)] text-[var(--foreground)]/70 flex items-center justify-center shrink-0 group-[.active]:bg-primary-100 group-[.active]:text-primary-700 dark:text-primary-300">
-                        {a.abbr}
-                      </span>
+                      <span className="text-xl leading-none shrink-0">{a.flag}</span>
                       {a.label}
                     </button>
                   ))}

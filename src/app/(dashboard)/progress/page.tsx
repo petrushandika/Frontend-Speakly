@@ -171,7 +171,7 @@ export default function ProgressPage() {
 
         {/* Mini stats row */}
         {learningCtx && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 border-t border-[var(--line)]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Vocabulary", value: `${learningCtx.vocabularySize} words`, sub: `${learningCtx.avgMastery}% avg mastery`, icon: BookMarked, color: "text-sky-500", bg: "bg-sky-50 dark:bg-sky-900/30" },
               { label: "Lessons Done", value: `${learningCtx.lessonsCompleted}`, sub: "completed", icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-50" },
