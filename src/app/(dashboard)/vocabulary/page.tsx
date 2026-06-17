@@ -284,6 +284,7 @@ export default function VocabularyPage() {
                     <span className="text-xs px-2 py-0.5 bg-primary-50 text-primary-600 rounded-full font-semibold">{activeWord.cefrLevel}</span>
                   </div>
                   <p className="text-sm text-slate-600 mt-1">{activeWord.definition}</p>
+                  <p className="text-xs text-primary-600 font-semibold mt-0.5">{activeWord.indonesian}</p>
                   <p className="text-xs text-slate-400 italic mt-0.5">"{activeWord.example}"</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -403,6 +404,7 @@ export default function VocabularyPage() {
                     {defRevealed ? (
                       <>
                         <p className="text-sm text-slate-600 mt-1">{item.definition}</p>
+                        <p className="text-xs text-primary-600 font-semibold mt-0.5">{item.indonesian}</p>
                         <p className="text-xs text-slate-400 italic mt-0.5">"{item.example}"</p>
                       </>
                     ) : (

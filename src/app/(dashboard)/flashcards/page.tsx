@@ -17,10 +17,10 @@ import {
 type ReviewState = "idle" | "reviewing" | "done";
 
 const QUALITY_BUTTONS = [
-  { quality: 0, label: "Forgot",  color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100", icon: XCircle },
-  { quality: 2, label: "Hard",    color: "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100", icon: RotateCcw },
-  { quality: 4, label: "Good",    color: "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100", icon: ChevronRight },
-  { quality: 5, label: "Easy",    color: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100", icon: CheckCircle2 },
+  { quality: 0, label: "Forgot", color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100" },
+  { quality: 2, label: "Hard",   color: "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100" },
+  { quality: 4, label: "Good",   color: "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" },
+  { quality: 5, label: "Easy",   color: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" },
 ];
 
 export default function FlashcardsPage() {
@@ -206,20 +206,16 @@ export default function FlashcardsPage() {
                 How well did you recall?
               </p>
               <div className="grid grid-cols-4 gap-2">
-                {QUALITY_BUTTONS.map((b) => {
-                  const Icon = b.icon;
-                  return (
-                    <button
-                      key={b.quality}
-                      onClick={() => handleQuality(b.quality)}
-                      disabled={submitReview.isPending}
-                      className={`flex flex-col items-center gap-1.5 py-3 border rounded-xl text-xs font-bold transition-all disabled:opacity-50 active:scale-95 cursor-pointer ${b.color}`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {b.label}
-                    </button>
-                  );
-                })}
+                {QUALITY_BUTTONS.map((b) => (
+                  <button
+                    key={b.quality}
+                    onClick={() => handleQuality(b.quality)}
+                    disabled={submitReview.isPending}
+                    className={`py-3 border rounded-xl text-xs font-bold transition-all disabled:opacity-50 active:scale-95 cursor-pointer ${b.color}`}
+                  >
+                    {b.label}
+                  </button>
+                ))}
               </div>
             </div>
           ) : (
@@ -251,10 +247,9 @@ export default function FlashcardsPage() {
         </div>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95"
+          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95"
         >
-          {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showAdd ? "Cancel" : "New card"}
+          {showAdd ? "Cancel" : "+ Card"}
         </button>
       </div>
 
@@ -279,8 +274,8 @@ export default function FlashcardsPage() {
             <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95">
               Cancel
             </button>
-            <button type="submit" disabled={addCard.isPending} className="flex items-center gap-1.5 px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 shadow-sm">
-              {addCard.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</> : "Save card"}
+            <button type="submit" disabled={addCard.isPending} className="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 shadow-sm">
+              {addCard.isPending ? "Saving…" : "Add"}
             </button>
           </div>
         </form>

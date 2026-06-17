@@ -258,20 +258,20 @@ export default function SettingsPage() {
           </h2>
 
           {/* Avatar + Name */}
-          <div className="flex items-start gap-5">
+          <div className="flex items-center gap-6">
             <div className="relative shrink-0">
-              <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gradient-to-tr from-primary-100 to-indigo-100 border-2 border-slate-100 flex items-center justify-center shadow-sm">
+              <div className="w-32 h-32 rounded-2xl overflow-hidden bg-gradient-to-tr from-primary-100 to-indigo-100 border-2 border-slate-100 flex items-center justify-center shadow-sm">
                 {displayAvatar
                   ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
-                  : <span className="text-2xl font-extrabold text-primary-500 select-none">{getInitials(displayName || profile?.displayName || "?")}</span>
+                  : <span className="text-4xl font-extrabold text-primary-500 select-none">{getInitials(displayName || profile?.displayName || "?")}</span>
                 }
               </div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-xl bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center shadow-md transition-all cursor-pointer active:scale-95"
+                className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center shadow-md transition-all cursor-pointer active:scale-95"
               >
-                {uploadingAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+                {uploadingAvatar ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
               </button>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFileChange} />
             </div>
@@ -296,6 +296,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+
 
           {avatarFile && (
             <div className="flex items-center gap-3 px-4 py-3 bg-primary-50 border border-primary-100 rounded-xl text-xs">
@@ -418,10 +419,9 @@ export default function SettingsPage() {
         <button
           type="submit"
           disabled={isSaving}
-          className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-extrabold rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
+          className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-extrabold rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-          {uploadingAvatar ? "Uploading photo…" : update.isPending ? "Saving…" : "Save Changes"}
+          {uploadingAvatar ? "Uploading…" : update.isPending ? "Saving…" : "Save"}
         </button>
       </form>
     </div>

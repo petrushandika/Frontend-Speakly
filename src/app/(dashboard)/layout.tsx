@@ -20,16 +20,19 @@ import {
   ChevronDown,
   Flame,
   PhoneCall,
+  Zap,
+  Users2,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/home",        label: "Home",           icon: LayoutDashboard },
   { href: "/chat",        label: "Chat with Aria", icon: MessageSquare },
   { href: "/voice-call",  label: "Voice Call",     icon: PhoneCall },
+  { href: "/speaking",    label: "Speaking",       icon: Mic2 },
   { href: "/lessons",     label: "Lessons",        icon: BookOpen },
   { href: "/vocabulary",  label: "Vocabulary",     icon: BookMarked },
   { href: "/flashcards",  label: "Flashcards",     icon: Layers },
-  { href: "/rooms",       label: "Rooms",          icon: Mic2 },
+  { href: "/rooms",       label: "Rooms",          icon: Users2 },
   { href: "/progress",    label: "Progress",       icon: BarChart2 },
   { href: "/settings",    label: "Settings",       icon: Settings },
 ];
@@ -99,6 +102,33 @@ function TopBar() {
   );
 }
 
+function SidebarStats() {
+  const { data: profile } = trpc.users.getProfile.useQuery();
+  const { data: dueCount } = trpc.progress.getDueFlashcardsCount.useQuery();
+  return (
+    <div className="px-3 py-3 border-t border-slate-100 space-y-2">
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Today</p>
+      <div className="grid grid-cols-3 gap-1.5">
+        <div className="flex flex-col items-center gap-0.5 py-2 bg-amber-50 rounded-xl">
+          <Zap className="w-3.5 h-3.5 text-amber-500" />
+          <p className="text-xs font-bold text-amber-700">{profile?.xpTotal?.toLocaleString() ?? 0}</p>
+          <p className="text-[9px] text-amber-500 font-semibold">XP</p>
+        </div>
+        <div className="flex flex-col items-center gap-0.5 py-2 bg-orange-50 rounded-xl">
+          <Flame className="w-3.5 h-3.5 text-orange-500" />
+          <p className="text-xs font-bold text-orange-700">{profile?.streakDays ?? 0}</p>
+          <p className="text-[9px] text-orange-500 font-semibold">Streak</p>
+        </div>
+        <div className="flex flex-col items-center gap-0.5 py-2 bg-violet-50 rounded-xl">
+          <Layers className="w-3.5 h-3.5 text-violet-500" />
+          <p className="text-xs font-bold text-violet-700">{dueCount?.count ?? 0}</p>
+          <p className="text-[9px] text-violet-500 font-semibold">Due</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -138,7 +168,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <span className="text-lg font-bold tracking-tight text-slate-900">Speakly</span>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">{navLinks}</nav>
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">{navLinks}</nav>
+        <SidebarStats />
         <div className="p-3 border-t border-slate-100 shrink-0">
           <LogoutButton />
         </div>
@@ -173,6 +204,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">{navLinks}</nav>
+        <SidebarStats />
         <div className="p-3 border-t border-slate-100 shrink-0">
           <LogoutButton />
         </div>

@@ -106,8 +106,8 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
-      {/* Left Pane - Brand Info & Marketing (Desktop only) */}
+    <div className="min-h-screen flex flex-col md:flex-row-reverse bg-slate-50">
+      {/* Right Pane - Brand Info & Marketing (Desktop only) */}
       <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
         {/* Decorative background circles */}
         <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
@@ -156,7 +156,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right Pane - Sign In Form */}
+      {/* Left Pane - Sign In Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
         <div className="w-full max-w-md space-y-8">
           {/* Mobile brand header (Visible only on mobile) */}

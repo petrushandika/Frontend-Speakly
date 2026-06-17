@@ -102,8 +102,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
-      {/* Left Pane - Brand Info (Desktop only) */}
+    <div className="min-h-screen flex flex-col md:flex-row-reverse bg-slate-50">
+      {/* Right Pane - Brand Info (Desktop only) */}
       <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
         {/* Decorative background circles */}
         <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
@@ -151,9 +151,9 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Pane - Form steps */}
+      {/* Left Pane - Register Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md space-y-8">
           {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
             <span className="text-4xl">🗣️</span>
