@@ -4,6 +4,19 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc";
 
+type Section = {
+  type: "explanation" | "examples" | "tip";
+  text?: string;
+  items?: { en: string; id: string }[];
+};
+
+type Exercise = { question: string; answer: string };
+
+type LessonContent = {
+  sections?: Section[];
+  exercises?: Exercise[];
+};
+
 export default function LessonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -31,7 +44,9 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const content = lesson.content as Record<string, unknown>;
+  const content = lesson.content as LessonContent;
+  const sections = content.sections ?? [];
+  const exercises = content.exercises ?? [];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
@@ -57,56 +72,81 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
         )}
       </div>
 
-      {/* Content */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-        {content.explanation && (
-          <div>
-            <h2 className="font-semibold text-gray-800 mb-2">Explanation</h2>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {String(content.explanation)}
-            </p>
-          </div>
-        )}
-
-        {Array.isArray(content.examples) && content.examples.length > 0 && (
-          <div>
-            <h2 className="font-semibold text-gray-800 mb-2">Examples</h2>
-            <ul className="space-y-2">
-              {(content.examples as string[]).map((ex, i) => (
-                <li
-                  key={i}
-                  className="flex gap-2 text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg"
-                >
-                  <span className="text-primary-500 font-bold shrink-0">{i + 1}.</span>
-                  {ex}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {Array.isArray(content.tips) && content.tips.length > 0 && (
-          <div>
-            <h2 className="font-semibold text-gray-800 mb-2">Tips</h2>
-            <ul className="space-y-1.5">
-              {(content.tips as string[]).map((tip, i) => (
-                <li key={i} className="flex gap-2 text-sm text-gray-600">
-                  <span className="text-amber-500 shrink-0">💡</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {Object.keys(content).length === 0 && (
+      {/* Content sections */}
+      {sections.length > 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+          {sections.map((section, i) => {
+            if (section.type === "explanation" && section.text) {
+              return (
+                <div key={i}>
+                  <h2 className="font-semibold text-gray-800 mb-2">Explanation</h2>
+                  <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                    {section.text.replace(/\*\*(.*?)\*\*/g, "$1")}
+                  </p>
+                </div>
+              );
+            }
+            if (section.type === "examples" && section.items) {
+              return (
+                <div key={i}>
+                  <h2 className="font-semibold text-gray-800 mb-2">Examples</h2>
+                  <ul className="space-y-2">
+                    {section.items.map((ex, j) => (
+                      <li key={j} className="bg-gray-50 px-4 py-2.5 rounded-lg">
+                        <p className="text-sm font-medium text-gray-800">{ex.en}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{ex.id}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            if (section.type === "tip" && section.text) {
+              return (
+                <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-700 mb-1">💡 Tip</p>
+                  <p className="text-sm text-amber-800 leading-relaxed whitespace-pre-line">
+                    {section.text}
+                  </p>
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <p className="text-gray-400 text-sm text-center py-8">Content coming soon…</p>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Exercises */}
+      {exercises.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+          <h2 className="font-semibold text-gray-800">Practice Exercises</h2>
+          <ol className="space-y-3">
+            {exercises.map((ex, i) => (
+              <li key={i} className="bg-gray-50 rounded-xl px-4 py-3">
+                <p className="text-sm text-gray-700 font-medium mb-1">
+                  {i + 1}. {ex.question}
+                </p>
+                <details className="group">
+                  <summary className="text-xs text-primary-600 cursor-pointer select-none list-none">
+                    Show answer ▾
+                  </summary>
+                  <p className="mt-1 text-sm font-semibold text-primary-700 bg-primary-50 px-3 py-1.5 rounded-lg inline-block">
+                    {ex.answer}
+                  </p>
+                </details>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       {/* Complete button */}
       <button
-        onClick={() => complete.mutate({ id, score: 100, xpEarned: 50 })}
+        onClick={() => complete.mutate({ lessonId: id, score: 100, xpEarned: 50 })}
         disabled={complete.isPending}
         className="w-full py-3 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-colors disabled:opacity-50"
       >

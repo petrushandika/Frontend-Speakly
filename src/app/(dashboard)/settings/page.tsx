@@ -9,8 +9,10 @@ const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 const GOALS = [
   { value: "general",  label: "General English" },
   { value: "business", label: "Business / Work" },
+  { value: "tech",     label: "Tech / IT" },
   { value: "academic", label: "Academic / IELTS" },
   { value: "travel",   label: "Travel & Daily Life" },
+  { value: "ielts",    label: "IELTS Preparation" },
 ] as const;
 
 const ACCENTS = [
@@ -25,16 +27,16 @@ export default function SettingsPage() {
   const { data: profile, isLoading } = trpc.users.getProfile.useQuery();
 
   const [displayName, setDisplayName]         = useState("");
-  const [cefrLevel, setCefrLevel]             = useState("B1");
-  const [goal, setGoal]                       = useState("general");
-  const [accentPreference, setAccentPreference] = useState("american");
+  const [cefrLevel, setCefrLevel]             = useState<"A1"|"A2"|"B1"|"B2"|"C1"|"C2">("B1");
+  const [goal, setGoal]                       = useState<"general"|"business"|"tech"|"academic"|"travel"|"ielts">("general");
+  const [accentPreference, setAccentPreference] = useState<"american"|"british"|"australian"|"neutral">("american");
 
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.displayName ?? "");
-      setCefrLevel(profile.cefrLevel ?? "B1");
-      setGoal(profile.goal ?? "general");
-      setAccentPreference(profile.accentPreference ?? "american");
+      setCefrLevel((profile.cefrLevel as "A1"|"A2"|"B1"|"B2"|"C1"|"C2") ?? "B1");
+      setGoal((profile.goal as "general"|"business"|"tech"|"academic"|"travel"|"ielts") ?? "general");
+      setAccentPreference((profile.accentPreference as "american"|"british"|"australian"|"neutral") ?? "american");
     }
   }, [profile]);
 

@@ -4,13 +4,23 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { trpcClient } from "@/lib/trpc";
 
 const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+
 const GOALS = [
-  { value: "general", label: "General English" },
+  { value: "general",  label: "General English" },
   { value: "business", label: "Business / Work" },
   { value: "academic", label: "Academic / IELTS" },
-  { value: "travel", label: "Travel & Daily Life" },
+  { value: "travel",   label: "Travel & Daily Life" },
+  { value: "tech",     label: "Tech / IT" },
+] as const;
+
+const ACCENTS = [
+  { value: "american",   label: "🇺🇸 American" },
+  { value: "british",    label: "🇬🇧 British" },
+  { value: "australian", label: "🇦🇺 Australian" },
+  { value: "neutral",    label: "🌐 Neutral" },
 ] as const;
 
 export default function RegisterPage() {
@@ -19,16 +29,15 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Step 1
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
 
-  // Step 2
   const [cefrLevel, setCefrLevel] = useState<string>("B1");
   const [goal, setGoal] = useState<string>("general");
+  const [accentPreference, setAccentPreference] = useState<string>("american");
 
-  async function handleStep1(e: React.FormEvent) {
+  function handleStep1(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
@@ -48,9 +57,7 @@ export default function RegisterPage() {
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { display_name: displayName },
-      },
+      options: { data: { display_name: displayName } },
     });
 
     if (signUpError) {
@@ -59,26 +66,26 @@ export default function RegisterPage() {
       return;
     }
 
-    if (data.session) {
-      localStorage.setItem("sb-access-token", data.session.access_token);
-
-      // Create user profile
-      await supabase.from("users").insert({
-        auth_id: data.user!.id,
-        email,
-        display_name: displayName,
-        cefr_level: cefrLevel,
-        goal,
-      });
-    }
-
-    // Supabase may require email confirmation
     if (!data.session) {
       router.push("/verify-email");
       return;
     }
 
-    router.push("/chat");
+    localStorage.setItem("sb-access-token", data.session.access_token);
+
+    try {
+      await trpcClient.users.createProfile.mutate({
+        email,
+        displayName,
+        cefrLevel: cefrLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
+        goal: goal as "general" | "business" | "tech" | "academic" | "travel" | "ielts",
+        accentPreference: accentPreference as "american" | "british" | "australian" | "neutral",
+      });
+    } catch (profileErr) {
+      console.error("Profile creation failed:", profileErr);
+    }
+
+    router.push("/home");
   }
 
   return (
@@ -90,7 +97,6 @@ export default function RegisterPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          {/* Progress dots */}
           <div className="flex items-center gap-2 mb-6">
             <div className="h-1.5 flex-1 rounded-full bg-primary-600" />
             <div className={`h-1.5 flex-1 rounded-full transition-colors ${step === 2 ? "bg-primary-600" : "bg-gray-200"}`} />
@@ -103,9 +109,7 @@ export default function RegisterPage() {
           {step === 1 ? (
             <form onSubmit={handleStep1} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Your name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your name</label>
                 <input
                   type="text"
                   value={displayName}
@@ -116,9 +120,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -129,9 +131,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
                 <input
                   type="password"
                   value={password}
@@ -143,9 +143,7 @@ export default function RegisterPage() {
               </div>
 
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  {error}
-                </p>
+                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
               )}
 
               <button
@@ -159,7 +157,7 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What&apos;s your current English level?
+                  Current English level
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {CEFR_LEVELS.map((level) => (
@@ -180,9 +178,7 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  What&apos;s your main goal?
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Main goal</label>
                 <div className="space-y-2">
                   {GOALS.map((g) => (
                     <button
@@ -201,10 +197,30 @@ export default function RegisterPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Preferred accent
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {ACCENTS.map((a) => (
+                    <button
+                      key={a.value}
+                      type="button"
+                      onClick={() => setAccentPreference(a.value)}
+                      className={`py-2.5 px-3 text-left rounded-lg text-sm border transition-colors ${
+                        accentPreference === a.value
+                          ? "bg-primary-50 border-primary-500 text-primary-700 font-medium"
+                          : "border-gray-200 text-gray-600 hover:border-primary-300"
+                      }`}
+                    >
+                      {a.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                  {error}
-                </p>
+                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
               )}
 
               <div className="flex gap-2">
