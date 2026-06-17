@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
 import { Toaster } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { createClient } from "@/lib/supabase/client";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() =>
@@ -13,7 +14,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         queries: { staleTime: 60_000, retry: 1 },
         mutations: {
           onError: (err) => {
-            // Global mutation error handler — shows toast
             const message = err instanceof Error ? err.message : "Something went wrong";
             import("sonner").then(({ toast }) => toast.error(message));
           },
@@ -36,6 +36,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
       ],
     }),
   );
+
+  // Keep localStorage token in sync with Supabase session
+  useEffect(() => {
+    const supabase = createClient();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) {
+        localStorage.setItem("sb-access-token", session.access_token);
+      } else {
+        localStorage.removeItem("sb-access-token");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>

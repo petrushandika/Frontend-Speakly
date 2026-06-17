@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/lessons",    label: "Lessons",        icon: "📚" },
   { href: "/vocabulary", label: "Vocabulary",     icon: "📝" },
   { href: "/flashcards", label: "Flashcards",     icon: "🃏" },
+  { href: "/rooms",      label: "Rooms",          icon: "🎙️" },
   { href: "/progress",   label: "Progress",       icon: "📈" },
   { href: "/settings",   label: "Settings",       icon: "⚙️" },
 ];
