@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
 
@@ -12,8 +13,13 @@ const QUICK_ACTIONS = [
 
 export default function HomePage() {
   const { data: profile } = trpc.users.getProfile.useQuery();
-  const { data: summary } = trpc.progress.getSummary.useQuery();
+  const { data: summary, refetch: refetchSummary } = trpc.progress.getSummary.useQuery();
   const { data: dueCount } = trpc.progress.getDueFlashcardsCount.useQuery();
+  const updateStreak = trpc.progress.updateStreak.useMutation({
+    onSuccess: () => refetchSummary(),
+  });
+
+  useEffect(() => { updateStreak.mutate(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayName = profile?.displayName ?? "there";
   const cefrLevel   = profile?.cefrLevel ?? "B1";
