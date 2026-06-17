@@ -19,17 +19,19 @@ import {
   Sparkles,
   ChevronDown,
   Flame,
+  PhoneCall,
 } from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "/home",       label: "Home",           icon: LayoutDashboard },
-  { href: "/chat",       label: "Chat with Aria", icon: MessageSquare },
-  { href: "/lessons",    label: "Lessons",        icon: BookOpen },
-  { href: "/vocabulary", label: "Vocabulary",     icon: BookMarked },
-  { href: "/flashcards", label: "Flashcards",     icon: Layers },
-  { href: "/rooms",      label: "Rooms",          icon: Mic2 },
-  { href: "/progress",   label: "Progress",       icon: BarChart2 },
-  { href: "/settings",   label: "Settings",       icon: Settings },
+  { href: "/home",        label: "Home",           icon: LayoutDashboard },
+  { href: "/chat",        label: "Chat with Aria", icon: MessageSquare },
+  { href: "/voice-call",  label: "Voice Call",     icon: PhoneCall },
+  { href: "/lessons",     label: "Lessons",        icon: BookOpen },
+  { href: "/vocabulary",  label: "Vocabulary",     icon: BookMarked },
+  { href: "/flashcards",  label: "Flashcards",     icon: Layers },
+  { href: "/rooms",       label: "Rooms",          icon: Mic2 },
+  { href: "/progress",    label: "Progress",       icon: BarChart2 },
+  { href: "/settings",    label: "Settings",       icon: Settings },
 ];
 
 function TopBar() {
