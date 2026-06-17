@@ -22,6 +22,13 @@ import {
 type Tab = "study" | "bank";
 type PracticeState = "idle" | "recording" | "checking" | "correct" | "wrong";
 
+interface PronunciationScore {
+  score: number;
+  correct: boolean;
+  feedback: string;
+  mismatchedWords: Array<{ expected: string; said: string | null }>;
+}
+
 const MASTERY_LABEL = ["New", "Learning", "Familiar", "Good", "Strong", "Mastered"];
 const MASTERY_COLOR = [
   "bg-slate-100 border-slate-200 text-slate-500",
@@ -32,16 +39,6 @@ const MASTERY_COLOR = [
   "bg-green-50 border-green-200 text-green-700",
 ];
 
-function normalize(s: string) {
-  return s.toLowerCase().replace(/[^a-z\s]/g, "").trim();
-}
-
-function checkPronunciation(spoken: string, target: string): boolean {
-  const spokenWords = normalize(spoken).split(/\s+/);
-  const targetWord = normalize(target);
-  return spokenWords.some((w) => w === targetWord || w.startsWith(targetWord.slice(0, -1)));
-}
-
 export default function VocabularyPage() {
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<Tab>("study");
@@ -51,6 +48,7 @@ export default function VocabularyPage() {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [practiceState, setPracticeState] = useState<PracticeState>("idle");
   const [spokenText, setSpokenText] = useState("");
+  const [pronScore, setPronScore] = useState<PronunciationScore | null>(null);
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
@@ -155,7 +153,16 @@ export default function VocabularyPage() {
           const data = await res.json();
           const transcript: string = data.transcript ?? "";
           setSpokenText(transcript);
-          setPracticeState(checkPronunciation(transcript, targetWord) ? "correct" : "wrong");
+
+          // WER-based pronunciation scoring via backend
+          const scoreRes = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/trpc/ai.scorePronunciation?input=${encodeURIComponent(JSON.stringify({ expected: targetWord, transcript }))}`,
+            { headers: { Authorization: `Bearer ${token}` } },
+          );
+          const scoreData = await scoreRes.json();
+          const result: PronunciationScore = scoreData?.result?.data ?? { score: 0, correct: false, feedback: "", mismatchedWords: [] };
+          setPronScore(result);
+          setPracticeState(result.correct ? "correct" : "wrong");
         } catch {
           setPracticeState("idle");
           toast.error("Could not transcribe. Check your microphone.");
@@ -186,6 +193,7 @@ export default function VocabularyPage() {
   function resetPractice() {
     setPracticeState("idle");
     setSpokenText("");
+    setPronScore(null);
   }
 
   const displayed = search.length >= 2 ? (searchResults ?? []) : vocab;
@@ -313,20 +321,35 @@ export default function VocabularyPage() {
                   </div>
                 )}
                 {practiceState === "correct" && (
-                  <div className="space-y-1">
-                    <p className="font-semibold text-green-600 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" /> Correct! Moving to next word…
-                    </p>
-                    {spokenText && <p className="text-xs text-slate-400">You said: "{spokenText}"</p>}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <p className="font-semibold text-green-600 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" /> Correct! Moving to next word…
+                      </p>
+                      {pronScore && (
+                        <span className="text-xs font-bold px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg">
+                          {pronScore.score}% accuracy
+                        </span>
+                      )}
+                    </div>
+                    {pronScore?.feedback && <p className="text-xs text-slate-500 italic">{pronScore.feedback}</p>}
                   </div>
                 )}
                 {practiceState === "wrong" && (
-                  <div className="space-y-1.5">
-                    <p className="font-semibold text-orange-500 flex items-center gap-2">
-                      <XCircle className="w-4 h-4" /> Not quite — try again!
-                    </p>
-                    {spokenText && <p className="text-xs text-slate-400">You said: "{spokenText}"</p>}
-                    <p className="text-xs text-slate-400">Target: <span className="font-semibold text-slate-600">{activeWord.word}</span> {activeWord.phonetic}</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <p className="font-semibold text-orange-500 flex items-center gap-2">
+                        <XCircle className="w-4 h-4" /> Not quite — try again!
+                      </p>
+                      {pronScore && (
+                        <span className="text-xs font-bold px-2 py-0.5 bg-orange-50 border border-orange-200 text-orange-700 rounded-lg">
+                          {pronScore.score}% accuracy
+                        </span>
+                      )}
+                    </div>
+                    {pronScore?.feedback && <p className="text-xs text-slate-500 italic">{pronScore.feedback}</p>}
+                    {spokenText && <p className="text-xs text-slate-400">You said: "<span className="font-medium">{spokenText}</span>"</p>}
+                    <p className="text-xs text-slate-400">Target: <span className="font-semibold text-slate-600">{activeWord.word}</span></p>
                     <button onClick={() => resetPractice()} className="flex items-center gap-1 text-xs text-primary-600 hover:underline">
                       <RotateCcw className="w-3 h-3" /> Try again
                     </button>
