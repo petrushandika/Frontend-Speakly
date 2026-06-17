@@ -5,6 +5,101 @@ import { cn } from "@/lib/utils/cn";
 import { Lightbulb, X, Loader2 } from "lucide-react";
 import type { Message } from "@/hooks/useAIChat";
 
+// ── Lightweight markdown renderer (no external library) ───────────────────────
+// Handles: **bold**, *italic*, newlines → paragraphs, - bullets, 1. numbered lists
+
+function renderInline(text: string): React.ReactNode[] {
+  // Split on **bold** and *italic* markers
+  const parts = text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith("*") && part.endsWith("*")) {
+      return <em key={i} className="italic">{part.slice(1, -1)}</em>;
+    }
+    return part;
+  });
+}
+
+function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
+  if (isUser) return <p className="font-medium leading-relaxed">{text}</p>;
+
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let ulItems:   string[] = [];
+  let olItems:   string[] = [];
+
+  function flushUL() {
+    if (!ulItems.length) return;
+    elements.push(
+      <ul key={`ul-${elements.length}`} className="list-disc list-outside ml-4 space-y-0.5 my-1.5">
+        {ulItems.map((item, i) => (
+          <li key={i} className="text-slate-700 leading-relaxed">{renderInline(item)}</li>
+        ))}
+      </ul>
+    );
+    ulItems = [];
+  }
+
+  function flushOL() {
+    if (!olItems.length) return;
+    elements.push(
+      <ol key={`ol-${elements.length}`} className="list-decimal list-outside ml-4 space-y-0.5 my-1.5">
+        {olItems.map((item, i) => (
+          <li key={i} className="text-slate-700 leading-relaxed">{renderInline(item)}</li>
+        ))}
+      </ol>
+    );
+    olItems = [];
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw  = lines[i];
+    const line = raw.trim();
+
+    // Bullet list
+    const bulletMatch = line.match(/^[-*•]\s+(.+)/);
+    if (bulletMatch) {
+      flushOL();
+      ulItems.push(bulletMatch[1]);
+      continue;
+    }
+
+    // Numbered list
+    const numMatch = line.match(/^\d+[.)]\s+(.+)/);
+    if (numMatch) {
+      flushUL();
+      olItems.push(numMatch[1]);
+      continue;
+    }
+
+    flushUL();
+    flushOL();
+
+    if (line === "") {
+      // blank line → small gap (only add if previous element exists)
+      if (elements.length > 0) {
+        elements.push(<div key={`gap-${i}`} className="h-1" />);
+      }
+      continue;
+    }
+
+    elements.push(
+      <p key={`p-${i}`} className="leading-relaxed text-slate-800">
+        {renderInline(line)}
+      </p>
+    );
+  }
+
+  flushUL();
+  flushOL();
+
+  return <div className="space-y-1">{elements}</div>;
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 interface ChatBubbleProps {
   message: Message;
 }
@@ -13,16 +108,18 @@ export function ChatBubble({ message }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const [correctionDismissed, setCorrectionDismissed] = useState(false);
 
-  // Split AI message: main text + optional correction chip
-  const noteIndex = message.content.indexOf("— Small note:");
-  const mainText = noteIndex !== -1 ? message.content.slice(0, noteIndex).trim() : message.content;
-  const correctionRaw = noteIndex !== -1 ? message.content.slice(noteIndex) : null;
-  const correctionText = correctionRaw
-    ? correctionRaw.replace(/^[—–-]\s*Small note:\s*/i, "").trim()
+  // Split AI message: main reply + optional "— Small note:" correction
+  const noteIndex   = message.content.indexOf("— Small note:");
+  const mainText    = noteIndex !== -1
+    ? message.content.slice(0, noteIndex).trim()
+    : message.content.trim();
+  const correctionText = noteIndex !== -1
+    ? message.content.slice(noteIndex).replace(/^[—–-]\s*Small note:\s*/i, "").trim()
     : null;
 
   return (
     <div className={cn("flex gap-3 my-3", isUser ? "justify-end" : "justify-start")}>
+
       {/* Aria avatar */}
       {!isUser && (
         <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1 shadow-md shadow-primary-500/10">
@@ -30,39 +127,34 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         </div>
       )}
 
-      <div className={cn("flex flex-col gap-1.5 max-w-[78%]", isUser ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col gap-2 max-w-[78%]", isUser ? "items-end" : "items-start")}>
+
         {/* Main bubble */}
-        <div
-          className={cn(
-            "rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm",
-            isUser
-              ? "bg-gradient-to-br from-primary-600 to-indigo-600 text-white rounded-tr-sm"
-              : "bg-white border border-slate-100 text-slate-800 rounded-tl-sm"
-          )}
-        >
-          {isUser ? (
-            <p className="font-medium">{message.content}</p>
-          ) : (
-            <div>
-              <p className="font-medium">{mainText || message.content}</p>
-              {message.isStreaming && (
-                <span className="inline-flex items-center gap-1 mt-2">
-                  <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                  <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                  <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:300ms]" />
-                </span>
-              )}
-            </div>
+        <div className={cn(
+          "rounded-2xl px-4 py-3 text-sm shadow-sm",
+          isUser
+            ? "bg-gradient-to-br from-primary-600 to-indigo-600 text-white rounded-tr-sm"
+            : "bg-white border border-slate-100 text-slate-800 rounded-tl-sm"
+        )}>
+          <FormattedText text={mainText || message.content} isUser={isUser} />
+
+          {/* Streaming cursor */}
+          {message.isStreaming && !isUser && (
+            <span className="inline-flex items-center gap-1 mt-2">
+              <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0ms]" />
+              <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:150ms]" />
+              <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:300ms]" />
+            </span>
           )}
         </div>
 
-        {/* Grammar correction chip — outside the bubble, dismissible */}
+        {/* Grammar correction chip — dismissible */}
         {!isUser && correctionText && !message.isStreaming && !correctionDismissed && (
           <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs max-w-full animate-in slide-in-from-bottom-1 duration-200">
             <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <span className="font-bold text-amber-800 block mb-0.5">Grammar note</span>
-              <span className="text-slate-600 leading-relaxed">{correctionText}</span>
+              <FormattedText text={correctionText} isUser={false} />
             </div>
             <button
               onClick={() => setCorrectionDismissed(true)}
@@ -73,9 +165,9 @@ export function ChatBubble({ message }: ChatBubbleProps) {
           </div>
         )}
 
-        {/* Streaming indicator for correction (when still streaming) */}
+        {/* Streaming status */}
         {!isUser && message.isStreaming && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-slate-400">
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>Aria is typing…</span>
           </div>

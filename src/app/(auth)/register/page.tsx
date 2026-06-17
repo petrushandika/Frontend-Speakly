@@ -9,18 +9,31 @@ import { trpcClient } from "@/lib/trpc";
 const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 const GOALS = [
-  { value: "general",  label: "General English", icon: "🌐" },
-  { value: "business", label: "Business & Work", icon: "💼" },
-  { value: "academic", label: "Academic & IELTS", icon: "🎓" },
-  { value: "travel",   label: "Travel & Daily Life", icon: "✈️" },
-  { value: "tech",     label: "Tech & IT", icon: "💻" },
+  { value: "general",     label: "General English",      icon: "🌐" },
+  { value: "business",    label: "Business & Work",       icon: "💼" },
+  { value: "tech",        label: "Tech & IT",             icon: "💻" },
+  { value: "academic",    label: "Academic & Research",   icon: "🎓" },
+  { value: "travel",      label: "Travel & Daily Life",   icon: "✈️" },
+  { value: "ielts",       label: "IELTS / TOEFL Prep",    icon: "📝" },
+  { value: "medical",     label: "Medical & Healthcare",  icon: "🏥" },
+  { value: "finance",     label: "Finance & Banking",     icon: "📈" },
+  { value: "creative",    label: "Creative & Arts",       icon: "🎨" },
+  { value: "education",   label: "Teaching & Education",  icon: "🏫" },
+  { value: "hospitality", label: "Hospitality & Tourism", icon: "☕" },
+  { value: "law",         label: "Law & Legal",           icon: "⚖️" },
 ] as const;
 
 const ACCENTS = [
-  { value: "american",   label: "American", flag: "🇺🇸" },
-  { value: "british",    label: "British", flag: "🇬🇧" },
-  { value: "australian", label: "Australian", flag: "🇦🇺" },
-  { value: "neutral",    label: "Neutral / Global", flag: "🌐" },
+  { value: "american",      label: "American",         abbr: "US" },
+  { value: "british",       label: "British",          abbr: "UK" },
+  { value: "australian",    label: "Australian",       abbr: "AU" },
+  { value: "canadian",      label: "Canadian",         abbr: "CA" },
+  { value: "irish",         label: "Irish",            abbr: "IE" },
+  { value: "newzealand",    label: "New Zealand",      abbr: "NZ" },
+  { value: "south_african", label: "South African",    abbr: "ZA" },
+  { value: "indian",        label: "Indian",           abbr: "IN" },
+  { value: "singaporean",   label: "Singaporean",      abbr: "SG" },
+  { value: "neutral",       label: "Neutral / Global", abbr: "GL" },
 ] as const;
 
 export default function RegisterPage() {
@@ -253,20 +266,20 @@ export default function RegisterPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
                     Main Goal
                   </label>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {GOALS.map((g) => (
                       <button
                         key={g.value}
                         type="button"
                         onClick={() => setGoal(g.value)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm border transition-all active:scale-[0.99] ${
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs border transition-all active:scale-[0.99] font-semibold ${
                           goal === g.value
-                            ? "bg-primary-50/50 border-primary-500 text-primary-700 font-semibold shadow-sm"
+                            ? "bg-primary-50/50 border-primary-500 text-primary-700 shadow-sm"
                             : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
                         }`}
                       >
-                        <span className="text-lg">{g.icon}</span>
-                        {g.label}
+                        <span className="text-base shrink-0">{g.icon}</span>
+                        <span className="text-left leading-tight">{g.label}</span>
                       </button>
                     ))}
                   </div>
@@ -274,7 +287,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-                    Preferred Accent
+                    Preferred Accent (Aria&apos;s Voice)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     {ACCENTS.map((a) => (
@@ -282,14 +295,16 @@ export default function RegisterPage() {
                         key={a.value}
                         type="button"
                         onClick={() => setAccentPreference(a.value)}
-                        className={`py-3 px-4 flex items-center gap-2 rounded-xl text-sm border transition-all active:scale-95 ${
+                        className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-xs border transition-all active:scale-95 font-semibold ${
                           accentPreference === a.value
-                            ? "bg-primary-50/50 border-primary-500 text-primary-700 font-semibold shadow-sm"
+                            ? "bg-primary-50/50 border-primary-500 text-primary-700 shadow-sm"
                             : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
                         }`}
                       >
-                        <span>{a.flag}</span>
-                        <span>{a.label}</span>
+                        <span className="w-7 h-5 rounded text-[10px] font-black bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                          {a.abbr}
+                        </span>
+                        {a.label}
                       </button>
                     ))}
                   </div>
