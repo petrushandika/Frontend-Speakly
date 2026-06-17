@@ -5,11 +5,13 @@ import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
 
 const NAV_ITEMS = [
-  { href: "/home",       label: "Home",         icon: "🏠" },
+  { href: "/home",       label: "Home",           icon: "🏠" },
   { href: "/chat",       label: "Chat with Aria", icon: "💬" },
-  { href: "/lessons",    label: "Lessons",      icon: "📚" },
-  { href: "/vocabulary", label: "Vocabulary",   icon: "📝" },
-  { href: "/flashcards", label: "Flashcards",   icon: "🃏" },
+  { href: "/lessons",    label: "Lessons",        icon: "📚" },
+  { href: "/vocabulary", label: "Vocabulary",     icon: "📝" },
+  { href: "/flashcards", label: "Flashcards",     icon: "🃏" },
+  { href: "/progress",   label: "Progress",       icon: "📈" },
+  { href: "/settings",   label: "Settings",       icon: "⚙️" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

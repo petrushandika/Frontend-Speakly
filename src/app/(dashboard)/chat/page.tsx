@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useAIChat } from "@/hooks/useAIChat";
+import { useSpeech } from "@/hooks/useSpeech";
 import { ChatBubble } from "@/components/learning/ChatBubble";
+import { trpc } from "@/lib/trpc";
 
 const SUGGESTED_STARTERS = [
   "Tell me about yourself and what you do for work.",
@@ -13,18 +15,45 @@ const SUGGESTED_STARTERS = [
 ];
 
 export default function ChatPage() {
+  const { data: profile } = trpc.users.getProfile.useQuery();
+  const accent = profile?.accentPreference ?? "american";
+
   const { messages, isLoading, sendMessage, clearChat } = useAIChat({
     onError: (e) => setError(e),
   });
+
+  const { isRecording, isSpeaking, startRecording, stopRecording, speak, stopSpeaking } =
+    useSpeech({
+      onTranscript: (text) => setInput(text),
+      onError: (e) => setError(e),
+    });
+
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Auto-speak last AI message when TTS is enabled
+  const lastMsg = messages[messages.length - 1];
+  const prevLastRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (
+      ttsEnabled &&
+      lastMsg?.role === "assistant" &&
+      !lastMsg.isStreaming &&
+      lastMsg.id !== prevLastRef.current
+    ) {
+      prevLastRef.current = lastMsg.id;
+      // Strip "— Small note:" section before speaking
+      const textToSpeak = lastMsg.content.split("— Small note:")[0].trim();
+      speak(textToSpeak, accent);
+    }
+  }, [lastMsg, ttsEnabled, accent, speak]);
 
   function handleSend() {
     if (!input.trim() || isLoading) return;
@@ -41,10 +70,15 @@ export default function ChatPage() {
     }
   }
 
+  function handleMic() {
+    if (isRecording) stopRecording();
+    else startRecording();
+  }
+
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] max-w-3xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-0px)] max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white">
         <div className="flex items-center gap-3">
@@ -59,14 +93,26 @@ export default function ChatPage() {
             </p>
           </div>
         </div>
-        {!isEmpty && (
+        <div className="flex items-center gap-2">
+          {/* TTS toggle */}
           <button
-            onClick={clearChat}
-            className="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2 py-1"
+            onClick={() => { setTtsEnabled(!ttsEnabled); if (isSpeaking) stopSpeaking(); }}
+            title={ttsEnabled ? "Disable voice" : "Enable voice"}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+              ttsEnabled ? "bg-primary-100 text-primary-600" : "bg-gray-100 text-gray-400"
+            }`}
           >
-            Clear chat
+            {isSpeaking ? "🔊" : ttsEnabled ? "🔈" : "🔇"}
           </button>
-        )}
+          {!isEmpty && (
+            <button
+              onClick={clearChat}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors px-2 py-1"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
@@ -77,26 +123,17 @@ export default function ChatPage() {
               <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3">
                 <span className="text-2xl">🎓</span>
               </div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                Practice English with Aria
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-800">Practice English with Aria</h2>
               <p className="text-sm text-gray-500 mt-1 max-w-xs">
-                Have a real conversation. Aria will reply naturally and correct
-                your grammar along the way.
+                Have a real conversation. Aria will reply naturally and correct your grammar.
               </p>
             </div>
-
             <div className="w-full max-w-sm space-y-2">
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
-                Try saying
-              </p>
+              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Try saying</p>
               {SUGGESTED_STARTERS.map((s) => (
                 <button
                   key={s}
-                  onClick={() => {
-                    setInput(s);
-                    inputRef.current?.focus();
-                  }}
+                  onClick={() => { setInput(s); inputRef.current?.focus(); }}
                   className="w-full text-left px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm text-gray-700 hover:border-primary-400 hover:text-primary-600 transition-colors"
                 >
                   {s}
@@ -116,17 +153,16 @@ export default function ChatPage() {
 
       {/* Error banner */}
       {error && (
-        <div className="mx-4 mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex justify-between items-center">
+        <div className="mx-4 mb-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex justify-between">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="ml-2 font-bold">×</button>
         </div>
       )}
 
-      {/* Correction legend — shown once there's a correction */}
       {messages.some((m) => m.hasCorrection) && (
         <div className="mx-4 mb-1 flex items-center gap-2 text-xs text-gray-400">
           <span className="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded">
-            — Small note: ...
+            — Small note: …
           </span>
           <span>= grammar correction from Aria</span>
         </div>
@@ -135,26 +171,39 @@ export default function ChatPage() {
       {/* Input area */}
       <div className="px-4 py-3 bg-white border-t border-gray-100">
         <div className="flex gap-2 items-end">
+          {/* Mic button */}
+          <button
+            onClick={handleMic}
+            title={isRecording ? "Stop recording" : "Record voice"}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+              isRecording
+                ? "bg-red-500 text-white animate-pulse"
+                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            }`}
+          >
+            🎙️
+          </button>
+
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type in English… (Enter to send, Shift+Enter for new line)"
+            placeholder="Type in English… (Enter to send)"
             rows={1}
-            disabled={isLoading}
+            disabled={isLoading || isRecording}
             className="flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 max-h-32 leading-relaxed"
-            style={{ height: "auto" }}
             onInput={(e) => {
               const t = e.currentTarget;
               t.style.height = "auto";
               t.style.height = `${Math.min(t.scrollHeight, 128)}px`;
             }}
           />
+
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center hover:bg-primary-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center hover:bg-primary-700 transition-colors disabled:opacity-40 shrink-0"
           >
             {isLoading ? (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -168,9 +217,11 @@ export default function ChatPage() {
             )}
           </button>
         </div>
-        <p className="text-xs text-gray-400 mt-1.5 text-center">
-          Aria will correct your grammar naturally in conversation
-        </p>
+        {isRecording && (
+          <p className="text-xs text-red-500 text-center mt-1.5 animate-pulse">
+            Recording… tap mic to stop
+          </p>
+        )}
       </div>
     </div>
   );
