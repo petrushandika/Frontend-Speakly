@@ -41,7 +41,7 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
           Email Address
         </label>
         <div className="relative">
@@ -59,10 +59,10 @@ function LoginForm() {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55">
             Password
           </label>
-          <Link href="/forgot-password" className="text-xs font-medium text-primary-600 hover:text-primary-700 hover:underline">
+          <Link href="/forgot-password" className="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-300 hover:underline">
             Forgot password?
           </Link>
         </div>
@@ -79,7 +79,7 @@ function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-slate-100 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 rounded-lg hover:bg-[var(--surface-strong)] transition-colors"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -87,7 +87,7 @@ function LoginForm() {
       </div>
 
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+        <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">
           {error}
         </p>
       )}
@@ -139,7 +139,7 @@ export default function LoginPage() {
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Master English by speaking naturally.
           </h1>
-          <p className="text-stone-400 leading-relaxed text-base">
+          <p className="text-[var(--foreground)]/40 leading-relaxed text-base">
             Practice real-world conversations with Aria, your personal AI tutor, and receive dynamic, real-time grammar corrections.
           </p>
 
@@ -164,7 +164,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom footer */}
-        <div className="text-stone-500 text-xs z-10 font-medium">
+        <div className="text-[var(--foreground)]/55 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -180,27 +180,27 @@ export default function LoginPage() {
               </svg>
             </div>
             <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
-            <p className="text-stone-600 text-sm mt-1">Practice English with AI</p>
+            <p className="text-[var(--foreground)]/70 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">
               Sign In
             </h2>
-            <p className="text-sm text-stone-600 mt-2">
+            <p className="text-sm text-[var(--foreground)]/70 mt-2">
               Welcome back! Please enter your details below.
             </p>
           </div>
 
           <div className="sk-panel p-8 bg-[var(--surface-strong)]">
-            <Suspense fallback={<div className="h-40 animate-pulse bg-[#efe9d9] rounded-xl" />}>
+            <Suspense fallback={<div className="h-40 animate-pulse bg-[var(--surface)] rounded-xl" />}>
               <LoginForm />
             </Suspense>
           </div>
 
-          <p className="text-center text-sm text-stone-500 mt-4">
+          <p className="text-center text-sm text-[var(--foreground)]/55 mt-4">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
+            <Link href="/register" className="text-primary-600 font-semibold hover:text-primary-700 dark:text-primary-300 hover:underline">
               Sign up for free
             </Link>
           </p>

@@ -2,8 +2,9 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc";
-import { SearchX, Lightbulb, ChevronLeft, Eye, EyeOff, Check, X } from "lucide-react";
+import { SearchX, Lightbulb, ChevronRight, Eye, EyeOff, Check, X } from "lucide-react";
 
 function parseInlineMarkdown(text: string) {
   if (!text) return "";
@@ -11,10 +12,10 @@ function parseInlineMarkdown(text: string) {
   const parts = text.split(regex);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-extrabold text-stone-950">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-extrabold text-[var(--foreground)]">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("*") && part.endsWith("*")) {
-      return <em key={i} className="italic text-stone-800 font-semibold">{part.slice(1, -1)}</em>;
+      return <em key={i} className="italic text-[var(--foreground)] font-semibold">{part.slice(1, -1)}</em>;
     }
     return part;
   });
@@ -53,7 +54,7 @@ function renderMarkdown(text: string) {
     // Headers
     if (line.startsWith("### ")) {
       rendered.push(
-        <h3 key={`h3-${index}`} className="text-sm md:text-base font-bold text-stone-900 mt-4 mb-2 first:mt-0">
+        <h3 key={`h3-${index}`} className="text-sm md:text-base font-bold text-[var(--foreground)] mt-4 mb-2 first:mt-0">
           {parseInlineMarkdown(line.slice(4))}
         </h3>
       );
@@ -61,7 +62,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("## ")) {
       rendered.push(
-        <h2 key={`h2-${index}`} className="text-base md:text-lg font-extrabold text-stone-900 mt-5 mb-2.5 first:mt-0">
+        <h2 key={`h2-${index}`} className="text-base md:text-lg font-extrabold text-[var(--foreground)] mt-5 mb-2.5 first:mt-0">
           {parseInlineMarkdown(line.slice(3))}
         </h2>
       );
@@ -69,7 +70,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("# ")) {
       rendered.push(
-        <h1 key={`h1-${index}`} className="text-lg md:text-xl font-black text-stone-900 mt-6 mb-3 first:mt-0">
+        <h1 key={`h1-${index}`} className="text-lg md:text-xl font-black text-[var(--foreground)] mt-6 mb-3 first:mt-0">
           {parseInlineMarkdown(line.slice(2))}
         </h1>
       );
@@ -81,8 +82,8 @@ function renderMarkdown(text: string) {
       const content = line.trim().slice(2);
       rendered.push(
         <div key={`li-${index}`} className="flex items-start gap-2 ml-4 my-1">
-          <span className="w-1.5 h-1.5 bg-stone-400 rounded-full mt-2 shrink-0" />
-          <p className="text-stone-700 text-sm md:text-base leading-relaxed font-medium">
+          <span className="w-1.5 h-1.5 bg-[var(--foreground)]/40 rounded-full mt-2 shrink-0" />
+          <p className="text-[var(--foreground)]/80 text-sm md:text-base leading-relaxed font-medium">
             {parseInlineMarkdown(content)}
           </p>
         </div>
@@ -95,7 +96,7 @@ function renderMarkdown(text: string) {
       rendered.push(<div key={`empty-${index}`} className="h-2" />);
     } else {
       rendered.push(
-        <p key={`p-${index}`} className="text-stone-700 text-sm md:text-base leading-relaxed font-medium">
+        <p key={`p-${index}`} className="text-[var(--foreground)]/80 text-sm md:text-base leading-relaxed font-medium">
           {parseInlineMarkdown(line)}
         </p>
       );
@@ -113,17 +114,17 @@ type GrammarRole = "subject" | "verb" | "object" | "adverb" | "complement" | "ne
 interface GrammarPart { text: string; role: GrammarRole }
 
 const ROLE_STYLE: Record<GrammarRole, string> = {
-  subject:    "bg-amber-100 text-amber-900 border border-amber-300 font-bold",
-  verb:       "bg-primary-100 text-primary-900 border border-primary-300 font-bold",
-  object:     "bg-sky-100 text-sky-900 border border-sky-300 font-bold",
-  adverb:     "bg-violet-100 text-violet-900 border border-violet-300 font-bold",
-  complement: "bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold",
-  neutral:    "text-stone-800 font-semibold",
+  subject:    "bg-amber-100 dark:bg-amber-900/30 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-bold",
+  verb:       "bg-primary-100 dark:bg-primary-900/40 text-primary-900 dark:text-primary-200 border border-primary-300 dark:border-primary-700 font-bold",
+  object:     "bg-sky-100 dark:bg-sky-900/30 text-sky-900 dark:text-sky-200 border border-sky-300 dark:border-sky-700 font-bold",
+  adverb:     "bg-violet-100 dark:bg-violet-900/30 text-violet-900 dark:text-violet-200 border border-violet-300 dark:border-violet-700 font-bold",
+  complement: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 font-bold",
+  neutral:    "text-[var(--foreground)] font-semibold",
 };
 
 function GrammarToken({ text, role }: { text: string; role: GrammarRole }) {
   if (role === "neutral") {
-    return <span className="text-sm text-stone-800 font-semibold">{text} </span>;
+    return <span className="text-sm text-[var(--foreground)] font-semibold">{text} </span>;
   }
   return (
     <span
@@ -273,7 +274,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
   if (isLoading) {
     return (
-      <div className="w-full p-6 md:p-8 space-y-4">
+      <div className="w-full p-3 md:p-8 space-y-4">
         <div className="h-6 w-24 bg-[var(--surface)]/60 border border-[var(--line-soft)] rounded-xl animate-pulse" />
         <div className="h-40 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl animate-pulse" />
         <div className="h-64 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl animate-pulse" />
@@ -283,12 +284,12 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
   if (!lesson) {
     return (
-      <div className="w-full p-6 md:p-8 text-center py-16 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl shadow-sm flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center">
-          <SearchX className="w-6 h-6 text-stone-400" />
+      <div className="w-full p-3 md:p-8 text-center py-16 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl shadow-sm flex flex-col items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--surface)] flex items-center justify-center">
+          <SearchX className="w-6 h-6 text-[var(--foreground)]/40" />
         </div>
-        <h3 className="font-bold text-stone-900">Lesson Not Found</h3>
-        <p className="text-stone-400 text-sm mt-1">We couldn&apos;t retrieve the requested lesson details.</p>
+        <h3 className="font-bold text-[var(--foreground)]">Lesson Not Found</h3>
+        <p className="text-[var(--foreground)]/40 text-sm mt-1">We couldn&apos;t retrieve the requested lesson details.</p>
         <button
           onClick={() => router.push("/lessons")}
           className="mt-6 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all"
@@ -304,51 +305,53 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const exercises = content.exercises ?? [];
 
   return (
-    <div className="w-full p-6 md:p-8 space-y-6">
+    <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
       {/* Top Navigation & Header */}
       <div className="space-y-4">
-        <button
-          onClick={() => router.back()}
-          className="text-xs font-semibold text-stone-400 hover:text-stone-700 flex items-center gap-1 px-3 py-2 bg-[var(--surface-strong)] hover:bg-[var(--surface)] border border-[var(--line)] rounded-xl transition-all cursor-pointer active:scale-95"
-        >
-          <ChevronLeft className="w-3.5 h-3.5" /> Back
-        </button>
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1.5 text-xs font-semibold">
+          <Link href="/home" className="text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 transition-colors">Home</Link>
+          <ChevronRight className="w-3 h-3 text-[var(--foreground)]/25 shrink-0" />
+          <Link href="/lessons" className="text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 transition-colors">Lessons</Link>
+          <ChevronRight className="w-3 h-3 text-[var(--foreground)]/25 shrink-0" />
+          <span className="text-[var(--foreground)]/70 truncate max-w-[200px] md:max-w-sm">{lesson.title}</span>
+        </nav>
         
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-primary-100 border border-primary-200 text-primary-700 rounded-md">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-primary-100 border border-primary-200 text-primary-700 dark:text-primary-300 rounded-md">
             {lesson.cefrLevel}
           </span>
-          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-stone-100 border border-stone-200 text-stone-500 rounded-md uppercase tracking-wider">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-[var(--surface-strong)] border border-[var(--line)] text-[var(--foreground)]/55 rounded-md uppercase tracking-wider">
             {lesson.category}
           </span>
         </div>
         
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight leading-snug">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <h1 className="text-xl sm:text-3xl font-extrabold text-[var(--foreground)] tracking-tight leading-snug flex-1 min-w-0">
             {lesson.title}
           </h1>
           {/* Translation toggle for B1+ */}
           {!isBeginnerLevel && (
             <button
               onClick={() => setShowTranslations((v) => !v)}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold shrink-0 transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl border text-xs font-bold shrink-0 transition-all cursor-pointer ${
                 showTranslations
-                  ? "bg-primary-50 border-primary-200 text-primary-700 hover:bg-primary-100"
-                  : "bg-[var(--surface-strong)] border-[var(--line)] text-stone-500 hover:text-stone-800 hover:border-stone-300"
+                  ? "bg-primary-50 dark:bg-primary-900/30 border-primary-200 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40"
+                  : "bg-[var(--surface-strong)] border-[var(--line)] text-[var(--foreground)]/55 hover:text-[var(--foreground)] hover:border-[var(--line-soft)]"
               }`}
             >
               {showTranslations
-                ? <><EyeOff className="w-4 h-4 shrink-0" /> Sembunyikan terjemahan</>
-                : <><Eye className="w-4 h-4 shrink-0" /> Lihat terjemahan</>
+                ? <><EyeOff className="w-3.5 h-3.5 shrink-0" /><span className="hidden sm:inline"> Sembunyikan terjemahan</span><span className="sm:hidden">Hide</span></>
+                : <><Eye className="w-3.5 h-3.5 shrink-0" /><span className="hidden sm:inline"> Lihat terjemahan</span><span className="sm:hidden">Show</span></>
               }
             </button>
           )}
         </div>
         {lesson.description && (
-          <p className="text-stone-500 text-sm leading-relaxed max-w-2xl">{lesson.description}</p>
+          <p className="text-[var(--foreground)]/55 text-sm leading-relaxed max-w-2xl">{lesson.description}</p>
         )}
         {isBeginnerLevel && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 font-semibold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg text-xs text-amber-700 dark:text-amber-400 font-semibold">
             Terjemahan Bahasa Indonesia selalu ditampilkan untuk level {cefrLevel}
           </div>
         )}
@@ -356,12 +359,12 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
       {/* Content sections */}
       {sections.length > 0 ? (
-        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-6 md:p-8 space-y-6 shadow-sm">
+        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-3 md:p-8 space-y-4 md:space-y-6 shadow-sm">
           {sections.map((section, i) => {
             if (section.type === "explanation" && section.text) {
               return (
                 <div key={i} className="space-y-3">
-                  <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
+                  <h2 className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
                     Explanation
                   </h2>
@@ -375,17 +378,17 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               return (
                 <div key={i} className="space-y-4 pt-2">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
+                    <h2 className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
                       Examples
                     </h2>
                     {/* Grammar legend */}
                     <div className="flex items-center gap-2 flex-wrap">
                       {[
-                        { label: "Subject",   cls: "bg-amber-100 text-amber-800 border-amber-200" },
-                        { label: "Verb",      cls: "bg-primary-100 text-primary-800 border-primary-200" },
-                        { label: "Object",    cls: "bg-sky-100 text-sky-800 border-sky-200" },
-                        { label: "Adverb",    cls: "bg-violet-100 text-violet-800 border-violet-200" },
+                        { label: "Subject",   cls: "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-700" },
+                        { label: "Verb",      cls: "bg-primary-100 dark:bg-primary-900/40 text-primary-800 dark:text-primary-300 border-primary-200 dark:border-primary-700" },
+                        { label: "Object",    cls: "bg-sky-100 dark:bg-sky-900/30 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-700" },
+                        { label: "Adverb",    cls: "bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 border-violet-200 dark:border-violet-700" },
                       ].map((t) => (
                         <span key={t.label} className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${t.cls}`}>
                           {t.label}
@@ -402,8 +405,8 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                         <li key={j} className="bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-2xl overflow-hidden">
                           {/* Number strip */}
                           <div className="flex items-stretch">
-                            <div className="w-9 bg-stone-100 border-r border-[var(--line)] flex items-center justify-center shrink-0">
-                              <span className="text-[11px] font-black text-stone-400">{j + 1}</span>
+                            <div className="w-9 bg-[var(--surface-strong)] border-r border-[var(--line)] flex items-center justify-center shrink-0">
+                              <span className="text-[11px] font-black text-[var(--foreground)]/40">{j + 1}</span>
                             </div>
                             <div className="flex-1 px-4 py-3.5 space-y-2.5">
                               {isCode ? (
@@ -417,13 +420,13 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-sm font-bold text-stone-900 leading-relaxed">{ex.en}</p>
+                                <p className="text-sm font-bold text-[var(--foreground)] leading-relaxed">{ex.en}</p>
                               )}
 
                               {showTranslations && ex.id && (
-                                <div className={`flex items-start gap-2 pt-1 border-t ${isBeginnerLevel ? "border-amber-200" : "border-stone-100"}`}>
-                                  <span className={`text-[9px] font-black uppercase tracking-wider shrink-0 mt-0.5 ${isBeginnerLevel ? "text-amber-600" : "text-stone-400"}`}>ID</span>
-                                  <p className={`text-xs leading-relaxed italic ${isBeginnerLevel ? "text-amber-800 font-semibold" : "text-stone-500 font-medium"}`}>
+                                <div className={`flex items-start gap-2 pt-1 border-t ${isBeginnerLevel ? "border-amber-200" : "border-[var(--line)]"}`}>
+                                  <span className={`text-[9px] font-black uppercase tracking-wider shrink-0 mt-0.5 ${isBeginnerLevel ? "text-amber-600 dark:text-amber-400" : "text-[var(--foreground)]/40"}`}>ID</span>
+                                  <p className={`text-xs leading-relaxed italic ${isBeginnerLevel ? "text-amber-800 font-semibold" : "text-[var(--foreground)]/55 font-medium"}`}>
                                     {ex.id}
                                   </p>
                                 </div>
@@ -443,7 +446,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                   <p className="text-xs font-bold text-amber-800 flex items-center gap-1.5 uppercase tracking-wider mb-1">
                     <Lightbulb className="w-3.5 h-3.5" /> Tip / Remember
                   </p>
-                  <div className="space-y-1.5 text-xs md:text-sm text-stone-700 leading-relaxed font-semibold">
+                  <div className="space-y-1.5 text-xs md:text-sm text-[var(--foreground)]/80 leading-relaxed font-semibold">
                     {renderMarkdown(section.text)}
                   </div>
                 </div>
@@ -453,15 +456,15 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
           })}
         </div>
       ) : (
-        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-8 text-center shadow-sm">
-          <p className="text-stone-400 text-sm py-4">Lesson content is currently being updated...</p>
+        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-4 sm:p-8 text-center shadow-sm">
+          <p className="text-[var(--foreground)]/40 text-sm py-4">Lesson content is currently being updated...</p>
         </div>
       )}
 
       {/* Exercises */}
       {exercises.length > 0 && (
-        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-6 md:p-8 space-y-4 shadow-sm">
-          <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
+        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-3 md:p-8 space-y-4 shadow-sm">
+          <h2 className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
             Practice Exercises
           </h2>
@@ -477,9 +480,9 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                     ? isCorrect 
                       ? "bg-emerald-50/50 border-emerald-200" 
                       : "bg-red-50/50 border-red-200"
-                    : "bg-[var(--surface)] border-[var(--line-soft)] hover:bg-white hover:border-primary-200"
+                    : "bg-[var(--surface)] border-[var(--line-soft)] hover:bg-[var(--surface-strong)] hover:border-primary-200 dark:hover:border-primary-700"
                 }`}>
-                  <p className="text-sm text-stone-800 font-extrabold leading-relaxed">
+                  <p className="text-sm text-[var(--foreground)] font-extrabold leading-relaxed">
                     {i + 1}. {ex.question.replace("___", "______")}
                   </p>
                   
@@ -493,25 +496,25 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                       className={`flex-1 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                         submitted
                           ? isCorrect
-                            ? "bg-emerald-100/50 border-emerald-200 text-emerald-800"
-                            : "bg-red-100/50 border-red-200 text-red-800"
-                          : "bg-[var(--surface-strong)] border-[var(--line)] text-stone-900 placeholder:text-stone-400 placeholder:font-normal"
+                            ? "bg-emerald-100/50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300"
+                            : "bg-red-100/50 dark:bg-red-900/30 border-red-200 dark:border-red-700 text-red-800 dark:text-red-300"
+                          : "bg-[var(--surface-strong)] border-[var(--line)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 placeholder:font-normal"
                       }`}
                     />
                     
                     {submitted && (
                       <div className="flex items-center gap-2 px-1">
                         {isCorrect ? (
-                          <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-100 px-3 py-1.5 rounded-lg">
+                          <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1.5 rounded-lg">
                             <Check className="w-3.5 h-3.5" /> Correct
                           </span>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-100 px-3 py-1.5 rounded-lg">
+                            <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-3 py-1.5 rounded-lg">
                               <X className="w-3.5 h-3.5" /> Incorrect
                             </span>
-                            <span className="text-xs font-semibold text-stone-500">
-                              Answer: <span className="text-stone-800 font-bold">{ex.answer}</span>
+                            <span className="text-xs font-semibold text-[var(--foreground)]/55">
+                              Answer: <span className="text-[var(--foreground)] font-bold">{ex.answer}</span>
                             </span>
                           </div>
                         )}
@@ -533,7 +536,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                 Check Answers
               </button>
               {Object.keys(answers).length < exercises.length && (
-                <p className="text-center text-xs text-stone-400 mt-3 font-medium">Please answer all questions before checking.</p>
+                <p className="text-center text-xs text-[var(--foreground)]/40 mt-3 font-medium">Please answer all questions before checking.</p>
               )}
             </div>
           )}
@@ -544,8 +547,8 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
       {(!exercises.length || submitted) && (
         <div className="pt-2">
           {submitted && exercises.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 bg-primary-50 rounded-2xl mb-4 border border-primary-100">
-              <span className="text-sm font-bold text-primary-900">Your Score</span>
+            <div className="flex items-center justify-between px-6 py-4 bg-primary-50 dark:bg-primary-900/30 rounded-2xl mb-4 border border-primary-100 dark:border-primary-800">
+              <span className="text-sm font-bold text-primary-900 dark:text-primary-200">Your Score</span>
               <span className="text-2xl font-extrabold text-primary-600">{calculateScore()}%</span>
             </div>
           )}

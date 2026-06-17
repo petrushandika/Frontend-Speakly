@@ -9,7 +9,7 @@ function renderInline(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold text-stone-900">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-semibold text-[var(--foreground)]">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("*") && part.endsWith("*")) {
       return <em key={i} className="italic">{part.slice(1, -1)}</em>;
@@ -31,7 +31,7 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
     elements.push(
       <ul key={`ul-${elements.length}`} className="list-disc list-outside ml-4 space-y-0.5 my-1.5">
         {ulItems.map((item, i) => (
-          <li key={i} className="text-stone-700 leading-relaxed">{renderInline(item)}</li>
+          <li key={i} className="text-[var(--foreground)]/80 leading-relaxed">{renderInline(item)}</li>
         ))}
       </ul>
     );
@@ -43,7 +43,7 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
     elements.push(
       <ol key={`ol-${elements.length}`} className="list-decimal list-outside ml-4 space-y-0.5 my-1.5">
         {olItems.map((item, i) => (
-          <li key={i} className="text-stone-700 leading-relaxed">{renderInline(item)}</li>
+          <li key={i} className="text-[var(--foreground)]/80 leading-relaxed">{renderInline(item)}</li>
         ))}
       </ol>
     );
@@ -69,7 +69,7 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
     }
 
     elements.push(
-      <p key={`p-${i}`} className="leading-relaxed text-stone-800">
+      <p key={`p-${i}`} className="leading-relaxed text-[var(--foreground)]">
         {renderInline(line)}
       </p>
     );
@@ -110,7 +110,7 @@ export function ChatBubble({ message }: { message: Message }) {
           "rounded-2xl px-4 py-3 text-sm shadow-sm",
           isUser
             ? "bg-stone-900 text-white rounded-tr-sm"
-            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-stone-800 rounded-tl-sm"
+            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-[var(--foreground)] rounded-tl-sm"
         )}>
           <FormattedText text={mainText || message.content} isUser={isUser} />
 
@@ -125,15 +125,15 @@ export function ChatBubble({ message }: { message: Message }) {
 
         {/* Grammar correction chip */}
         {!isUser && correctionText && !message.isStreaming && !correctionDismissed && (
-          <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs max-w-full">
+          <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl text-xs max-w-full">
             <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <span className="font-bold text-amber-800 block mb-0.5">Grammar note</span>
+              <span className="font-bold text-amber-800 dark:text-amber-400 block mb-0.5">Grammar note</span>
               <FormattedText text={correctionText} isUser={false} />
             </div>
             <button
               onClick={() => setCorrectionDismissed(true)}
-              className="shrink-0 p-0.5 rounded-md text-amber-400 hover:text-amber-600 hover:bg-amber-100 transition-colors mt-0.5"
+              className="shrink-0 p-0.5 rounded-md text-amber-400 hover:text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mt-0.5"
             >
               <X className="w-3 h-3" />
             </button>
@@ -142,7 +142,7 @@ export function ChatBubble({ message }: { message: Message }) {
 
         {/* Streaming status */}
         {!isUser && message.isStreaming && (
-          <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-stone-400">
+          <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-[var(--foreground)]/40">
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>Aria is typing…</span>
           </div>
@@ -151,7 +151,7 @@ export function ChatBubble({ message }: { message: Message }) {
 
       {/* User avatar */}
       {isUser && (
-        <div className="w-8 h-8 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-xl bg-[var(--surface-strong)] border border-[var(--line)] flex items-center justify-center text-[var(--foreground)]/70 text-xs font-bold shrink-0 mt-1">
           You
         </div>
       )}

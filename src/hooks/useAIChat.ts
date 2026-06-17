@@ -19,6 +19,14 @@ export interface ChatSession {
   messages: Message[];
 }
 
+export type ConversationMode =
+  | "free_talk"
+  | "roleplay"
+  | "grammar_drill"
+  | "debate"
+  | "storytelling"
+  | "interview_prep";
+
 interface UseAIChatOptions {
   onError?: (error: string) => void;
 }
@@ -148,6 +156,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
   const [sessions, setSessions]     = useState<ChatSession[]>(initial.sessions);
   const [activeId, setActiveId]     = useState<string>(initial.activeId);
   const [isLoading, setIsLoading]   = useState(false);
+  const [mode, setMode]             = useState<ConversationMode>("free_talk");
   const abortRef = useRef<(() => void) | null>(null);
 
   const activeSession = sessions.find((s) => s.id === activeId) ?? sessions[sessions.length - 1];
@@ -220,7 +229,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ message: text.trim(), history }),
+            body: JSON.stringify({ message: text.trim(), history, mode }),
           },
         );
 
@@ -318,27 +327,57 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
     [messages, isLoading, activeId, onError],
   );
 
+  // Auto-summarize a session if it has enough messages
+  const summarizeSession = useCallback(async (sessionMessages: Message[]) => {
+    const userMsgs = sessionMessages.filter((m) => m.role === "user");
+    if (userMsgs.length < 4) return; // not enough to summarize
+    try {
+      const token = localStorage.getItem("sb-access-token") ?? "";
+      const payload = sessionMessages.map((m) => ({ role: m.role, content: m.content }));
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/summarize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ messages: payload }),
+      });
+    } catch {
+      // ignore — memory is best-effort
+    }
+  }, []);
+
   const newSession = useCallback(() => {
     abortRef.current?.();
     setIsLoading(false);
     const s = createSession();
     setSessions((prev) => {
-      // Don't create duplicate empty sessions
       const last = prev[prev.length - 1];
       if (last && last.messages.length === 0) {
         setActiveId(last.id);
         return prev;
       }
+      // Summarize current session before leaving
+      if (last && last.messages.length >= 8) {
+        summarizeSession(last.messages);
+      }
       setActiveId(s.id);
       return [...prev, s];
     });
-  }, []);
+    setMode("free_talk");
+  }, [summarizeSession]);
 
   const switchSession = useCallback((id: string) => {
     abortRef.current?.();
     setIsLoading(false);
+    // Summarize outgoing session
+    setSessions((prev) => {
+      const current = prev.find((s) => s.id === activeId);
+      if (current && current.messages.length >= 8) {
+        summarizeSession(current.messages);
+      }
+      return prev;
+    });
     setActiveId(id);
-  }, []);
+    setMode("free_talk");
+  }, [activeId, summarizeSession]);
 
   const deleteSession = useCallback(
     (id: string) => {
@@ -369,6 +408,8 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
     sessions,
     activeSession,
     isLoading,
+    mode,
+    setMode,
     sendMessage,
     newSession,
     switchSession,

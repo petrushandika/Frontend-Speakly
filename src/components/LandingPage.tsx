@@ -17,7 +17,7 @@ const FEATURES = [
     title: "Voice Call",
     desc: "Latih percakapan suara dua arah dengan Aria — layaknya menelepon native speaker asli.",
     icon: PhoneCall,
-    color: "bg-primary-100 text-primary-700",
+    color: "bg-primary-100 text-primary-700 dark:text-primary-300",
     details: [
       "Interaksi suara real-time dengan latensi sangat rendah",
       "Pilihan aksen native (American, British, Australian, dll)",
@@ -35,7 +35,7 @@ const FEATURES = [
         </div>
         <div>
           <p className="text-xs font-bold text-stone-300">Aria · Voice Call</p>
-          <p className="text-[10px] text-stone-500 mt-0.5">Connected · Speech Mode</p>
+          <p className="text-[10px] text-white/55 mt-0.5">Connected · Speech Mode</p>
         </div>
         <div className="flex items-center justify-center gap-1 h-7">
           {[4,7,12,9,5,11,8,6,10,7,4,9].map((h, i) => (
@@ -53,7 +53,7 @@ const FEATURES = [
     title: "Voice Input",
     desc: "Bicara ke mikrofon — AI transkripsi suara Anda dan langsung koreksi grammar secara otomatis.",
     icon: Mic,
-    color: "bg-accent-100 text-accent-500",
+    color: "bg-accent-100 text-accent-500 dark:text-accent-400",
     details: [
       "Transkripsi suara dengan akurasi sangat tinggi",
       "Koreksi tata bahasa otomatis real-time",
@@ -63,13 +63,13 @@ const FEATURES = [
       <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-[var(--line-soft)] pb-2">
           <span className="text-[9px] font-black text-[var(--foreground)]/50 uppercase tracking-widest">Transcriber</span>
-          <span className="text-[10px] font-bold bg-primary-50 text-primary-700 border border-primary-200 px-2 py-0.5 rounded-full dark:bg-primary-900/40 dark:text-primary-300 dark:border-primary-700">96% accuracy</span>
+          <span className="text-[10px] font-bold bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border border-primary-200 px-2 py-0.5 rounded-full dark:bg-primary-900/40 dark:text-primary-300 dark:border-primary-700">96% accuracy</span>
         </div>
         <div className="space-y-2">
           <div className="flex items-start gap-2">
             <Mic className="w-3.5 h-3.5 text-accent-400 mt-0.5 shrink-0 animate-pulse" />
             <p className="text-xs font-mono text-[var(--foreground)]/70">
-              "I <span className="text-accent-500 line-through">go</span>{" "}
+              "I <span className="text-accent-500 dark:text-accent-400 line-through">go</span>{" "}
               <span className="text-primary-600 dark:text-primary-400 font-bold underline">went</span> to the market."
             </p>
           </div>
@@ -85,7 +85,7 @@ const FEATURES = [
     title: "Audio Pronunciation",
     desc: "Dengarkan setiap kalimat dibunyikan oleh native speaker — sempurnakan listening Anda.",
     icon: Volume2,
-    color: "bg-amber-100 text-amber-600",
+    color: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
     details: [
       "Intonasi natural manusia asli (ElevenLabs TTS)",
       "Kecepatan audio yang dapat diatur (0.8x–1.2x)",
@@ -122,12 +122,12 @@ const NAV_LINKS = [
 ];
 
 const FEATURE_CARDS = [
-  { icon: PhoneCall, color: "bg-primary-100 text-primary-700 border-primary-200 dark:bg-primary-900/40 dark:text-primary-300 dark:border-primary-700", title: "Voice Call (STS)", desc: "Panggil Aria secara suara — latih kelancaran tanpa rasa takut salah." },
-  { icon: Mic,       color: "bg-accent-100 text-accent-500 border-accent-200 dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-700",     title: "Voice Input (STT)", desc: "Bicara, transkripsi otomatis, koreksi grammar instan dari AI." },
+  { icon: PhoneCall, color: "bg-primary-100 text-primary-700 dark:text-primary-300 border-primary-200 dark:bg-primary-900/40 dark:text-primary-300 dark:border-primary-700", title: "Voice Call (STS)", desc: "Panggil Aria secara suara — latih kelancaran tanpa rasa takut salah." },
+  { icon: Mic,       color: "bg-accent-100 text-accent-500 dark:text-accent-400 border-accent-200 dark:bg-accent-900/30 dark:text-accent-300 dark:border-accent-700",     title: "Voice Input (STT)", desc: "Bicara, transkripsi otomatis, koreksi grammar instan dari AI." },
   { icon: Volume2,   color: "bg-amber-100 text-amber-600 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700",             title: "Audio Pronunciation (TTS)", desc: "Dengar setiap kata & kalimat dari native speaker AI." },
-  { icon: BookOpen,  color: "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700",       title: "Structured Lessons", desc: "Modul CEFR A1–C2 dengan terjemahan Bahasa Indonesia." },
+  { icon: BookOpen,  color: "bg-violet-100 text-violet-700 dark:text-violet-400 border-violet-200 dark:bg-violet-900/30 dark:text-violet-300 dark:border-violet-700",       title: "Structured Lessons", desc: "Modul CEFR A1–C2 dengan terjemahan Bahasa Indonesia." },
   { icon: Users2,    color: "bg-rose-100 text-rose-600 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-700",                  title: "Speaking Rooms", desc: "Praktik langsung bersama sesama pelajar dalam room terbuka." },
-  { icon: Layers,    color: "bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700",                  title: "Spaced Repetition Flashcards", desc: "Kosakata baru dari percakapan otomatis masuk ke review berkala." },
+  { icon: Layers,    color: "bg-teal-100 text-teal-700 dark:text-teal-400 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700",                  title: "Spaced Repetition Flashcards", desc: "Kosakata baru dari percakapan otomatis masuk ke review berkala." },
 ];
 
 export function LandingPage() {
@@ -152,9 +152,9 @@ export function LandingPage() {
 
       {/* ── NAVBAR ── */}
       <header className="sticky top-4 z-50 px-6">
-        <div className="max-w-5xl mx-auto bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-2xl shadow-sm px-5 h-14 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+        <div className="max-w-5xl mx-auto bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-2xl shadow-sm px-5 h-14 grid grid-cols-3 items-center">
+          {/* Logo — left */}
+          <Link href="/" className="flex items-center gap-2 shrink-0 justify-self-start">
             <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -163,24 +163,24 @@ export function LandingPage() {
             <span className="text-base font-black text-[var(--foreground)] tracking-tight">Speakly</span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-0.5 bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl px-1.5 py-1.5">
+          {/* Desktop nav — true center */}
+          <nav className="hidden md:flex items-center justify-center gap-0.5 bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl px-1.5 py-1.5 justify-self-center">
             {NAV_LINKS.map((n) => (
               <button
                 key={n.id}
                 onClick={() => scrollTo(n.id)}
-                className="px-4 py-1.5 text-sm font-semibold text-[var(--foreground)]/70 hover:text-[var(--foreground)] hover:bg-[var(--surface-strong)] rounded-lg transition-all cursor-pointer"
+                className="px-4 py-1.5 text-sm font-semibold text-[var(--foreground)]/70 hover:text-[var(--foreground)] hover:bg-[var(--surface-strong)] rounded-lg transition-all cursor-pointer whitespace-nowrap"
               >
                 {n.label}
               </button>
             ))}
           </nav>
 
-          {/* CTA + theme toggle */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* CTA + theme toggle — right */}
+          <div className="hidden md:flex items-center gap-2 justify-self-end">
             <ThemeToggle compact />
             {isLoggedIn ? (
-              <Link href="/home" className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-bold rounded-full transition-all">
+              <Link href="/home" className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] text-sm font-bold rounded-full transition-all">
                 Dashboard <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             ) : (
@@ -188,15 +188,15 @@ export function LandingPage() {
                 <Link href="/login" className="px-4 py-2 text-sm font-semibold text-[var(--foreground)]/70 hover:text-[var(--foreground)] transition-colors">
                   Masuk
                 </Link>
-                <Link href="/register" className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-bold rounded-full transition-all">
+                <Link href="/register" className="flex items-center gap-1.5 px-4 py-2 bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] text-sm font-bold rounded-full transition-all">
                   Mulai Gratis <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile toggle */}
-          <div className="md:hidden flex items-center gap-2">
+          {/* Mobile: logo already on left, toggle + hamburger on right */}
+          <div className="md:hidden col-start-2 col-end-4 flex items-center gap-2 justify-self-end">
             <ThemeToggle compact />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -223,13 +223,13 @@ export function LandingPage() {
             </nav>
             <div className="border-t border-[var(--line-soft)] pt-3 flex flex-col gap-2">
               {isLoggedIn ? (
-                <Link href="/home" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-sm font-bold text-white dark:text-stone-900 bg-stone-900 dark:bg-stone-100 rounded-xl">
+                <Link href="/home" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-sm font-bold text-white dark:text-[var(--foreground)] bg-stone-900 dark:bg-[var(--surface-strong)] rounded-xl">
                   Dashboard
                 </Link>
               ) : (
                 <>
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2 text-sm font-semibold text-[var(--foreground)]/70">Masuk</Link>
-                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-sm font-bold text-white dark:text-stone-900 bg-stone-900 dark:bg-stone-100 rounded-xl">
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="w-full text-center py-2.5 text-sm font-bold text-white dark:text-[var(--foreground)] bg-stone-900 dark:bg-[var(--surface-strong)] rounded-xl">
                     Mulai Belajar Gratis
                   </Link>
                 </>
@@ -281,7 +281,7 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href={isLoggedIn ? "/home" : "/register"}
-              className="flex items-center gap-2 px-7 py-3.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-bold text-sm rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-7 py-3.5 bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] font-bold text-sm rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
               {isLoggedIn ? "Ke Dashboard" : "Mulai Belajar Gratis"}
               <ArrowUpRight className="w-4 h-4" />
@@ -367,7 +367,7 @@ export function LandingPage() {
                   onClick={() => setActiveTab(f.id)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer ${
                     active
-                      ? "bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-900 shadow-md"
+                      ? "bg-stone-900 dark:bg-[var(--surface-strong)] border-stone-900 dark:border-[var(--line)] text-white dark:text-[var(--foreground)] shadow-md"
                       : "bg-[var(--surface-strong)] border-[var(--line)] text-[var(--foreground)]/70 hover:border-[var(--line-soft)] hover:text-[var(--foreground)]"
                   }`}
                 >
@@ -487,9 +487,9 @@ export function LandingPage() {
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-black text-white">Rp 79.000</span>
-                  <span className="text-stone-400 text-sm">/ bulan</span>
+                  <span className="text-white/40 text-sm">/ bulan</span>
                 </div>
-                <p className="text-stone-400 text-sm">Akses penuh semua fitur — voice call, STT, TTS, dan lebih.</p>
+                <p className="text-white/50 text-sm">Akses penuh semua fitur — voice call, STT, TTS, dan lebih.</p>
               </div>
               <ul className="space-y-3 text-sm text-stone-300 flex-1">
                 {["Voice Call (Speech-to-Speech) tanpa batas","Transkripsi & Koreksi (STT) tanpa batas","Speaking Rooms premium tanpa limit waktu","Unlimited Flashcards & Smart intervals","Laporan analisis CEFR bulanan"].map((f) => (
@@ -515,14 +515,14 @@ export function LandingPage() {
             <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
               Mulai Perjalanan Berbicara Bahasa Inggris Hari Ini
             </h2>
-            <p className="text-stone-400 text-base max-w-md mx-auto">
+            <p className="text-white/60 text-base max-w-md mx-auto">
               Bergabung dengan ribuan pelajar yang sudah berlatih bersama Aria, tutor AI personal Speakly.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link href="/register" className="flex items-center gap-2 px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-bold rounded-2xl transition-all shadow-lg shadow-primary-500/20">
                 Mulai Latihan Sekarang <ArrowUpRight className="w-4 h-4" />
               </Link>
-              <Link href="/login" className="flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/15 text-white font-bold rounded-2xl transition-all border border-white/10">
+              <Link href="/login" className="flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-[var(--surface)]/15 text-white font-bold rounded-2xl transition-all border border-white/10">
                 Sudah punya akun? Masuk
               </Link>
             </div>

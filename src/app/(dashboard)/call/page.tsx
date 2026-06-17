@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Mic, MicOff, Phone, PhoneOff, Volume2, Loader2,
-  RefreshCw, PanelLeft, Plus, Trash2,
+  Plus, PanelLeft, Trash2, X,
 } from "lucide-react";
 import { useVoiceChat, type VoiceState, type VoiceMessage, type VoiceSession } from "@/hooks/useVoiceChat";
 import { trpc } from "@/lib/trpc";
@@ -11,32 +11,29 @@ import { trpc } from "@/lib/trpc";
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatDate(ts: number): string {
-  const d   = new Date(ts);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
+  const diffMs  = Date.now() - ts;
   const diffMin = Math.floor(diffMs / 60_000);
   const diffH   = Math.floor(diffMs / 3_600_000);
   const diffD   = Math.floor(diffMs / 86_400_000);
-
-  if (diffMin < 1)   return "just now";
-  if (diffMin < 60)  return `${diffMin}m ago`;
-  if (diffH   < 24)  return `${diffH}h ago`;
-  if (diffD   < 7)   return `${diffD}d ago`;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (diffMin < 1)  return "just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffH   < 24) return `${diffH}h ago`;
+  if (diffD   < 7)  return `${diffD}d ago`;
+  return new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── State Indicator ───────────────────────────────────────────────────────────
 
 function StateIndicator({ state }: { state: VoiceState }) {
   const cfg = {
-    idle:     { label: "Tap mic to speak",      cls: "bg-slate-100 text-stone-500" },
-    listening:{ label: "Listening…",            cls: "bg-red-50 text-red-500" },
-    thinking: { label: "Aria is thinking…",     cls: "bg-amber-50 text-amber-600" },
-    speaking: { label: "Aria is speaking…",     cls: "bg-primary-50 text-primary-600" },
+    idle:     { label: "Tap mic to speak",  cls: "bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)]/55" },
+    listening:{ label: "Listening…",        cls: "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400" },
+    thinking: { label: "Aria is thinking…", cls: "bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 dark:text-amber-400" },
+    speaking: { label: "Aria is speaking…", cls: "bg-primary-50 dark:bg-primary-900/40 border border-primary-200 dark:border-primary-800 text-primary-600 dark:text-primary-400" },
   }[state];
 
   return (
-    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium ${cfg.cls}`}>
+    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold ${cfg.cls}`}>
       {state === "listening" && (
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -49,6 +46,8 @@ function StateIndicator({ state }: { state: VoiceState }) {
     </div>
   );
 }
+
+// ── Mic Button ────────────────────────────────────────────────────────────────
 
 function MicButton({
   state, onStart, onStop, onInterrupt,
@@ -67,12 +66,12 @@ function MicButton({
       className={`
         relative w-20 h-20 rounded-full flex items-center justify-center
         shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2
-        transition-all duration-200
+        transition-all duration-200 cursor-pointer active:scale-95
         ${isListening
           ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 scale-110"
           : isBusy
-            ? "bg-slate-200 hover:bg-slate-300 focus:ring-slate-200"
-            : "bg-[#1f1d19] hover:bg-[#161411] focus:ring-primary-300"
+            ? "bg-[var(--line)] hover:bg-[var(--line-soft)] focus:ring-[var(--line)]"
+            : "bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 focus:ring-primary-300"
         }
       `}
     >
@@ -80,14 +79,16 @@ function MicButton({
         <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-40" />
       )}
       {isBusy
-        ? <PhoneOff className="w-7 h-7 text-stone-500" />
+        ? <PhoneOff className="w-7 h-7 text-[var(--foreground)]/55" />
         : isListening
           ? <MicOff className="w-7 h-7 text-white" />
-          : <Mic className="w-7 h-7 text-white" />
+          : <Mic    className="w-7 h-7 text-white dark:text-stone-900" />
       }
     </button>
   );
 }
+
+// ── Message Bubble ────────────────────────────────────────────────────────────
 
 function MessageBubble({ msg }: { msg: VoiceMessage }) {
   const isUser = msg.role === "user";
@@ -97,32 +98,43 @@ function MessageBubble({ msg }: { msg: VoiceMessage }) {
     : null;
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div className="max-w-[78%] space-y-1">
-        {!isUser && <p className="text-[11px] font-semibold text-stone-400 px-1">Aria</p>}
-        <div className={`px-4 py-2.5 rounded-[18px] text-sm leading-relaxed ${
+    <div className={`flex gap-3 my-3 ${isUser ? "justify-end" : "justify-start"}`}>
+      {/* Aria avatar */}
+      {!isUser && (
+        <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1 shadow-sm">
+          AI
+        </div>
+      )}
+
+      <div className={`flex flex-col gap-1.5 max-w-[78%] ${isUser ? "items-end" : "items-start"}`}>
+        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
           isUser
-            ? "bg-primary-600 text-white rounded-tr-sm"
-            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-stone-800 rounded-tl-sm shadow-sm"
+            ? "bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 rounded-tr-sm"
+            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-[var(--foreground)] rounded-tl-sm"
         }`}>
           {text}
         </div>
         {note && (
-          <div className="px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700">
-            {note}
+          <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl text-xs text-amber-700 dark:text-amber-400 dark:text-amber-400 max-w-full">
+            <span className="font-bold">Note:</span> {note}
           </div>
         )}
       </div>
+
+      {/* User avatar */}
+      {isUser && (
+        <div className="w-8 h-8 rounded-xl bg-[var(--surface-strong)] border border-[var(--line)] flex items-center justify-center text-[var(--foreground)]/70 text-xs font-bold shrink-0 mt-1">
+          You
+        </div>
+      )}
     </div>
   );
 }
 
+// ── History Sidebar ───────────────────────────────────────────────────────────
+
 function HistorySidebar({
-  sessions,
-  activeId,
-  onSwitch,
-  onDelete,
-  onNew,
+  sessions, activeId, onSwitch, onDelete, onNew,
 }: {
   sessions: VoiceSession[];
   activeId: string | null;
@@ -135,19 +147,22 @@ function HistorySidebar({
 
   return (
     <div className="w-64 flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 h-14 border-b border-slate-100 shrink-0">
-        <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">History</span>
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--line)] shrink-0">
+        <span className="text-xs font-bold text-[var(--foreground)]/50 uppercase tracking-widest">History</span>
         <button
           onClick={onNew}
-          className="w-7 h-7 rounded-lg bg-[#1f1d19] hover:bg-[#161411] text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+          title="New session"
+          className="w-7 h-7 rounded-lg bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
 
+      {/* Session list */}
       <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
         {sorted.length === 0 && (
-          <p className="text-xs text-stone-400 text-center py-8 px-4">No voice sessions yet</p>
+          <p className="text-xs text-[var(--foreground)]/40 text-center py-8 px-4">No voice sessions yet</p>
         )}
         {sorted.map((s) => {
           const isActive = s.id === activeId;
@@ -160,15 +175,15 @@ function HistorySidebar({
               onClick={() => onSwitch(s.id)}
               className={`group relative flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
                 isActive
-                  ? "bg-primary-50 border border-primary-100"
-                  : "hover:bg-white hover:border hover:border-slate-100 border border-transparent"
+                  ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-100 dark:border-primary-800"
+                  : "hover:bg-[var(--surface)] border border-transparent hover:border-[var(--line)]"
               }`}
             >
               <div className="flex-1 min-w-0">
-                <p className={`text-xs font-semibold truncate ${isActive ? "text-primary-700" : "text-stone-700"}`}>
+                <p className={`text-xs font-semibold truncate ${isActive ? "text-primary-700 dark:text-primary-400" : "text-[var(--foreground)]/80"}`}>
                   {s.title}
                 </p>
-                <p className="text-[10px] text-stone-400 mt-0.5 font-medium">
+                <p className="text-[10px] text-[var(--foreground)]/40 mt-0.5 font-medium">
                   {formatDate(s.updatedAt)}
                   {msgCount > 0 && ` · ${msgCount} msg${msgCount !== 1 ? "s" : ""}`}
                 </p>
@@ -176,7 +191,7 @@ function HistorySidebar({
               {hovered === s.id && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
-                  className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[var(--foreground)]/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -189,14 +204,14 @@ function HistorySidebar({
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function VoiceCallPage() {
   const { data: profile } = trpc.users.getProfile.useQuery();
   const accent = profile?.accentPreference ?? "american";
 
-  const [error, setError]           = useState<string | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
+  const [error, setError]             = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -209,9 +224,12 @@ export default function VoiceCallPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
 
+  const isEmpty = messages.length === 0 && !streamingText;
+
   return (
     <div className="flex h-full w-full overflow-hidden relative">
-      {/* ── Mobile overlay backdrop ── */}
+
+      {/* Mobile overlay backdrop */}
       {showHistory && (
         <div
           className="fixed inset-0 z-30 bg-stone-900/30 backdrop-blur-sm md:hidden"
@@ -219,7 +237,7 @@ export default function VoiceCallPage() {
         />
       )}
 
-      {/* ── History sidebar ── */}
+      {/* History sidebar */}
       <aside className={`
         z-40 flex flex-col border-r border-[var(--line)] bg-[var(--surface-strong)] overflow-hidden transition-all duration-200
         md:relative md:shrink-0
@@ -235,92 +253,111 @@ export default function VoiceCallPage() {
         />
       </aside>
 
-      {/* ── Main content ── */}
-      <div className="flex flex-col flex-1 p-6 md:p-8 min-w-0 overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-[1.5px] border-[var(--line)] bg-[var(--surface-strong)] rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
+      {/* Main area */}
+      <div className="flex flex-col flex-1 p-3 md:p-8 min-w-0 overflow-hidden">
+
+        {/* Header — identical structure to chat page */}
+        <div className="flex items-center justify-between px-3 py-2.5 border-[1.5px] border-[var(--line)] bg-[var(--surface-strong)] rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setShowHistory(!showHistory)}
               title="Toggle history"
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                 showHistory
-                  ? "bg-primary-50 border border-primary-200 text-primary-600"
-                  : "bg-[var(--surface)] border border-slate-100 text-stone-400 hover:text-stone-600"
+                  ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400"
+                  : "bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70"
               }`}
             >
               <PanelLeft className="w-4 h-4" />
             </button>
-            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center shrink-0 shadow-sm">
               <Phone className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-stone-900 text-sm leading-tight truncate">
+              <p className="font-bold text-[var(--foreground)] text-sm leading-tight truncate">
                 {activeSession?.title ?? "Voice Call"}
               </p>
-              <p className="text-xs text-emerald-500 font-semibold">Aria · AI English Tutor</p>
+              <p className="text-xs text-emerald-500 font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-ping" />
+                Aria · AI English Tutor
+              </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={newSession}
-              className="flex items-center gap-1.5 text-xs font-semibold text-stone-400 hover:text-primary-600 hover:bg-primary-50 border border-transparent hover:border-primary-100 px-3 py-1.5 rounded-xl transition-all"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 border border-transparent hover:border-primary-100 dark:hover:border-primary-800 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> New
+              <Plus className="w-3.5 h-3.5" /> New
             </button>
           </div>
         </div>
 
-        {/* Transcript */}
-        <div className="flex-1 overflow-y-auto space-y-3 min-h-0 mb-4">
-          {messages.length === 0 && !streamingText && (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-3 pb-16">
-              <div className="w-16 h-16 rounded-full bg-primary-50 flex items-center justify-center">
-                <Mic className="w-8 h-8 text-primary-400" />
+        {/* Transcript panel — same style as chat message window */}
+        <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-5 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] shadow-sm min-h-0 mb-4">
+          {isEmpty ? (
+            <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-xs mx-auto">
+              <div className="w-14 h-14 rounded-[18px] bg-primary-50 dark:bg-primary-900/40 border border-primary-100 dark:border-primary-800 flex items-center justify-center">
+                <Mic className="w-7 h-7 text-primary-400" />
               </div>
-              <div>
-                <p className="text-sm font-semibold text-stone-700">Start the conversation</p>
-                <p className="text-xs text-stone-400 mt-1">Tap the mic and start speaking — Aria will reply by voice</p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-bold text-[var(--foreground)]">Voice Call with Aria</h2>
+                <p className="text-sm text-[var(--foreground)]/60 leading-relaxed">
+                  Tap the mic below and start speaking — Aria will reply by voice in real-time.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-[var(--foreground)]/40">
+                {["Speech-to-Speech", "Auto grammar tips", "Native accent"].map((t) => (
+                  <span key={t} className="px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] rounded-full">{t}</span>
+                ))}
               </div>
             </div>
-          )}
+          ) : (
+            <>
+              {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
 
-          {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
-
-          {streamingText && (
-            <div className="flex justify-start">
-              <div className="max-w-[78%] space-y-1">
-                <p className="text-[11px] font-semibold text-stone-400 px-1">Aria</p>
-                <div className="px-4 py-2.5 rounded-[18px] rounded-tl-sm bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-sm leading-relaxed text-stone-800 shadow-sm">
-                  {streamingText}
-                  <span className="inline-block w-1 h-4 bg-primary-400 ml-0.5 animate-pulse rounded" />
+              {streamingText && (
+                <div className="flex gap-3 my-3 justify-start">
+                  <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1 shadow-sm">
+                    AI
+                  </div>
+                  <div className="max-w-[78%]">
+                    <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-sm leading-relaxed text-[var(--foreground)] shadow-sm">
+                      {streamingText}
+                      <span className="inline-block w-1 h-4 bg-primary-400 ml-0.5 animate-pulse rounded" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+              <div ref={bottomRef} />
+            </>
           )}
-          <div ref={bottomRef} />
         </div>
 
-        {/* Error toast */}
+        {/* Error banner */}
         {error && (
-          <div className="mb-3 px-4 py-2.5 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600 flex items-center justify-between shrink-0">
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-600 font-bold">×</button>
+          <div className="mb-3 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 dark:text-red-400 flex justify-between items-center shrink-0">
+            <span className="font-semibold">{error}</span>
+            <button onClick={() => setError(null)} className="ml-2 p-0.5 hover:text-red-800 dark:hover:text-red-300">
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         )}
 
-        {/* Controls */}
+        {/* Mic controls — bottom panel */}
         <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] shadow-sm px-6 py-5 flex flex-col items-center gap-4 shrink-0">
           <StateIndicator state={voiceState} />
+
           <MicButton
             state={voiceState}
             onStart={startListening}
             onStop={stopListening}
             onInterrupt={interrupt}
           />
-          <p className="text-[11px] text-stone-400">
-            {voiceState === "idle" && "Tap to start · auto-stops on silence"}
+
+          <p className="text-[11px] text-[var(--foreground)]/40 font-medium">
+            {voiceState === "idle"      && "Tap to start · auto-stops on silence"}
             {voiceState === "listening" && "Recording… tap to send early"}
             {(voiceState === "thinking" || voiceState === "speaking") && "Tap to interrupt Aria"}
           </p>

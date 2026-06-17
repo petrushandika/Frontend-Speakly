@@ -22,6 +22,7 @@ export interface VoiceSession {
 interface UseVoiceChatOptions {
   accent?: string;
   onError?: (msg: string) => void;
+  mode?: string;
 }
 
 const SESSIONS_KEY   = "speakly-voice-sessions";
@@ -55,7 +56,7 @@ function saveSessions(sessions: VoiceSession[]) {
   } catch {}
 }
 
-export function useVoiceChat({ accent = "american", onError }: UseVoiceChatOptions = {}) {
+export function useVoiceChat({ accent = "american", onError, mode = "free_talk" }: UseVoiceChatOptions = {}) {
   const [voiceState, setVoiceState]       = useState<VoiceState>("idle");
   const [sessions, setSessions]           = useState<VoiceSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
@@ -273,6 +274,7 @@ export function useVoiceChat({ accent = "american", onError }: UseVoiceChatOptio
         message: userText,
         history: historyRef.current.slice(-10),
         voiceMode: true,
+        mode,
       }),
       signal: abortRef.current.signal,
     });

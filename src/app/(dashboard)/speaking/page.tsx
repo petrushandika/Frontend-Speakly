@@ -33,12 +33,12 @@ interface WordResult {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const THEMES: { id: Theme; label: string; icon: React.ElementType; color: string; desc: string }[] = [
-  { id: "business",    label: "Business",    icon: Zap,          color: "bg-blue-50 border-blue-200 text-blue-700",   desc: "Professional scenarios" },
-  { id: "technology",  label: "Technology",  icon: Cpu,          color: "bg-primary-50 border-primary-200 text-primary-700", desc: "Tech & innovation" },
-  { id: "travel",      label: "Travel",      icon: Globe,        color: "bg-emerald-50 border-emerald-200 text-emerald-700", desc: "Exploration & culture" },
-  { id: "daily_life",  label: "Daily Life",  icon: Coffee,       color: "bg-amber-50 border-amber-200 text-amber-700", desc: "Everyday situations" },
-  { id: "science",     label: "Science",     icon: FlaskConical, color: "bg-cyan-50 border-cyan-200 text-cyan-700",   desc: "Discovery & research" },
-  { id: "culture",     label: "Culture",     icon: Palette,      color: "bg-pink-50 border-pink-200 text-pink-700",   desc: "Arts & traditions" },
+  { id: "business",    label: "Business",    icon: Zap,          color: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400",   desc: "Professional scenarios" },
+  { id: "technology",  label: "Technology",  icon: Cpu,          color: "bg-primary-50 dark:bg-primary-900/30 border-primary-200 text-primary-700 dark:text-primary-300", desc: "Tech & innovation" },
+  { id: "travel",      label: "Travel",      icon: Globe,        color: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400", desc: "Exploration & culture" },
+  { id: "daily_life",  label: "Daily Life",  icon: Coffee,       color: "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400", desc: "Everyday situations" },
+  { id: "science",     label: "Science",     icon: FlaskConical, color: "bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800 text-cyan-700 dark:text-cyan-400",   desc: "Discovery & research" },
+  { id: "culture",     label: "Culture",     icon: Palette,      color: "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800 text-pink-700 dark:text-pink-400",   desc: "Arts & traditions" },
 ];
 
 const PARAGRAPH_OPTIONS = [
@@ -84,22 +84,22 @@ function SelectStep({
   isGenerating: boolean;
 }) {
   return (
-    <div className="w-full space-y-8 py-4">
+    <div className="w-full space-y-5 sm:space-y-8 py-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 flex items-center justify-center shrink-0">
           <BookOpen className="w-5 h-5 text-primary-600" />
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-stone-900">Reading Aloud Practice</h1>
-          <p className="text-sm text-stone-500">AI generates a passage — you read it aloud, we score your pronunciation</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg sm:text-xl font-bold text-[var(--foreground)]">Reading Aloud Practice</h1>
+          <p className="text-xs sm:text-sm text-[var(--foreground)]/55 line-clamp-2">AI generates a passage — you read it aloud, we score your pronunciation</p>
         </div>
       </div>
 
       {/* Theme picker */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Choose a theme</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Choose a theme</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {THEMES.map((t) => {
             const Icon = t.icon;
             const active = theme === t.id;
@@ -107,18 +107,18 @@ function SelectStep({
               <button
                 key={t.id}
                 onClick={() => setTheme(t.id)}
-                className={`flex items-start gap-3 p-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                className={`flex items-start gap-2.5 p-3 rounded-2xl border-2 text-left transition-all cursor-pointer ${
                   active
-                    ? "border-primary-500 bg-primary-50 shadow-sm"
-                    : "border-transparent bg-white hover:border-slate-200 hover:shadow-sm"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 shadow-sm"
+                    : "border-transparent bg-[var(--surface-strong)] hover:border-[var(--line)] hover:shadow-sm"
                 }`}
               >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${t.color}`}>
-                  <Icon className="w-4 h-4" />
+                <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 border ${t.color}`}>
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-sm font-bold ${active ? "text-primary-700" : "text-stone-700"}`}>{t.label}</p>
-                  <p className="text-[11px] text-stone-400 mt-0.5">{t.desc}</p>
+                  <p className={`text-xs sm:text-sm font-bold ${active ? "text-primary-700 dark:text-primary-300" : "text-[var(--foreground)]/80"}`}>{t.label}</p>
+                  <p className="text-[10px] sm:text-[11px] text-[var(--foreground)]/40 mt-0.5">{t.desc}</p>
                 </div>
               </button>
             );
@@ -128,7 +128,7 @@ function SelectStep({
 
       {/* Length picker */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Passage length</p>
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Passage length</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
           {PARAGRAPH_OPTIONS.map((opt) => {
             const active = paragraphs === opt.value;
@@ -138,12 +138,12 @@ function SelectStep({
                 onClick={() => setParagraphs(opt.value)}
                 className={`px-4 py-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
                   active
-                    ? "border-primary-500 bg-primary-50"
-                    : "border-transparent bg-white hover:border-slate-200"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
+                    : "border-transparent bg-[var(--surface-strong)] hover:border-[var(--line)]"
                 }`}
               >
-                <p className={`text-sm font-bold ${active ? "text-primary-700" : "text-stone-700"}`}>{opt.label}</p>
-                <p className="text-[11px] text-stone-400 mt-0.5">{opt.sub}</p>
+                <p className={`text-sm font-bold ${active ? "text-primary-700 dark:text-primary-300" : "text-[var(--foreground)]/80"}`}>{opt.label}</p>
+                <p className="text-[11px] text-[var(--foreground)]/40 mt-0.5">{opt.sub}</p>
               </button>
             );
           })}
@@ -237,27 +237,27 @@ function ReadingStep({
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-1">Read Aloud</p>
-          <h2 className="text-xl font-bold text-stone-900">{text.title}</h2>
-          <p className="text-xs text-stone-400 mt-0.5">{text.wordCount} words · CEFR {text.cefrLevel}</p>
+          <h2 className="text-xl font-bold text-[var(--foreground)]">{text.title}</h2>
+          <p className="text-xs text-[var(--foreground)]/40 mt-0.5">{text.wordCount} words · CEFR {text.cefrLevel}</p>
         </div>
         <button
           onClick={onReset}
-          className="text-xs font-semibold text-stone-400 hover:text-stone-700 bg-white border border-slate-100 hover:border-slate-200 px-3 py-1.5 rounded-xl transition-all"
+          className="text-xs font-semibold text-[var(--foreground)]/40 hover:text-[var(--foreground)]/80 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-[var(--line)] px-3 py-1.5 rounded-xl transition-all"
         >
           New text
         </button>
       </div>
 
       {/* Reading tip */}
-      <div className="flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl">
+      <div className="flex items-start gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl">
         <Lightbulb className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-xs text-amber-700 font-medium leading-relaxed">{text.readingTips}</p>
+        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-relaxed">{text.readingTips}</p>
       </div>
 
       {/* Passage */}
-      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
+      <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-6 shadow-sm space-y-4">
         {text.paragraphs.map((p, i) => (
-          <p key={i} className="text-stone-800 leading-8 text-base tracking-wide">
+          <p key={i} className="text-[var(--foreground)] leading-8 text-base tracking-wide">
             {p}
           </p>
         ))}
@@ -266,14 +266,14 @@ function ReadingStep({
       {/* Key vocabulary */}
       {text.keyVocabulary.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Key Vocabulary</p>
+          <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Key Vocabulary</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {text.keyVocabulary.map((v) => (
-              <div key={v.word} className="flex items-start gap-3 p-3 bg-white border border-slate-100 rounded-xl">
+              <div key={v.word} className="flex items-start gap-3 p-3 bg-[var(--surface-strong)] border border-[var(--line)] rounded-xl">
                 <BookMarked className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <p className="font-bold text-stone-800 text-sm">{v.word} <span className="text-xs font-normal text-stone-400">{v.ipa}</span></p>
-                  <p className="text-xs text-stone-500 mt-0.5">{v.definition}</p>
+                  <p className="font-bold text-[var(--foreground)] text-sm">{v.word} <span className="text-xs font-normal text-[var(--foreground)]/40">{v.ipa}</span></p>
+                  <p className="text-xs text-[var(--foreground)]/55 mt-0.5">{v.definition}</p>
                   <p className="text-xs text-primary-600 font-semibold mt-0.5">{v.indonesian}</p>
                 </div>
               </div>
@@ -284,14 +284,14 @@ function ReadingStep({
 
       {/* Error */}
       {error && (
-        <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+        <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600">
           {error}
         </div>
       )}
 
       {/* Record controls */}
-      <div className="bg-white border border-slate-100 rounded-2xl p-5 flex flex-col items-center gap-4 shadow-sm">
-        <p className="text-sm font-semibold text-stone-700">
+      <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 flex flex-col items-center gap-4 shadow-sm">
+        <p className="text-sm font-semibold text-[var(--foreground)]/80">
           {isProcessing ? "Processing your recording…" : isRecording ? "Recording — read the passage above" : "Press the mic and read the passage aloud"}
         </p>
         <button
@@ -299,7 +299,7 @@ function ReadingStep({
           disabled={isProcessing}
           className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2 ${
             isProcessing
-              ? "bg-slate-100 cursor-not-allowed focus:ring-slate-200"
+              ? "bg-[var(--surface-strong)] cursor-not-allowed focus:ring-slate-200"
               : isRecording
                 ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 scale-110"
                 : "bg-primary-600 hover:bg-primary-700 focus:ring-primary-300"
@@ -307,14 +307,14 @@ function ReadingStep({
         >
           {isRecording && <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-40" />}
           {isProcessing ? (
-            <Loader2 className="w-8 h-8 text-stone-400 animate-spin" />
+            <Loader2 className="w-8 h-8 text-[var(--foreground)]/40 animate-spin" />
           ) : isRecording ? (
             <MicOff className="w-8 h-8 text-white" />
           ) : (
             <Mic className="w-8 h-8 text-white" />
           )}
         </button>
-        <p className="text-xs text-stone-400">
+        <p className="text-xs text-[var(--foreground)]/40">
           {isRecording ? "Tap to stop recording" : isProcessing ? "Please wait…" : "Tap to start recording"}
         </p>
       </div>
@@ -343,13 +343,13 @@ function ResultStep({
   const incorrect = wordResults.filter((r) => !r.correct).length;
 
   const scoreColor =
-    score >= 85 ? "text-emerald-600" :
-    score >= 65 ? "text-amber-600"  :
+    score >= 85 ? "text-emerald-600 dark:text-emerald-400" :
+    score >= 65 ? "text-amber-600 dark:text-amber-400"  :
     "text-red-600";
   const scoreBg =
-    score >= 85 ? "bg-emerald-50 border-emerald-200" :
-    score >= 65 ? "bg-amber-50 border-amber-200" :
-    "bg-red-50 border-red-200";
+    score >= 85 ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700" :
+    score >= 65 ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700" :
+    "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800";
 
   const scoreLabel =
     score >= 90 ? "Excellent! Near-native accuracy" :
@@ -360,39 +360,39 @@ function ResultStep({
   return (
     <div className="w-full space-y-6">
       {/* Score card */}
-      <div className={`rounded-2xl border p-6 text-center ${scoreBg}`}>
+      <div className={`rounded-2xl border p-4 sm:p-6 text-center ${scoreBg}`}>
         <div className="flex items-center justify-center gap-2 mb-2">
           <Star className={`w-5 h-5 ${scoreColor}`} />
-          <p className="text-xs font-bold uppercase tracking-widest text-stone-500">Pronunciation Score</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-[var(--foreground)]/55">Pronunciation Score</p>
         </div>
-        <p className={`text-6xl font-black ${scoreColor}`}>{score}<span className="text-2xl font-bold text-stone-400">%</span></p>
+        <p className={`text-4xl sm:text-6xl font-black ${scoreColor}`}>{score}<span className="text-xl sm:text-xl sm:text-2xl font-bold text-[var(--foreground)]/40">%</span></p>
         <p className={`text-sm font-semibold mt-2 ${scoreColor}`}>{scoreLabel}</p>
 
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-1.5 text-sm">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span className="font-bold text-emerald-700">{correct}</span>
-            <span className="text-stone-500">correct</span>
+            <span className="font-bold text-emerald-700 dark:text-emerald-400">{correct}</span>
+            <span className="text-[var(--foreground)]/55">correct</span>
           </div>
           <div className="flex items-center gap-1.5 text-sm">
             <XCircle className="w-4 h-4 text-red-500" />
-            <span className="font-bold text-red-700">{incorrect}</span>
-            <span className="text-stone-500">incorrect</span>
+            <span className="font-bold text-red-700 dark:text-red-400">{incorrect}</span>
+            <span className="text-[var(--foreground)]/55">incorrect</span>
           </div>
         </div>
       </div>
 
       {/* Word-by-word result */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Word-by-word result</p>
-        <div className="bg-white border border-slate-100 rounded-2xl p-5 leading-9 shadow-sm">
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Word-by-word result</p>
+        <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 leading-9 shadow-sm">
           {wordResults.map((r, i) => (
             <span
               key={i}
               className={`inline-block mr-1 px-1 rounded font-medium ${
                 r.correct
-                  ? "text-emerald-700 bg-emerald-50"
-                  : "text-red-700 bg-red-50 line-through decoration-red-400"
+                  ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50"
+                  : "text-red-700 dark:text-red-400 bg-red-50 line-through decoration-red-400"
               }`}
               title={r.correct ? "Correct!" : `Expected: "${r.expected}"`}
             >
@@ -401,7 +401,7 @@ function ResultStep({
           ))}
         </div>
         {incorrect > 0 && (
-          <p className="text-xs text-stone-400 flex items-center gap-1.5">
+          <p className="text-xs text-[var(--foreground)]/40 flex items-center gap-1.5">
             <XCircle className="w-3.5 h-3.5 text-red-400" />
             Red strikethrough words were not recognized — try pronouncing them more clearly
           </p>
@@ -410,8 +410,8 @@ function ResultStep({
 
       {/* Your transcript */}
       <div className="space-y-2">
-        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">What we heard</p>
-        <div className="bg-stone-50 border border-slate-100 rounded-xl p-4 text-sm text-stone-600 leading-relaxed italic">
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">What we heard</p>
+        <div className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 text-sm text-[var(--foreground)]/70 leading-relaxed italic">
           {transcript || "No speech detected"}
         </div>
       </div>
@@ -420,7 +420,7 @@ function ResultStep({
       <div className="flex gap-3">
         <button
           onClick={onTryAgain}
-          className="flex-1 py-3.5 bg-white border border-slate-200 hover:border-primary-300 hover:bg-primary-50 text-stone-700 hover:text-primary-700 font-bold rounded-2xl transition-all"
+          className="flex-1 py-3.5 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 dark:bg-primary-900/30 text-[var(--foreground)]/80 hover:text-primary-700 dark:hover:text-primary-300 dark:text-primary-300 font-bold rounded-2xl transition-all"
         >
           Retry
         </button>
@@ -474,9 +474,9 @@ export default function SpeakingPage() {
   }
 
   return (
-    <div className="w-full p-6 md:p-8">
+    <div className="w-full p-3 md:p-8">
       {/* Progress indicator */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex items-center gap-2 mb-5 sm:mb-8">
         {(["select", "read", "result"] as Step[]).map((s, i) => {
           const stepIndex   = ["select", "read", "result"].indexOf(step);
           const thisIndex   = i;
@@ -486,14 +486,14 @@ export default function SpeakingPage() {
           return (
             <div key={s} className="flex items-center gap-2">
               <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
-                isCurrent ? "bg-primary-100 text-primary-700" :
-                isDone    ? "bg-emerald-100 text-emerald-700" :
-                "bg-slate-100 text-stone-400"
+                isCurrent ? "bg-primary-100 text-primary-700 dark:text-primary-300" :
+                isDone    ? "bg-emerald-100 text-emerald-700 dark:text-emerald-400" :
+                "bg-[var(--surface-strong)] text-[var(--foreground)]/40"
               }`}>
                 {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span>{i + 1}</span>}
                 {labels[i]}
               </div>
-              {i < 2 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+              {i < 2 && <ChevronRight className="w-3.5 h-3.5 text-[var(--foreground)]/35 shrink-0" />}
             </div>
           );
         })}
@@ -501,7 +501,7 @@ export default function SpeakingPage() {
 
       {/* Error banner */}
       {generateMutation.error && (
-        <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+        <div className="mb-6 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600">
           {generateMutation.error.message}
         </div>
       )}

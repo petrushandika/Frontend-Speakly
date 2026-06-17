@@ -88,35 +88,35 @@ function TopBar() {
       <div className="relative">
         <button
           onClick={() => setDropdownOpen((v) => !v)}
-          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-cream-100 transition-colors border border-transparent hover:border-cream-200"
+          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-[var(--surface)] transition-colors border border-transparent hover:border-[var(--line)]"
         >
           <div className="w-7 h-7 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
             {profile?.avatarUrl
               ? <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
               : initials}
           </div>
-          <span className="text-sm font-semibold text-stone-800">
+          <span className="text-sm font-semibold text-[var(--foreground)]">
             {profile?.displayName ?? "…"}
           </span>
-          <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+          <ChevronDown className="w-3.5 h-3.5 text-[var(--foreground)]/40" />
         </button>
 
         {dropdownOpen && (
           <>
             <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
             <div className="absolute right-0 top-full mt-2 w-52 bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-stone-100">
-                <p className="text-xs font-bold text-stone-800 truncate">{profile?.displayName}</p>
-                <p className="text-[10px] text-stone-400 mt-0.5">{profile?.cefrLevel} · {profile?.goal}</p>
+              <div className="px-4 py-2.5 border-b border-[var(--line)]">
+                <p className="text-xs font-bold text-[var(--foreground)] truncate">{profile?.displayName}</p>
+                <p className="text-[10px] text-[var(--foreground)]/50 mt-0.5">{profile?.cefrLevel} · {profile?.goal}</p>
               </div>
               <Link
                 href="/settings"
                 onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--foreground)]/70 hover:bg-[var(--surface)] transition-colors"
               >
                 <Settings className="w-4 h-4" /> Settings
               </Link>
-              <div className="border-t border-stone-100 mt-1">
+              <div className="border-t border-[var(--line)] mt-1">
                 <LogoutButton compact />
               </div>
             </div>
@@ -137,18 +137,18 @@ function SidebarStats() {
       <div className="grid grid-cols-3 gap-1.5">
         <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--highlight)]/45 rounded-xl border border-[var(--line)]">
           <Zap className="w-3.5 h-3.5 text-amber-500" />
-          <p className="text-xs font-black text-stone-800">{profile?.xpTotal?.toLocaleString() ?? 0}</p>
-          <p className="text-[9px] text-stone-400 font-semibold uppercase tracking-wider">XP</p>
+          <p className="text-xs font-black text-[var(--foreground)]">{profile?.xpTotal?.toLocaleString() ?? 0}</p>
+          <p className="text-[9px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">XP</p>
         </div>
         <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--pink)]/35 rounded-xl border border-[var(--line)]">
           <Flame className="w-3.5 h-3.5 text-orange-400" />
-          <p className="text-xs font-black text-stone-800">{profile?.streakDays ?? 0}</p>
-          <p className="text-[9px] text-stone-400 font-semibold uppercase tracking-wider">Streak</p>
+          <p className="text-xs font-black text-[var(--foreground)]">{profile?.streakDays ?? 0}</p>
+          <p className="text-[9px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">Streak</p>
         </div>
         <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--yellow)]/40 rounded-xl border border-[var(--line)]">
           <Layers className="w-3.5 h-3.5 text-primary-500" />
-          <p className="text-xs font-black text-stone-800">{dueCount?.count ?? 0}</p>
-          <p className="text-[9px] text-stone-400 font-semibold uppercase tracking-wider">Due</p>
+          <p className="text-xs font-black text-[var(--foreground)]">{dueCount?.count ?? 0}</p>
+          <p className="text-[9px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">Due</p>
         </div>
       </div>
     </div>
@@ -162,7 +162,7 @@ function NavItems({ pathname, onClick }: { pathname: string; onClick?: () => voi
     <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
       {NAV_SECTIONS.map((section) => (
         <div key={section.label} className="space-y-0.5">
-          <p className="text-[9px] font-black uppercase tracking-widest text-stone-400 px-3 pb-1">
+          <p className="text-[9px] font-black uppercase tracking-widest text-[var(--foreground)]/40 px-3 pb-1">
             {section.label}
           </p>
           {section.items.map((item) => {
@@ -175,11 +175,11 @@ function NavItems({ pathname, onClick }: { pathname: string; onClick?: () => voi
                 onClick={onClick}
                 className={`flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-150 ${
                   active
-                    ? "bg-primary-100 border border-[var(--line)] text-primary-800"
-                    : "text-stone-600 hover:bg-[#ede6d5] hover:text-stone-900 border border-transparent"
+                    ? "bg-primary-100 dark:bg-primary-900/40 border border-[var(--line)] text-primary-800 dark:text-primary-300"
+                    : "text-[var(--foreground)]/60 hover:bg-[var(--surface)] hover:text-[var(--foreground)] border border-transparent"
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-primary-600" : "text-stone-400"}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-primary-600" : "text-[var(--foreground)]/40"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -213,12 +213,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
           </div>
-          <span className="text-base font-black tracking-tight text-stone-900">Speakly</span>
+          <span className="text-base font-black tracking-tight text-[var(--foreground)]">Speakly</span>
         </div>
 
         <NavItems pathname={pathname} />
         <SidebarStats />
-        <div className="p-3 border-t border-[var(--line)] shrink-0 bg-[#efe7d4]">
+        <div className="p-3 border-t border-[var(--line)] shrink-0 bg-[var(--surface)]">
           <LogoutButton />
         </div>
       </aside>
@@ -244,18 +244,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </div>
-            <span className="text-base font-black tracking-tight text-stone-900">Speakly</span>
+            <span className="text-base font-black tracking-tight text-[var(--foreground)]">Speakly</span>
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-stone-400 hover:bg-[#efe9d9]"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--foreground)]/50 hover:bg-[var(--surface)]"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
         <NavItems pathname={pathname} onClick={() => setOpen(false)} />
         <SidebarStats />
-        <div className="p-3 border-t border-[var(--line)] shrink-0 bg-[#efe7d4]">
+        <div className="p-3 border-t border-[var(--line)] shrink-0 bg-[var(--surface)]">
           <LogoutButton />
         </div>
       </aside>
@@ -269,11 +269,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOpen(true)}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-stone-500 hover:bg-[#efe9d9]"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--foreground)]/50 hover:bg-[var(--surface)]"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="text-base font-black text-stone-900">Speakly</span>
+            <span className="text-base font-black text-[var(--foreground)]">Speakly</span>
           </div>
         </header>
 
@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all ${
-                  active ? "text-primary-600" : "text-stone-400 hover:text-stone-700"
+                  active ? "text-primary-600" : "text-[var(--foreground)]/40 hover:text-[var(--foreground)]/80"
                 }`}
               >
                 <Icon className="w-5 h-5" />

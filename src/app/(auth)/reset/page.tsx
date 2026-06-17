@@ -51,12 +51,12 @@ export default function ResetPasswordPage() {
 
         <div className="space-y-6 z-10 max-w-lg">
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">Secure your account.</h1>
-          <p className="text-stone-400 leading-relaxed text-base">
+          <p className="text-[var(--foreground)]/40 leading-relaxed text-base">
             Create a new, strong password with at least 8 characters combining letters, numbers, and special characters.
           </p>
         </div>
 
-        <div className="text-stone-600 text-xs z-10 font-medium">
+        <div className="text-[var(--foreground)]/70 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -67,18 +67,18 @@ export default function ResetPasswordPage() {
           <div className="text-center md:hidden mb-6">
             <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">{LOGO_SVG}</div>
             <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
-            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
+            <p className="text-[var(--foreground)]/55 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Set New Password</h2>
-            <p className="text-sm text-stone-500 mt-2">Update your account password below.</p>
+            <p className="text-sm text-[var(--foreground)]/55 mt-2">Update your account password below.</p>
           </div>
 
           <div className="sk-panel p-8 bg-[var(--surface-strong)]">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                   New Password
                 </label>
                 <div className="relative">
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 rounded-lg hover:bg-[var(--surface-strong)] transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -116,7 +116,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 rounded-lg hover:bg-[var(--surface-strong)] transition-colors"
                   >
                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
               </div>
 
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">
                   {error}
                 </p>
               )}

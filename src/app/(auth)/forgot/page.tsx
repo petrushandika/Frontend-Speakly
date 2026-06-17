@@ -52,12 +52,12 @@ export default function ForgotPasswordPage() {
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Recover your account.
           </h1>
-          <p className="text-stone-400 leading-relaxed text-base">
+          <p className="text-[var(--foreground)]/40 leading-relaxed text-base">
             Don&apos;t worry, it happens! Enter your email address and we&apos;ll send you a password reset link.
           </p>
         </div>
 
-        <div className="text-stone-600 text-xs z-10 font-medium">
+        <div className="text-[var(--foreground)]/70 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -68,27 +68,27 @@ export default function ForgotPasswordPage() {
           <div className="text-center md:hidden mb-6">
             <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">{LOGO_SVG}</div>
             <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
-            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
+            <p className="text-[var(--foreground)]/55 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Reset Password</h2>
-            <p className="text-sm text-stone-500 mt-2">Enter your email and we&apos;ll send you a reset link.</p>
+            <p className="text-sm text-[var(--foreground)]/55 mt-2">Enter your email and we&apos;ll send you a reset link.</p>
           </div>
 
           <div className="sk-panel p-8 bg-[var(--surface-strong)]">
             {sent ? (
               <div className="text-center space-y-4 py-4">
-                <div className="w-16 h-16 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center text-3xl mx-auto border border-primary-100">
+                <div className="w-16 h-16 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 flex items-center justify-center text-3xl mx-auto border border-primary-100 dark:border-primary-800">
                   ✉️
                 </div>
-                <h3 className="text-lg font-bold text-stone-900">Email Sent!</h3>
-                <p className="text-sm text-stone-500 leading-relaxed">
+                <h3 className="text-lg font-bold text-[var(--foreground)]">Email Sent!</h3>
+                <p className="text-sm text-[var(--foreground)]/55 leading-relaxed">
                   Please check your inbox for the password reset confirmation link.
                 </p>
                 <Link
                   href="/login"
-                  className="inline-block mt-4 px-6 py-2.5 bg-[#1f1d19] hover:bg-[#161411] text-white text-sm font-bold rounded-full transition-all shadow-sm active:scale-95"
+                  className="inline-block mt-4 px-6 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-bold rounded-full transition-all shadow-sm active:scale-95"
                 >
                   Back to Sign In
                 </Link>
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Email Address
                   </label>
                   <input
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 {error && (
-                  <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                  <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">
                     {error}
                   </p>
                 )}
@@ -127,8 +127,8 @@ export default function ForgotPasswordPage() {
           </div>
 
           {!sent && (
-            <p className="text-center text-sm text-stone-500">
-              <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
+            <p className="text-center text-sm text-[var(--foreground)]/55">
+              <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 dark:text-primary-300 hover:underline">
                 Back to Sign In
               </Link>
             </p>

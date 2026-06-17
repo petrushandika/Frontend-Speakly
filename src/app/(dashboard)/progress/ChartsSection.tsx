@@ -17,17 +17,17 @@ const ERROR_COLOR: Record<string, string> = {
 
 function TrendBadge({ trend }: { trend: "improving" | "stable" | "needs_attention" }) {
   if (trend === "improving") return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400">
       <TrendingDown className="w-3 h-3" /> Improving
     </span>
   );
   if (trend === "needs_attention") return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-red-50 border border-red-200 text-red-700">
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400">
       <TrendingUp className="w-3 h-3" /> More errors
     </span>
   );
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-stone-50 border border-slate-200 text-stone-500">
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)]/55">
       <Minus className="w-3 h-3" /> Stable
     </span>
   );
@@ -52,14 +52,14 @@ export default function ChartsSection({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       {/* Grammar Diagnostics */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+      <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center shrink-0">
             <AlertTriangle className="w-4 h-4 text-rose-500" />
           </div>
           <div>
-            <h2 className="font-bold text-stone-900 text-sm">Grammar Diagnostics</h2>
-            <p className="text-xs text-stone-400 mt-0.5">Error frequency by category</p>
+            <h2 className="font-bold text-[var(--foreground)] text-sm">Grammar Diagnostics</h2>
+            <p className="text-xs text-[var(--foreground)]/40 mt-0.5">Error frequency by category</p>
           </div>
         </div>
         {errorData.length > 0 ? (
@@ -84,22 +84,22 @@ export default function ChartsSection({
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 h-[200px] text-slate-300">
+          <div className="flex flex-col items-center justify-center gap-2 h-[200px] text-[var(--foreground)]/35">
             <BarChart2 className="w-10 h-10" />
-            <p className="text-xs text-stone-400 text-center">Chat with Aria to see your error patterns</p>
+            <p className="text-xs text-[var(--foreground)]/40 text-center">Chat with Aria to see your error patterns</p>
           </div>
         )}
       </div>
 
       {/* Skills Radar */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+      <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
             <Layers className="w-4 h-4 text-primary-600" />
           </div>
           <div>
-            <h2 className="font-bold text-stone-900 text-sm">Skills Balance</h2>
-            <p className="text-xs text-stone-400 mt-0.5">Across 6 core skill areas</p>
+            <h2 className="font-bold text-[var(--foreground)] text-sm">Skills Balance</h2>
+            <p className="text-xs text-[var(--foreground)]/40 mt-0.5">Across 6 core skill areas</p>
           </div>
         </div>
         <div className="w-full h-[200px]">
@@ -114,15 +114,15 @@ export default function ChartsSection({
       </div>
 
       {/* Error Trend */}
-      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-4">
+      <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-3xl p-6 shadow-sm space-y-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
-              <TrendingDown className="w-4 h-4 text-emerald-600" />
+              <TrendingDown className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h2 className="font-bold text-stone-900 text-sm">Error Trend</h2>
-              <p className="text-xs text-stone-400 mt-0.5">Last 14 days</p>
+              <h2 className="font-bold text-[var(--foreground)] text-sm">Error Trend</h2>
+              <p className="text-xs text-[var(--foreground)]/40 mt-0.5">Last 14 days</p>
             </div>
           </div>
           {analytics?.trend && (
@@ -145,22 +145,22 @@ export default function ChartsSection({
               </ResponsiveContainer>
             </div>
             {analytics && (
-              <div className="flex gap-4 text-[11px] text-stone-500 border-t border-slate-100 pt-3">
+              <div className="flex gap-4 text-[11px] text-[var(--foreground)]/55 border-t border-[var(--line)] pt-3">
                 <div>
-                  <span className="text-stone-400">This week</span>
-                  <p className="font-bold text-stone-800">{analytics.totalThisWeek}</p>
+                  <span className="text-[var(--foreground)]/40">This week</span>
+                  <p className="font-bold text-[var(--foreground)]">{analytics.totalThisWeek}</p>
                 </div>
                 <div>
-                  <span className="text-stone-400">Last week</span>
-                  <p className="font-bold text-stone-800">{analytics.totalLastWeek}</p>
+                  <span className="text-[var(--foreground)]/40">Last week</span>
+                  <p className="font-bold text-[var(--foreground)]">{analytics.totalLastWeek}</p>
                 </div>
               </div>
             )}
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 h-[160px] text-slate-300">
+          <div className="flex flex-col items-center justify-center gap-2 h-[160px] text-[var(--foreground)]/35">
             <TrendingDown className="w-10 h-10" />
-            <p className="text-xs text-stone-400 text-center">No trend data yet</p>
+            <p className="text-xs text-[var(--foreground)]/40 text-center">No trend data yet</p>
           </div>
         )}
       </div>

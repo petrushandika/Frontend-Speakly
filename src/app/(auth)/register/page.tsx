@@ -128,7 +128,7 @@ export default function RegisterPage() {
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Start your journey to fluent English.
           </h1>
-          <p className="text-stone-400 leading-relaxed text-base">
+          <p className="text-[var(--foreground)]/40 leading-relaxed text-base">
             Personalize your learning goals, practice speaking with AI, and master pronunciation with real-time feedback.
           </p>
 
@@ -150,7 +150,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Bottom footer */}
-        <div className="text-stone-600 text-xs z-10 font-medium">
+        <div className="text-[var(--foreground)]/70 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -166,7 +166,7 @@ export default function RegisterPage() {
               </svg>
             </div>
             <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
-            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
+            <p className="text-[var(--foreground)]/55 text-sm mt-1">Practice English with AI</p>
           </div>
 
           {/* Heading */}
@@ -175,11 +175,11 @@ export default function RegisterPage() {
               <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">
                 {step === 1 ? "Sign Up" : "Personalize"}
               </h2>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-primary-100 text-primary-700 rounded-full">
+              <span className="text-xs font-semibold px-2.5 py-1 bg-primary-100 text-primary-700 dark:text-primary-300 rounded-full">
                 Step {step} of 2
               </span>
             </div>
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-[var(--foreground)]/70">
               {step === 1 
                 ? "Let's create your account to get started." 
                 : "Help us tailor Speakly's AI lessons to your level."}
@@ -190,13 +190,13 @@ export default function RegisterPage() {
             {/* Step indicators */}
             <div className="flex items-center gap-2 mb-6">
               <div className="h-1.5 flex-1 rounded-full bg-primary-600" />
-              <div className={`h-1.5 flex-1 rounded-full transition-colors ${step === 2 ? "bg-primary-600" : "bg-slate-200"}`} />
+              <div className={`h-1.5 flex-1 rounded-full transition-colors ${step === 2 ? "bg-primary-600" : "bg-[var(--line)]"}`} />
             </div>
 
             {step === 1 ? (
               <form onSubmit={handleStep1} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-1.5">
                     Your Name
                   </label>
                   <input
@@ -205,11 +205,11 @@ export default function RegisterPage() {
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
                     placeholder="John Doe"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -218,11 +218,11 @@ export default function RegisterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@example.com"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-1.5">
                     Password
                   </label>
                   <div className="relative">
@@ -232,12 +232,12 @@ export default function RegisterPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="Minimum 8 characters"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
+                      className="w-full px-4 py-3 rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-slate-100 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 rounded-lg hover:bg-[var(--surface-strong)] transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -245,7 +245,7 @@ export default function RegisterPage() {
                 </div>
 
                 {error && (
-                  <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">{error}</p>
                 )}
 
                 <button
@@ -258,7 +258,7 @@ export default function RegisterPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Current English Level
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -270,7 +270,7 @@ export default function RegisterPage() {
                         className={`py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
                           cefrLevel === level
                             ? "bg-primary-600 text-white border-primary-600 shadow-sm"
-                            : "border-slate-200 bg-stone-50/50 text-stone-600 hover:border-primary-400 hover:bg-white"
+                            : "border-[var(--line)] bg-[var(--surface)]/50 text-[var(--foreground)]/70 hover:border-primary-400 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
                         {level}
@@ -280,7 +280,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Main Goal
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -291,8 +291,8 @@ export default function RegisterPage() {
                         onClick={() => setGoal(g.value)}
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs border transition-all active:scale-[0.99] font-semibold ${
                           goal === g.value
-                            ? "bg-primary-50/50 border-primary-500 text-primary-700 shadow-sm"
-                            : "border-slate-200 bg-stone-50/20 text-stone-600 hover:border-primary-300 hover:bg-white"
+                            ? "bg-primary-50 dark:bg-primary-900/30/50 border-primary-500 text-primary-700 dark:text-primary-300 shadow-sm"
+                            : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
                         <span className="text-base shrink-0">{g.icon}</span>
@@ -303,7 +303,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Preferred Accent (Aria&apos;s Voice)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -314,11 +314,11 @@ export default function RegisterPage() {
                         onClick={() => setAccentPreference(a.value)}
                         className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-xs border transition-all active:scale-95 font-semibold ${
                           accentPreference === a.value
-                            ? "bg-primary-50/50 border-primary-500 text-primary-700 shadow-sm"
-                            : "border-slate-200 bg-stone-50/20 text-stone-600 hover:border-primary-300 hover:bg-white"
+                            ? "bg-primary-50 dark:bg-primary-900/30/50 border-primary-500 text-primary-700 dark:text-primary-300 shadow-sm"
+                            : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
-                        <span className="w-7 h-5 rounded text-[10px] font-black bg-slate-200 text-stone-600 flex items-center justify-center shrink-0">
+                        <span className="w-7 h-5 rounded text-[10px] font-black bg-[var(--line)] text-[var(--foreground)]/70 flex items-center justify-center shrink-0">
                           {a.abbr}
                         </span>
                         {a.label}
@@ -328,14 +328,14 @@ export default function RegisterPage() {
                 </div>
 
                 {error && (
-                  <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">{error}</p>
                 )}
 
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-3 border border-slate-200 text-sm text-stone-600 font-semibold rounded-xl hover:bg-stone-50 transition-all active:scale-95"
+                    className="flex-1 py-3 border border-[var(--line)] text-sm text-[var(--foreground)]/70 font-semibold rounded-xl hover:bg-[var(--surface)] transition-all active:scale-95"
                   >
                     Back
                   </button>
@@ -351,9 +351,9 @@ export default function RegisterPage() {
             )}
           </div>
 
-          <p className="text-center text-sm text-stone-500 mt-4">
+          <p className="text-center text-sm text-[var(--foreground)]/55 mt-4">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
+            <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 dark:text-primary-300 hover:underline">
               Sign in
             </Link>
           </p>

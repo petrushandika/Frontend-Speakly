@@ -23,12 +23,12 @@ export default function VerifyEmailPage() {
 
         <div className="space-y-6 z-10 max-w-lg">
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">Almost there!</h1>
-          <p className="text-stone-400 leading-relaxed text-base">
+          <p className="text-[var(--foreground)]/40 leading-relaxed text-base">
             We need to verify your email address to keep your learning progress secure.
           </p>
         </div>
 
-        <div className="text-stone-600 text-xs z-10 font-medium">
+        <div className="text-[var(--foreground)]/70 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -39,16 +39,16 @@ export default function VerifyEmailPage() {
           <div className="text-center md:hidden mb-6">
             <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">{LOGO_SVG}</div>
             <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
-            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
+            <p className="text-[var(--foreground)]/55 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div className="sk-panel p-8 bg-[var(--surface-strong)] space-y-6">
-            <div className="w-16 h-16 rounded-full bg-primary-50 flex items-center justify-center text-3xl mx-auto border border-primary-100 animate-pulse">
+            <div className="w-16 h-16 rounded-full bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center text-3xl mx-auto border border-primary-100 dark:border-primary-800 animate-pulse">
               📬
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-stone-900">Check your email</h2>
-              <p className="text-sm text-stone-500 leading-relaxed">
+              <h2 className="text-2xl font-bold text-[var(--foreground)]">Check your email</h2>
+              <p className="text-sm text-[var(--foreground)]/55 leading-relaxed">
                 We sent a confirmation link to your email. Click it to activate your account and start practicing.
               </p>
             </div>
