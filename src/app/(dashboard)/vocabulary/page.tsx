@@ -289,7 +289,11 @@ export default function VocabularyPage() {
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button
-                    onClick={() => addFlashcard.mutate({ front: activeWord.word, back: activeWord.definition, example: activeWord.example })}
+                    onClick={() => addFlashcard.mutate({ 
+                      front: activeWord.word, 
+                      back: activeWord.indonesian ? `${activeWord.indonesian} — ${activeWord.definition}` : activeWord.definition, 
+                      example: activeWord.example 
+                    })}
                     disabled={addedToFlashcard.has(activeWord.word)}
                     title={addedToFlashcard.has(activeWord.word) ? "Added" : "Add to flashcards"}
                     className={`p-2 rounded-lg border transition-colors ${addedToFlashcard.has(activeWord.word) ? "border-green-200 bg-green-50 text-green-600" : "border-slate-200 text-slate-400 hover:border-primary-400 hover:text-primary-600"}`}
@@ -419,7 +423,11 @@ export default function VocabularyPage() {
 
                   <div className="flex gap-2 shrink-0 items-start">
                     <button
-                      onClick={() => addFlashcard.mutate({ front: item.word, back: item.definition, example: item.example })}
+                      onClick={() => addFlashcard.mutate({ 
+                        front: item.word, 
+                        back: item.indonesian ? `${item.indonesian} — ${item.definition}` : item.definition, 
+                        example: item.example 
+                      })}
                       disabled={addedToFlashcard.has(item.word)}
                       title={addedToFlashcard.has(item.word) ? "Added to flashcards" : "Add to flashcards"}
                       className={`p-2 rounded-lg border transition-colors ${
