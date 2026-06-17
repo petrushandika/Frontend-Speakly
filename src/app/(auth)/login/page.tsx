@@ -41,7 +41,7 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
           Email Address
         </label>
         <div className="relative">
@@ -59,7 +59,7 @@ function LoginForm() {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500">
             Password
           </label>
           <Link href="/forgot-password" className="text-xs font-medium text-primary-600 hover:text-primary-700 hover:underline">
@@ -79,7 +79,7 @@ function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-slate-100 transition-colors"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -124,8 +124,12 @@ export default function LoginPage() {
 
         {/* Top brand */}
         <div className="flex items-center gap-2.5 z-10">
-          <span className="text-3xl">🗣️</span>
-          <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
+          <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center">
+            <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <span className="text-2xl font-black tracking-tight text-white">
             Speakly
           </span>
         </div>
@@ -135,12 +139,12 @@ export default function LoginPage() {
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Master English by speaking naturally.
           </h1>
-          <p className="text-indigo-100/90 leading-relaxed text-base">
+          <p className="text-stone-400 leading-relaxed text-base">
             Practice real-world conversations with Aria, your personal AI tutor, and receive dynamic, real-time grammar corrections.
           </p>
 
           {/* Interactive Graphic Card mockup */}
-          <div className="glass-panel rounded-2xl p-6 shadow-xl border-white/10 bg-white/10 text-white space-y-4 animate-float">
+          <div className="rounded-2xl p-6 shadow-xl border border-white/10 bg-white/10 text-white space-y-4 animate-float">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
               <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
@@ -160,7 +164,7 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom footer */}
-        <div className="text-indigo-200/50 text-xs z-10 font-medium">
+        <div className="text-stone-500 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -170,8 +174,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
-            <span className="text-4xl">🗣️</span>
-            <h2 className="text-3xl font-extrabold text-[var(--foreground)] mt-2">Speakly</h2>
+            <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
             <p className="text-stone-600 text-sm mt-1">Practice English with AI</p>
           </div>
 
@@ -190,7 +198,7 @@ export default function LoginPage() {
             </Suspense>
           </div>
 
-          <p className="text-center text-sm text-slate-500 mt-4">
+          <p className="text-center text-sm text-stone-500 mt-4">
             Don&apos;t have an account?{" "}
             <Link href="/register" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
               Sign up for free

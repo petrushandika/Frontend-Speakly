@@ -19,7 +19,7 @@ type ReviewState = "idle" | "reviewing" | "done";
 const QUALITY_BUTTONS = [
   { quality: 0, label: "Forgot", color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100" },
   { quality: 2, label: "Hard",   color: "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100" },
-  { quality: 4, label: "Good",   color: "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100" },
+  { quality: 4, label: "Good",   color: "bg-primary-50 border-primary-200 text-primary-700 hover:bg-primary-100" },
   { quality: 5, label: "Easy",   color: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100" },
 ];
 
@@ -92,15 +92,15 @@ export default function FlashcardsPage() {
             <div className="w-14 h-14 rounded-[18px] bg-emerald-50 flex items-center justify-center mx-auto mb-3">
               <CheckCircle2 className="w-7 h-7 text-emerald-500" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">Session Complete!</h1>
-            <p className="text-sm text-slate-500">You reviewed all {total} due cards.</p>
+            <h1 className="text-2xl font-bold text-stone-900">Session Complete!</h1>
+            <p className="text-sm text-stone-500">You reviewed all {total} due cards.</p>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-slate-100 rounded-[18px]">
-              <span className="text-2xl font-bold text-slate-900">{total}</span>
-              <span className="text-xs text-slate-400 font-medium text-center">Cards reviewed</span>
+              <span className="text-2xl font-bold text-stone-900">{total}</span>
+              <span className="text-xs text-stone-400 font-medium text-center">Cards reviewed</span>
             </div>
             <div className="flex flex-col items-center gap-1 p-4 bg-emerald-50 border border-emerald-100 rounded-[18px]">
               <span className="text-2xl font-bold text-emerald-600">{correct}</span>
@@ -114,7 +114,7 @@ export default function FlashcardsPage() {
 
           {/* Accuracy bar */}
           <div className="space-y-1.5">
-            <div className="flex justify-between text-xs font-semibold text-slate-500">
+            <div className="flex justify-between text-xs font-semibold text-stone-500">
               <span>Accuracy</span>
               <span className={accuracy >= 70 ? "text-emerald-600" : "text-amber-600"}>{accuracy}%</span>
             </div>
@@ -124,7 +124,7 @@ export default function FlashcardsPage() {
                 style={{ width: `${accuracy}%` }}
               />
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-stone-400">
               {accuracy >= 80
                 ? "Excellent retention! Keep it up."
                 : accuracy >= 60
@@ -154,11 +154,11 @@ export default function FlashcardsPage() {
           <div className="flex items-center gap-3 bg-white px-4 py-3 border border-slate-100 rounded-[18px] shadow-sm">
             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-primary-500 to-indigo-500 rounded-full transition-all duration-300"
+                className="h-full bg-primary-500 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <div className="flex items-center gap-2 shrink-0 text-xs font-bold text-slate-400">
+            <div className="flex items-center gap-2 shrink-0 text-xs font-bold text-stone-400">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
               <span>{correct}</span>
               <XCircle className="w-3.5 h-3.5 text-red-400" />
@@ -175,10 +175,10 @@ export default function FlashcardsPage() {
           >
             {!flipped ? (
               <>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2.5 py-1 bg-[var(--surface)] border border-slate-100 rounded-full">
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest px-2.5 py-1 bg-[var(--surface)] border border-slate-100 rounded-full">
                   Tap to reveal answer
                 </span>
-                <p className="text-3xl font-bold text-slate-900 text-center leading-snug">
+                <p className="text-3xl font-bold text-stone-900 text-center leading-snug">
                   {current.front}
                 </p>
               </>
@@ -187,11 +187,11 @@ export default function FlashcardsPage() {
                 <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest px-2.5 py-1 bg-primary-50 border border-primary-100 rounded-full">
                   Answer
                 </span>
-                <p className="text-2xl font-bold text-indigo-900 text-center leading-snug">
+                <p className="text-2xl font-bold text-stone-900 text-center leading-snug">
                   {current.back}
                 </p>
                 {current.example && (
-                  <p className="text-xs text-slate-400 italic text-center border-t border-slate-100 pt-3 max-w-sm">
+                  <p className="text-xs text-stone-400 italic text-center border-t border-slate-100 pt-3 max-w-sm">
                     "{current.example}"
                   </p>
                 )}
@@ -202,7 +202,7 @@ export default function FlashcardsPage() {
           {/* Action buttons */}
           {flipped ? (
             <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 space-y-3 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 text-center">
+              <p className="text-xs font-bold uppercase tracking-widest text-stone-400 text-center">
                 How well did you recall?
               </p>
               <div className="grid grid-cols-4 gap-2">
@@ -241,8 +241,8 @@ export default function FlashcardsPage() {
             <Layers className="w-5 h-5 text-primary-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Flashcard Deck</h1>
-            <p className="text-sm text-slate-500">SM-2 spaced repetition system</p>
+            <h1 className="text-2xl font-bold text-stone-900">Flashcard Deck</h1>
+            <p className="text-sm text-stone-500">SM-2 spaced repetition system</p>
           </div>
         </div>
         <button
@@ -258,20 +258,20 @@ export default function FlashcardsPage() {
         <form onSubmit={handleAddCard} className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-5 space-y-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Front</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Front</label>
               <input value={front} onChange={(e) => setFront(e.target.value)} placeholder="Question or word" required className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Back</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Back</label>
               <input value={back} onChange={(e) => setBack(e.target.value)} placeholder="Answer or definition" required className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Example (optional)</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Example (optional)</label>
               <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence" className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-slate-500 hover:bg-[var(--surface)] transition-all active:scale-95">
+            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-stone-500 hover:bg-[var(--surface)] transition-all active:scale-95">
               Cancel
             </button>
             <button type="submit" disabled={addCard.isPending} className="px-5 py-2 bg-[#1f1d19] hover:bg-[#161411] text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 shadow-sm">
@@ -307,8 +307,8 @@ export default function FlashcardsPage() {
           <div className="w-12 h-12 rounded-[18px] bg-emerald-50 flex items-center justify-center">
             <CheckCircle2 className="w-6 h-6 text-emerald-500" />
           </div>
-          <h3 className="font-bold text-slate-900">All caught up!</h3>
-          <p className="text-slate-400 text-sm max-w-xs">No cards due today. Come back tomorrow or add new cards.</p>
+          <h3 className="font-bold text-stone-900">All caught up!</h3>
+          <p className="text-stone-400 text-sm max-w-xs">No cards due today. Come back tomorrow or add new cards.</p>
         </div>
       )}
     </div>

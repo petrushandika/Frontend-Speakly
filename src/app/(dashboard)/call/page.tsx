@@ -29,7 +29,7 @@ function formatDate(ts: number): string {
 
 function StateIndicator({ state }: { state: VoiceState }) {
   const cfg = {
-    idle:     { label: "Tap mic to speak",      cls: "bg-slate-100 text-slate-500" },
+    idle:     { label: "Tap mic to speak",      cls: "bg-slate-100 text-stone-500" },
     listening:{ label: "Listening…",            cls: "bg-red-50 text-red-500" },
     thinking: { label: "Aria is thinking…",     cls: "bg-amber-50 text-amber-600" },
     speaking: { label: "Aria is speaking…",     cls: "bg-primary-50 text-primary-600" },
@@ -80,7 +80,7 @@ function MicButton({
         <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-40" />
       )}
       {isBusy
-        ? <PhoneOff className="w-7 h-7 text-slate-500" />
+        ? <PhoneOff className="w-7 h-7 text-stone-500" />
         : isListening
           ? <MicOff className="w-7 h-7 text-white" />
           : <Mic className="w-7 h-7 text-white" />
@@ -99,11 +99,11 @@ function MessageBubble({ msg }: { msg: VoiceMessage }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className="max-w-[78%] space-y-1">
-        {!isUser && <p className="text-[11px] font-semibold text-slate-400 px-1">Aria</p>}
+        {!isUser && <p className="text-[11px] font-semibold text-stone-400 px-1">Aria</p>}
         <div className={`px-4 py-2.5 rounded-[18px] text-sm leading-relaxed ${
           isUser
             ? "bg-primary-600 text-white rounded-tr-sm"
-            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-slate-800 rounded-tl-sm shadow-sm"
+            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-stone-800 rounded-tl-sm shadow-sm"
         }`}>
           {text}
         </div>
@@ -136,7 +136,7 @@ function HistorySidebar({
   return (
     <div className="w-64 flex flex-col h-full">
       <div className="flex items-center justify-between px-4 h-14 border-b border-slate-100 shrink-0">
-        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">History</span>
+        <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">History</span>
         <button
           onClick={onNew}
           className="w-7 h-7 rounded-lg bg-[#1f1d19] hover:bg-[#161411] text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
@@ -147,7 +147,7 @@ function HistorySidebar({
 
       <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
         {sorted.length === 0 && (
-          <p className="text-xs text-slate-400 text-center py-8 px-4">No voice sessions yet</p>
+          <p className="text-xs text-stone-400 text-center py-8 px-4">No voice sessions yet</p>
         )}
         {sorted.map((s) => {
           const isActive = s.id === activeId;
@@ -165,10 +165,10 @@ function HistorySidebar({
               }`}
             >
               <div className="flex-1 min-w-0">
-                <p className={`text-xs font-semibold truncate ${isActive ? "text-primary-700" : "text-slate-700"}`}>
+                <p className={`text-xs font-semibold truncate ${isActive ? "text-primary-700" : "text-stone-700"}`}>
                   {s.title}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                <p className="text-[10px] text-stone-400 mt-0.5 font-medium">
                   {formatDate(s.updatedAt)}
                   {msgCount > 0 && ` · ${msgCount} msg${msgCount !== 1 ? "s" : ""}`}
                 </p>
@@ -176,7 +176,7 @@ function HistorySidebar({
               {hovered === s.id && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onDelete(s.id); }}
-                  className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -210,9 +210,22 @@ export default function VoiceCallPage() {
   }, [messages, streamingText]);
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex h-full w-full overflow-hidden relative">
+      {/* ── Mobile overlay backdrop ── */}
+      {showHistory && (
+        <div
+          className="fixed inset-0 z-30 bg-stone-900/30 backdrop-blur-sm md:hidden"
+          onClick={() => setShowHistory(false)}
+        />
+      )}
+
       {/* ── History sidebar ── */}
-      <aside className={`shrink-0 flex flex-col border-r border-slate-100 bg-[var(--surface)]/60 overflow-hidden transition-all duration-200 ${showHistory ? "w-64" : "w-0"}`}>
+      <aside className={`
+        z-40 flex flex-col border-r border-[var(--line)] bg-[var(--surface-strong)] overflow-hidden transition-all duration-200
+        md:relative md:shrink-0
+        fixed inset-y-0 left-0 md:inset-auto
+        ${showHistory ? "w-64 translate-x-0" : "w-64 -translate-x-full md:w-0 md:translate-x-0"}
+      `}>
         <HistorySidebar
           sessions={sessions}
           activeId={activeSession?.id ?? null}
@@ -225,7 +238,7 @@ export default function VoiceCallPage() {
       {/* ── Main content ── */}
       <div className="flex flex-col flex-1 p-6 md:p-8 min-w-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border border-slate-100 bg-white rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
+        <div className="flex items-center justify-between px-4 py-3 border-[1.5px] border-[var(--line)] bg-[var(--surface-strong)] rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setShowHistory(!showHistory)}
@@ -233,16 +246,16 @@ export default function VoiceCallPage() {
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                 showHistory
                   ? "bg-primary-50 border border-primary-200 text-primary-600"
-                  : "bg-[var(--surface)] border border-slate-100 text-slate-400 hover:text-slate-600"
+                  : "bg-[var(--surface)] border border-slate-100 text-stone-400 hover:text-stone-600"
               }`}
             >
               <PanelLeft className="w-4 h-4" />
             </button>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center shrink-0">
               <Phone className="w-4 h-4 text-white" />
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-slate-900 text-sm leading-tight truncate">
+              <p className="font-bold text-stone-900 text-sm leading-tight truncate">
                 {activeSession?.title ?? "Voice Call"}
               </p>
               <p className="text-xs text-emerald-500 font-semibold">Aria · AI English Tutor</p>
@@ -252,7 +265,7 @@ export default function VoiceCallPage() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={newSession}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-primary-600 hover:bg-primary-50 border border-transparent hover:border-primary-100 px-3 py-1.5 rounded-xl transition-all"
+              className="flex items-center gap-1.5 text-xs font-semibold text-stone-400 hover:text-primary-600 hover:bg-primary-50 border border-transparent hover:border-primary-100 px-3 py-1.5 rounded-xl transition-all"
             >
               <RefreshCw className="w-3.5 h-3.5" /> New
             </button>
@@ -267,8 +280,8 @@ export default function VoiceCallPage() {
                 <Mic className="w-8 h-8 text-primary-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-700">Start the conversation</p>
-                <p className="text-xs text-slate-400 mt-1">Tap the mic and start speaking — Aria will reply by voice</p>
+                <p className="text-sm font-semibold text-stone-700">Start the conversation</p>
+                <p className="text-xs text-stone-400 mt-1">Tap the mic and start speaking — Aria will reply by voice</p>
               </div>
             </div>
           )}
@@ -278,8 +291,8 @@ export default function VoiceCallPage() {
           {streamingText && (
             <div className="flex justify-start">
               <div className="max-w-[78%] space-y-1">
-                <p className="text-[11px] font-semibold text-slate-400 px-1">Aria</p>
-                <div className="px-4 py-2.5 rounded-[18px] rounded-tl-sm bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-sm leading-relaxed text-slate-800 shadow-sm">
+                <p className="text-[11px] font-semibold text-stone-400 px-1">Aria</p>
+                <div className="px-4 py-2.5 rounded-[18px] rounded-tl-sm bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-sm leading-relaxed text-stone-800 shadow-sm">
                   {streamingText}
                   <span className="inline-block w-1 h-4 bg-primary-400 ml-0.5 animate-pulse rounded" />
                 </div>
@@ -306,7 +319,7 @@ export default function VoiceCallPage() {
             onStop={stopListening}
             onInterrupt={interrupt}
           />
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-stone-400">
             {voiceState === "idle" && "Tap to start · auto-stops on silence"}
             {voiceState === "listening" && "Recording… tap to send early"}
             {(voiceState === "thinking" || voiceState === "speaking") && "Tap to interrupt Aria"}

@@ -11,10 +11,10 @@ function parseInlineMarkdown(text: string) {
   const parts = text.split(regex);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-extrabold text-slate-950">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-extrabold text-stone-950">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("*") && part.endsWith("*")) {
-      return <em key={i} className="italic text-slate-800 font-semibold">{part.slice(1, -1)}</em>;
+      return <em key={i} className="italic text-stone-800 font-semibold">{part.slice(1, -1)}</em>;
     }
     return part;
   });
@@ -53,7 +53,7 @@ function renderMarkdown(text: string) {
     // Headers
     if (line.startsWith("### ")) {
       rendered.push(
-        <h3 key={`h3-${index}`} className="text-sm md:text-base font-bold text-slate-900 mt-4 mb-2 first:mt-0">
+        <h3 key={`h3-${index}`} className="text-sm md:text-base font-bold text-stone-900 mt-4 mb-2 first:mt-0">
           {parseInlineMarkdown(line.slice(4))}
         </h3>
       );
@@ -61,7 +61,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("## ")) {
       rendered.push(
-        <h2 key={`h2-${index}`} className="text-base md:text-lg font-extrabold text-slate-900 mt-5 mb-2.5 first:mt-0">
+        <h2 key={`h2-${index}`} className="text-base md:text-lg font-extrabold text-stone-900 mt-5 mb-2.5 first:mt-0">
           {parseInlineMarkdown(line.slice(3))}
         </h2>
       );
@@ -69,7 +69,7 @@ function renderMarkdown(text: string) {
     }
     if (line.startsWith("# ")) {
       rendered.push(
-        <h1 key={`h1-${index}`} className="text-lg md:text-xl font-black text-slate-900 mt-6 mb-3 first:mt-0">
+        <h1 key={`h1-${index}`} className="text-lg md:text-xl font-black text-stone-900 mt-6 mb-3 first:mt-0">
           {parseInlineMarkdown(line.slice(2))}
         </h1>
       );
@@ -81,8 +81,8 @@ function renderMarkdown(text: string) {
       const content = line.trim().slice(2);
       rendered.push(
         <div key={`li-${index}`} className="flex items-start gap-2 ml-4 my-1">
-          <span className="w-1.5 h-1.5 bg-slate-400 rounded-full mt-2 shrink-0" />
-          <p className="text-slate-700 text-sm md:text-base leading-relaxed font-medium">
+          <span className="w-1.5 h-1.5 bg-stone-400 rounded-full mt-2 shrink-0" />
+          <p className="text-stone-700 text-sm md:text-base leading-relaxed font-medium">
             {parseInlineMarkdown(content)}
           </p>
         </div>
@@ -95,7 +95,7 @@ function renderMarkdown(text: string) {
       rendered.push(<div key={`empty-${index}`} className="h-2" />);
     } else {
       rendered.push(
-        <p key={`p-${index}`} className="text-slate-700 text-sm md:text-base leading-relaxed font-medium">
+        <p key={`p-${index}`} className="text-stone-700 text-sm md:text-base leading-relaxed font-medium">
           {parseInlineMarkdown(line)}
         </p>
       );
@@ -105,6 +105,123 @@ function renderMarkdown(text: string) {
   return rendered;
 }
 
+
+// ── Grammar highlighting ──────────────────────────────────────────────────────
+
+type GrammarRole = "subject" | "verb" | "object" | "adverb" | "complement" | "neutral";
+
+interface GrammarPart { text: string; role: GrammarRole }
+
+const ROLE_STYLE: Record<GrammarRole, string> = {
+  subject:    "bg-amber-100 text-amber-900 border border-amber-300 font-bold",
+  verb:       "bg-primary-100 text-primary-900 border border-primary-300 font-bold",
+  object:     "bg-sky-100 text-sky-900 border border-sky-300 font-bold",
+  adverb:     "bg-violet-100 text-violet-900 border border-violet-300 font-bold",
+  complement: "bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold",
+  neutral:    "text-stone-800 font-semibold",
+};
+
+function GrammarToken({ text, role }: { text: string; role: GrammarRole }) {
+  if (role === "neutral") {
+    return <span className="text-sm text-stone-800 font-semibold">{text} </span>;
+  }
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-sm ${ROLE_STYLE[role]}`}
+      title={role.charAt(0).toUpperCase() + role.slice(1)}
+    >
+      {text}
+    </span>
+  );
+}
+
+// Lightweight heuristic: detects subject pronoun / noun phrase, auxiliary + main verb, object/adverb
+function parseGrammar(sentence: string): GrammarPart[] {
+  const clean = sentence.replace(/[""]/g, '"').trim();
+  // Remove trailing punctuation for analysis, add back at end
+  const punct = /[.?!,;:]$/.test(clean) ? clean.slice(-1) : "";
+  const text  = punct ? clean.slice(0, -1) : clean;
+
+  const words = text.split(/\s+/);
+  if (words.length < 2) return [{ text: clean, role: "neutral" }];
+
+  // Subject pronouns / common short NPs
+  const subjectPronouns = new Set(["i","you","he","she","it","we","they","this","that","these","those"]);
+  const auxiliaries     = new Set(["am","is","are","was","were","be","been","being","have","has","had","do","does","did","will","would","shall","should","may","might","can","could","must","need","dare","ought"]);
+  const adverbials      = new Set(["yesterday","today","tomorrow","always","never","often","sometimes","usually","already","still","just","soon","now","here","there","however","therefore","moreover","finally","lastly","firstly","then","ago","later","early","late","soon","daily","weekly","monthly"]);
+  const prepositions    = new Set(["to","in","on","at","from","for","of","with","by","about","between","among","into","onto","through","during","before","after","above","below","under","over","since","until","despite","along","across","without"]);
+
+  const parts: GrammarPart[] = [];
+  let i = 0;
+
+  // Detect subject: first 1-3 words if pronoun / "the/a + noun"
+  let subjectEnd = 0;
+  if (subjectPronouns.has(words[0].toLowerCase())) {
+    subjectEnd = 1;
+  } else if (
+    words.length > 1 &&
+    ["the","a","an","my","your","his","her","its","our","their"].includes(words[0].toLowerCase())
+  ) {
+    subjectEnd = 2; // "the cat"
+  }
+
+  if (subjectEnd > 0) {
+    parts.push({ text: words.slice(0, subjectEnd).join(" "), role: "subject" });
+    i = subjectEnd;
+  }
+
+  // Detect verb phrase: aux? + main verb
+  if (i < words.length) {
+    let verbEnd = i;
+    // Collect auxiliaries
+    while (verbEnd < words.length && auxiliaries.has(words[verbEnd].toLowerCase())) {
+      verbEnd++;
+    }
+    // One more word = main verb (if not preposition or adverb)
+    if (verbEnd < words.length && !prepositions.has(words[verbEnd].toLowerCase()) && !adverbials.has(words[verbEnd].toLowerCase())) {
+      verbEnd++;
+    }
+    if (verbEnd > i) {
+      parts.push({ text: words.slice(i, verbEnd).join(" "), role: "verb" });
+      i = verbEnd;
+    }
+  }
+
+  // Remaining: detect adverbials at end, rest is object/complement
+  if (i < words.length) {
+    const remaining = words.slice(i);
+    // Check if last 1-2 words are adverbials or prepositional phrases starting with preposition
+    let advStart = remaining.length;
+    // Trailing adverbial: "every day", "last year", "in London", "yesterday", etc.
+    if (
+      remaining.length >= 1 &&
+      (adverbials.has(remaining[remaining.length - 1].toLowerCase()) ||
+       (remaining.length >= 2 && prepositions.has(remaining[remaining.length - 2].toLowerCase())))
+    ) {
+      advStart = remaining.length >= 2 && prepositions.has(remaining[remaining.length - 2].toLowerCase())
+        ? remaining.length - 2
+        : remaining.length - 1;
+    }
+
+    const objectPart = remaining.slice(0, advStart).join(" ");
+    const advPart    = remaining.slice(advStart).join(" ");
+
+    if (objectPart) parts.push({ text: objectPart, role: "object" });
+    if (advPart)    parts.push({ text: advPart + punct, role: "adverb" });
+    else if (objectPart && punct) parts[parts.length - 1].text += punct;
+  } else if (punct && parts.length > 0) {
+    parts[parts.length - 1].text += punct;
+  }
+
+  // Fallback: if we only produced subject or nothing, return neutral
+  if (parts.length <= 1 && parts[0]?.role === "subject") {
+    return [{ text: clean, role: "neutral" }];
+  }
+
+  return parts.length > 0 ? parts : [{ text: clean, role: "neutral" }];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 type Section = {
   type: "explanation" | "examples" | "tip";
@@ -157,21 +274,21 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   if (isLoading) {
     return (
       <div className="w-full p-6 md:p-8 space-y-4">
-        <div className="h-6 w-24 bg-white/60 border border-slate-100 rounded-xl animate-pulse" />
-        <div className="h-40 bg-white border border-slate-100 rounded-3xl animate-pulse" />
-        <div className="h-64 bg-white border border-slate-100 rounded-3xl animate-pulse" />
+        <div className="h-6 w-24 bg-[var(--surface)]/60 border border-[var(--line-soft)] rounded-xl animate-pulse" />
+        <div className="h-40 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl animate-pulse" />
+        <div className="h-64 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl animate-pulse" />
       </div>
     );
   }
 
   if (!lesson) {
     return (
-      <div className="w-full p-6 md:p-8 text-center py-16 bg-white border border-slate-100 rounded-3xl shadow-sm flex flex-col items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center">
-          <SearchX className="w-6 h-6 text-slate-400" />
+      <div className="w-full p-6 md:p-8 text-center py-16 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl shadow-sm flex flex-col items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center">
+          <SearchX className="w-6 h-6 text-stone-400" />
         </div>
-        <h3 className="font-bold text-slate-900">Lesson Not Found</h3>
-        <p className="text-slate-400 text-sm mt-1">We couldn&apos;t retrieve the requested lesson details.</p>
+        <h3 className="font-bold text-stone-900">Lesson Not Found</h3>
+        <p className="text-stone-400 text-sm mt-1">We couldn&apos;t retrieve the requested lesson details.</p>
         <button
           onClick={() => router.push("/lessons")}
           className="mt-6 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all"
@@ -192,7 +309,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
       <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="text-xs font-semibold text-slate-400 hover:text-slate-700 flex items-center gap-1 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-100 rounded-xl transition-all cursor-pointer active:scale-95"
+          className="text-xs font-semibold text-stone-400 hover:text-stone-700 flex items-center gap-1 px-3 py-2 bg-[var(--surface-strong)] hover:bg-[var(--surface)] border border-[var(--line)] rounded-xl transition-all cursor-pointer active:scale-95"
         >
           <ChevronLeft className="w-3.5 h-3.5" /> Back
         </button>
@@ -201,28 +318,34 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
           <span className="text-[10px] font-bold px-2.5 py-0.5 bg-primary-100 border border-primary-200 text-primary-700 rounded-md">
             {lesson.cefrLevel}
           </span>
-          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-md uppercase tracking-wider">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-stone-100 border border-stone-200 text-stone-500 rounded-md uppercase tracking-wider">
             {lesson.category}
           </span>
         </div>
         
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+          <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight leading-snug">
             {lesson.title}
           </h1>
           {/* Translation toggle for B1+ */}
           {!isBeginnerLevel && (
             <button
               onClick={() => setShowTranslations((v) => !v)}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shrink-0 transition-colors"
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                showTranslations
+                  ? "bg-primary-50 border-primary-200 text-primary-700 hover:bg-primary-100"
+                  : "bg-[var(--surface-strong)] border-[var(--line)] text-stone-500 hover:text-stone-800 hover:border-stone-300"
+              }`}
             >
-              {showTranslations ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              {showTranslations ? "Sembunyikan terjemahan" : "Lihat terjemahan"}
+              {showTranslations
+                ? <><EyeOff className="w-4 h-4 shrink-0" /> Sembunyikan terjemahan</>
+                : <><Eye className="w-4 h-4 shrink-0" /> Lihat terjemahan</>
+              }
             </button>
           )}
         </div>
         {lesson.description && (
-          <p className="text-slate-500 text-sm leading-relaxed max-w-2xl">{lesson.description}</p>
+          <p className="text-stone-500 text-sm leading-relaxed max-w-2xl">{lesson.description}</p>
         )}
         {isBeginnerLevel && (
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 font-semibold">
@@ -233,12 +356,12 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
       {/* Content sections */}
       {sections.length > 0 ? (
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 space-y-6 shadow-sm">
+        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-6 md:p-8 space-y-6 shadow-sm">
           {sections.map((section, i) => {
             if (section.type === "explanation" && section.text) {
               return (
                 <div key={i} className="space-y-3">
-                  <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
                     <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
                     Explanation
                   </h2>
@@ -250,24 +373,66 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
             }
             if (section.type === "examples" && section.items) {
               return (
-                <div key={i} className="space-y-3 pt-2">
-                  <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
-                    Examples
-                  </h2>
-                  <ul className="grid grid-cols-1 gap-2.5">
-                    {section.items.map((ex, j) => (
-                      <li key={j} className="bg-slate-50 border border-slate-100/70 px-4 py-3.5 rounded-2xl hover:bg-white hover:border-primary-100 hover:shadow-sm transition-all duration-200">
-                        <p className={`text-sm font-bold text-slate-900 ${ex.en.includes("\n") ? "whitespace-pre font-mono leading-normal overflow-x-auto text-xs md:text-sm bg-slate-950 text-slate-100 p-4 rounded-xl shadow-inner border border-slate-800" : ""}`}>
-                          {ex.en}
-                        </p>
-                        {showTranslations && ex.id && (
-                          <p className={`text-xs font-semibold mt-1 italic ${isBeginnerLevel ? "text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md inline-block" : "text-slate-400"}`}>
-                            {ex.id}
-                          </p>
-                        )}
-                      </li>
-                    ))}
+                <div key={i} className="space-y-4 pt-2">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
+                      Examples
+                    </h2>
+                    {/* Grammar legend */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {[
+                        { label: "Subject",   cls: "bg-amber-100 text-amber-800 border-amber-200" },
+                        { label: "Verb",      cls: "bg-primary-100 text-primary-800 border-primary-200" },
+                        { label: "Object",    cls: "bg-sky-100 text-sky-800 border-sky-200" },
+                        { label: "Adverb",    cls: "bg-violet-100 text-violet-800 border-violet-200" },
+                      ].map((t) => (
+                        <span key={t.label} className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${t.cls}`}>
+                          {t.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <ul className="grid grid-cols-1 gap-3">
+                    {section.items.map((ex, j) => {
+                      const isCode = ex.en.includes("\n");
+                      const parts = isCode ? null : parseGrammar(ex.en);
+                      return (
+                        <li key={j} className="bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-2xl overflow-hidden">
+                          {/* Number strip */}
+                          <div className="flex items-stretch">
+                            <div className="w-9 bg-stone-100 border-r border-[var(--line)] flex items-center justify-center shrink-0">
+                              <span className="text-[11px] font-black text-stone-400">{j + 1}</span>
+                            </div>
+                            <div className="flex-1 px-4 py-3.5 space-y-2.5">
+                              {isCode ? (
+                                <pre className="font-mono bg-stone-950 text-stone-100 p-4 rounded-xl whitespace-pre overflow-x-auto text-xs border border-stone-800 shadow-inner">
+                                  {ex.en}
+                                </pre>
+                              ) : parts ? (
+                                <div className="flex flex-wrap gap-1.5 items-baseline">
+                                  {parts.map((p, k) => (
+                                    <GrammarToken key={k} text={p.text} role={p.role} />
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm font-bold text-stone-900 leading-relaxed">{ex.en}</p>
+                              )}
+
+                              {showTranslations && ex.id && (
+                                <div className={`flex items-start gap-2 pt-1 border-t ${isBeginnerLevel ? "border-amber-200" : "border-stone-100"}`}>
+                                  <span className={`text-[9px] font-black uppercase tracking-wider shrink-0 mt-0.5 ${isBeginnerLevel ? "text-amber-600" : "text-stone-400"}`}>ID</span>
+                                  <p className={`text-xs leading-relaxed italic ${isBeginnerLevel ? "text-amber-800 font-semibold" : "text-stone-500 font-medium"}`}>
+                                    {ex.id}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               );
@@ -278,7 +443,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                   <p className="text-xs font-bold text-amber-800 flex items-center gap-1.5 uppercase tracking-wider mb-1">
                     <Lightbulb className="w-3.5 h-3.5" /> Tip / Remember
                   </p>
-                  <div className="space-y-1.5 text-xs md:text-sm text-slate-700 leading-relaxed font-semibold">
+                  <div className="space-y-1.5 text-xs md:text-sm text-stone-700 leading-relaxed font-semibold">
                     {renderMarkdown(section.text)}
                   </div>
                 </div>
@@ -288,15 +453,15 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-3xl border border-slate-100 p-8 text-center shadow-sm">
-          <p className="text-slate-400 text-sm py-4">Lesson content is currently being updated...</p>
+        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-8 text-center shadow-sm">
+          <p className="text-stone-400 text-sm py-4">Lesson content is currently being updated...</p>
         </div>
       )}
 
       {/* Exercises */}
       {exercises.length > 0 && (
-        <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 space-y-4 shadow-sm">
-          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+        <div className="bg-[var(--surface-strong)] rounded-3xl border-2 border-[var(--line)] p-6 md:p-8 space-y-4 shadow-sm">
+          <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
             Practice Exercises
           </h2>
@@ -312,9 +477,9 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                     ? isCorrect 
                       ? "bg-emerald-50/50 border-emerald-200" 
                       : "bg-red-50/50 border-red-200"
-                    : "bg-slate-50 border-slate-100 hover:bg-white hover:border-primary-100"
+                    : "bg-[var(--surface)] border-[var(--line-soft)] hover:bg-white hover:border-primary-200"
                 }`}>
-                  <p className="text-sm text-slate-800 font-extrabold leading-relaxed">
+                  <p className="text-sm text-stone-800 font-extrabold leading-relaxed">
                     {i + 1}. {ex.question.replace("___", "______")}
                   </p>
                   
@@ -330,7 +495,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                           ? isCorrect
                             ? "bg-emerald-100/50 border-emerald-200 text-emerald-800"
                             : "bg-red-100/50 border-red-200 text-red-800"
-                          : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 placeholder:font-normal"
+                          : "bg-[var(--surface-strong)] border-[var(--line)] text-stone-900 placeholder:text-stone-400 placeholder:font-normal"
                       }`}
                     />
                     
@@ -345,8 +510,8 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                             <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-100 px-3 py-1.5 rounded-lg">
                               <X className="w-3.5 h-3.5" /> Incorrect
                             </span>
-                            <span className="text-xs font-semibold text-slate-500">
-                              Answer: <span className="text-slate-800 font-bold">{ex.answer}</span>
+                            <span className="text-xs font-semibold text-stone-500">
+                              Answer: <span className="text-stone-800 font-bold">{ex.answer}</span>
                             </span>
                           </div>
                         )}
@@ -363,12 +528,12 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               <button
                 onClick={() => setSubmitted(true)}
                 disabled={Object.keys(answers).length < exercises.length}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm rounded-2xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm rounded-2xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Check Answers
               </button>
               {Object.keys(answers).length < exercises.length && (
-                <p className="text-center text-xs text-slate-400 mt-3 font-medium">Please answer all questions before checking.</p>
+                <p className="text-center text-xs text-stone-400 mt-3 font-medium">Please answer all questions before checking.</p>
               )}
             </div>
           )}

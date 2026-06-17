@@ -25,9 +25,9 @@ const CATEGORY_ICON: Record<string, React.ElementType> = {
 };
 
 const CATEGORY_COLOR: Record<string, string> = {
-  grammar:    "bg-indigo-50 text-indigo-600 border-indigo-100",
+  grammar:    "bg-primary-50 text-primary-700 border-primary-100",
   vocabulary: "bg-sky-50 text-sky-600 border-sky-100",
-  speaking:   "bg-violet-50 text-violet-600 border-violet-100",
+  speaking:   "bg-accent-50 text-accent-500 border-accent-200",
   listening:  "bg-teal-50 text-teal-600 border-teal-100",
   reading:    "bg-emerald-50 text-emerald-600 border-emerald-100",
   writing:    "bg-amber-50 text-amber-600 border-amber-100",
@@ -35,8 +35,8 @@ const CATEGORY_COLOR: Record<string, string> = {
 
 const STATUS_STYLE: Record<string, string> = {
   completed:   "bg-emerald-50 border-emerald-200 text-emerald-700",
-  in_progress: "bg-indigo-50 border-indigo-200 text-indigo-700",
-  not_started: "bg-[var(--surface)] border-[var(--line-soft)] text-slate-500",
+  in_progress: "bg-primary-50 border-primary-200 text-primary-700",
+  not_started: "bg-[var(--surface)] border-[var(--line-soft)] text-stone-500",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -61,26 +61,26 @@ export default function LessonsPage() {
             <BookOpen className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Lessons</h1>
-            <p className="text-sm text-slate-500">Structured bite-sized learning</p>
+            <h1 className="text-2xl font-bold text-stone-900">Lessons</h1>
+            <p className="text-sm text-stone-500">Structured bite-sized learning</p>
           </div>
         </div>
 
         {totalCount > 0 && (
           <div className="flex items-center gap-3 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] px-4 py-3 shadow-sm">
             <div className="w-28 space-y-1">
-              <div className="flex justify-between text-xs font-semibold text-slate-400">
+              <div className="flex justify-between text-xs font-semibold text-stone-400">
                 <span>Progress</span>
                 <span className="text-primary-600">{percentage}%</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-primary-500 to-indigo-500 rounded-full transition-all duration-500"
+                  className="h-full bg-primary-500 rounded-full transition-all duration-500"
                   style={{ width: `${percentage}%` }}
                 />
               </div>
             </div>
-            <span className="text-xs text-slate-400 whitespace-nowrap">{completed}/{totalCount} done</span>
+            <span className="text-xs text-stone-400 whitespace-nowrap">{completed}/{totalCount} done</span>
           </div>
         )}
       </div>
@@ -100,8 +100,8 @@ export default function LessonsPage() {
           <div className="w-12 h-12 rounded-[18px] bg-primary-50 flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-primary-400" />
           </div>
-          <h3 className="font-bold text-slate-900">No Lessons Available Yet</h3>
-          <p className="text-slate-400 text-sm">Please check back later, we are preparing new lessons for you.</p>
+          <h3 className="font-bold text-stone-900">No Lessons Available Yet</h3>
+          <p className="text-stone-400 text-sm">Please check back later, we are preparing new lessons for you.</p>
         </div>
       )}
 
@@ -110,7 +110,7 @@ export default function LessonsPage() {
         {lessons.map((lesson, i) => {
           const status = lesson.progress?.status ?? "not_started";
           const Icon   = CATEGORY_ICON[lesson.category] ?? FileText;
-          const color  = CATEGORY_COLOR[lesson.category] ?? "bg-[var(--surface)] text-slate-500 border-slate-100";
+          const color  = CATEGORY_COLOR[lesson.category] ?? "bg-[var(--surface)] text-stone-500 border-slate-100";
           const StatusIcon = status === "completed" ? CheckCircle2 : status === "in_progress" ? Clock : Play;
 
           return (
@@ -125,16 +125,16 @@ export default function LessonsPage() {
 
               <div className="flex-1 min-w-0 space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-slate-400">#{i + 1}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 border border-[var(--line-soft)]/40 text-slate-500 rounded">
+                  <span className="text-[10px] font-bold text-stone-400">#{i + 1}</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-slate-100 border border-[var(--line-soft)]/40 text-stone-500 rounded">
                     {lesson.cefrLevel}
                   </span>
                 </div>
-                <p className="font-bold text-slate-800 text-sm group-hover:text-primary-600 transition-colors truncate">
+                <p className="font-bold text-stone-800 text-sm group-hover:text-primary-600 transition-colors truncate">
                   {lesson.title}
                 </p>
                 {lesson.description && (
-                  <p className="text-xs text-slate-400 truncate">{lesson.description}</p>
+                  <p className="text-xs text-stone-400 truncate">{lesson.description}</p>
                 )}
               </div>
 

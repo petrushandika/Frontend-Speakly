@@ -34,7 +34,7 @@ interface WordResult {
 
 const THEMES: { id: Theme; label: string; icon: React.ElementType; color: string; desc: string }[] = [
   { id: "business",    label: "Business",    icon: Zap,          color: "bg-blue-50 border-blue-200 text-blue-700",   desc: "Professional scenarios" },
-  { id: "technology",  label: "Technology",  icon: Cpu,          color: "bg-violet-50 border-violet-200 text-violet-700", desc: "Tech & innovation" },
+  { id: "technology",  label: "Technology",  icon: Cpu,          color: "bg-primary-50 border-primary-200 text-primary-700", desc: "Tech & innovation" },
   { id: "travel",      label: "Travel",      icon: Globe,        color: "bg-emerald-50 border-emerald-200 text-emerald-700", desc: "Exploration & culture" },
   { id: "daily_life",  label: "Daily Life",  icon: Coffee,       color: "bg-amber-50 border-amber-200 text-amber-700", desc: "Everyday situations" },
   { id: "science",     label: "Science",     icon: FlaskConical, color: "bg-cyan-50 border-cyan-200 text-cyan-700",   desc: "Discovery & research" },
@@ -87,18 +87,18 @@ function SelectStep({
     <div className="w-full space-y-8 py-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0">
-          <BookOpen className="w-5 h-5 text-violet-600" />
+        <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+          <BookOpen className="w-5 h-5 text-primary-600" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Reading Aloud Practice</h1>
-          <p className="text-sm text-slate-500">AI generates a passage — you read it aloud, we score your pronunciation</p>
+          <h1 className="text-xl font-bold text-stone-900">Reading Aloud Practice</h1>
+          <p className="text-sm text-stone-500">AI generates a passage — you read it aloud, we score your pronunciation</p>
         </div>
       </div>
 
       {/* Theme picker */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Choose a theme</p>
+        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Choose a theme</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
           {THEMES.map((t) => {
             const Icon = t.icon;
@@ -117,8 +117,8 @@ function SelectStep({
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-sm font-bold ${active ? "text-primary-700" : "text-slate-700"}`}>{t.label}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">{t.desc}</p>
+                  <p className={`text-sm font-bold ${active ? "text-primary-700" : "text-stone-700"}`}>{t.label}</p>
+                  <p className="text-[11px] text-stone-400 mt-0.5">{t.desc}</p>
                 </div>
               </button>
             );
@@ -128,7 +128,7 @@ function SelectStep({
 
       {/* Length picker */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Passage length</p>
+        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Passage length</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
           {PARAGRAPH_OPTIONS.map((opt) => {
             const active = paragraphs === opt.value;
@@ -142,8 +142,8 @@ function SelectStep({
                     : "border-transparent bg-white hover:border-slate-200"
                 }`}
               >
-                <p className={`text-sm font-bold ${active ? "text-primary-700" : "text-slate-700"}`}>{opt.label}</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">{opt.sub}</p>
+                <p className={`text-sm font-bold ${active ? "text-primary-700" : "text-stone-700"}`}>{opt.label}</p>
+                <p className="text-[11px] text-stone-400 mt-0.5">{opt.sub}</p>
               </button>
             );
           })}
@@ -237,12 +237,12 @@ function ReadingStep({
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-1">Read Aloud</p>
-          <h2 className="text-xl font-bold text-slate-900">{text.title}</h2>
-          <p className="text-xs text-slate-400 mt-0.5">{text.wordCount} words · CEFR {text.cefrLevel}</p>
+          <h2 className="text-xl font-bold text-stone-900">{text.title}</h2>
+          <p className="text-xs text-stone-400 mt-0.5">{text.wordCount} words · CEFR {text.cefrLevel}</p>
         </div>
         <button
           onClick={onReset}
-          className="text-xs font-semibold text-slate-400 hover:text-slate-700 bg-white border border-slate-100 hover:border-slate-200 px-3 py-1.5 rounded-xl transition-all"
+          className="text-xs font-semibold text-stone-400 hover:text-stone-700 bg-white border border-slate-100 hover:border-slate-200 px-3 py-1.5 rounded-xl transition-all"
         >
           New text
         </button>
@@ -257,7 +257,7 @@ function ReadingStep({
       {/* Passage */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm space-y-4">
         {text.paragraphs.map((p, i) => (
-          <p key={i} className="text-slate-800 leading-8 text-base tracking-wide">
+          <p key={i} className="text-stone-800 leading-8 text-base tracking-wide">
             {p}
           </p>
         ))}
@@ -266,14 +266,14 @@ function ReadingStep({
       {/* Key vocabulary */}
       {text.keyVocabulary.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Key Vocabulary</p>
+          <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Key Vocabulary</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {text.keyVocabulary.map((v) => (
               <div key={v.word} className="flex items-start gap-3 p-3 bg-white border border-slate-100 rounded-xl">
                 <BookMarked className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <p className="font-bold text-slate-800 text-sm">{v.word} <span className="text-xs font-normal text-slate-400">{v.ipa}</span></p>
-                  <p className="text-xs text-slate-500 mt-0.5">{v.definition}</p>
+                  <p className="font-bold text-stone-800 text-sm">{v.word} <span className="text-xs font-normal text-stone-400">{v.ipa}</span></p>
+                  <p className="text-xs text-stone-500 mt-0.5">{v.definition}</p>
                   <p className="text-xs text-primary-600 font-semibold mt-0.5">{v.indonesian}</p>
                 </div>
               </div>
@@ -291,7 +291,7 @@ function ReadingStep({
 
       {/* Record controls */}
       <div className="bg-white border border-slate-100 rounded-2xl p-5 flex flex-col items-center gap-4 shadow-sm">
-        <p className="text-sm font-semibold text-slate-700">
+        <p className="text-sm font-semibold text-stone-700">
           {isProcessing ? "Processing your recording…" : isRecording ? "Recording — read the passage above" : "Press the mic and read the passage aloud"}
         </p>
         <button
@@ -307,14 +307,14 @@ function ReadingStep({
         >
           {isRecording && <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-40" />}
           {isProcessing ? (
-            <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
+            <Loader2 className="w-8 h-8 text-stone-400 animate-spin" />
           ) : isRecording ? (
             <MicOff className="w-8 h-8 text-white" />
           ) : (
             <Mic className="w-8 h-8 text-white" />
           )}
         </button>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-stone-400">
           {isRecording ? "Tap to stop recording" : isProcessing ? "Please wait…" : "Tap to start recording"}
         </p>
       </div>
@@ -363,28 +363,28 @@ function ResultStep({
       <div className={`rounded-2xl border p-6 text-center ${scoreBg}`}>
         <div className="flex items-center justify-center gap-2 mb-2">
           <Star className={`w-5 h-5 ${scoreColor}`} />
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Pronunciation Score</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-stone-500">Pronunciation Score</p>
         </div>
-        <p className={`text-6xl font-black ${scoreColor}`}>{score}<span className="text-2xl font-bold text-slate-400">%</span></p>
+        <p className={`text-6xl font-black ${scoreColor}`}>{score}<span className="text-2xl font-bold text-stone-400">%</span></p>
         <p className={`text-sm font-semibold mt-2 ${scoreColor}`}>{scoreLabel}</p>
 
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="flex items-center gap-1.5 text-sm">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <span className="font-bold text-emerald-700">{correct}</span>
-            <span className="text-slate-500">correct</span>
+            <span className="text-stone-500">correct</span>
           </div>
           <div className="flex items-center gap-1.5 text-sm">
             <XCircle className="w-4 h-4 text-red-500" />
             <span className="font-bold text-red-700">{incorrect}</span>
-            <span className="text-slate-500">incorrect</span>
+            <span className="text-stone-500">incorrect</span>
           </div>
         </div>
       </div>
 
       {/* Word-by-word result */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Word-by-word result</p>
+        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Word-by-word result</p>
         <div className="bg-white border border-slate-100 rounded-2xl p-5 leading-9 shadow-sm">
           {wordResults.map((r, i) => (
             <span
@@ -401,7 +401,7 @@ function ResultStep({
           ))}
         </div>
         {incorrect > 0 && (
-          <p className="text-xs text-slate-400 flex items-center gap-1.5">
+          <p className="text-xs text-stone-400 flex items-center gap-1.5">
             <XCircle className="w-3.5 h-3.5 text-red-400" />
             Red strikethrough words were not recognized — try pronouncing them more clearly
           </p>
@@ -410,8 +410,8 @@ function ResultStep({
 
       {/* Your transcript */}
       <div className="space-y-2">
-        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">What we heard</p>
-        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 text-sm text-slate-600 leading-relaxed italic">
+        <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">What we heard</p>
+        <div className="bg-stone-50 border border-slate-100 rounded-xl p-4 text-sm text-stone-600 leading-relaxed italic">
           {transcript || "No speech detected"}
         </div>
       </div>
@@ -420,7 +420,7 @@ function ResultStep({
       <div className="flex gap-3">
         <button
           onClick={onTryAgain}
-          className="flex-1 py-3.5 bg-white border border-slate-200 hover:border-primary-300 hover:bg-primary-50 text-slate-700 hover:text-primary-700 font-bold rounded-2xl transition-all"
+          className="flex-1 py-3.5 bg-white border border-slate-200 hover:border-primary-300 hover:bg-primary-50 text-stone-700 hover:text-primary-700 font-bold rounded-2xl transition-all"
         >
           Retry
         </button>
@@ -488,7 +488,7 @@ export default function SpeakingPage() {
               <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all ${
                 isCurrent ? "bg-primary-100 text-primary-700" :
                 isDone    ? "bg-emerald-100 text-emerald-700" :
-                "bg-slate-100 text-slate-400"
+                "bg-slate-100 text-stone-400"
               }`}>
                 {isDone ? <CheckCircle2 className="w-3.5 h-3.5" /> : <span>{i + 1}</span>}
                 {labels[i]}

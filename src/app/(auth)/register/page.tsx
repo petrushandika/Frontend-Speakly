@@ -114,10 +114,12 @@ export default function RegisterPage() {
         {/* Top brand */}
         <div className="flex items-center gap-2.5 z-10">
           <Link href="/login" className="flex items-center gap-2.5">
-            <span className="text-3xl">🗣️</span>
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
-              Speakly
-            </span>
+            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center">
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <span className="text-2xl font-black tracking-tight text-white">Speakly</span>
           </Link>
         </div>
 
@@ -126,8 +128,8 @@ export default function RegisterPage() {
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Start your journey to fluent English.
           </h1>
-          <p className="text-indigo-100/90 leading-relaxed text-base">
-            Personalize your target learning goals, practice speaking asynchronously, and master pronunciation with immediate automated feedback.
+          <p className="text-stone-400 leading-relaxed text-base">
+            Personalize your learning goals, practice speaking with AI, and master pronunciation with real-time feedback.
           </p>
 
           {/* Marketing features list */}
@@ -148,7 +150,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Bottom footer */}
-        <div className="text-indigo-200/50 text-xs z-10 font-medium">
+        <div className="text-stone-600 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
@@ -158,9 +160,13 @@ export default function RegisterPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
-            <span className="text-4xl">🗣️</span>
-            <h2 className="text-3xl font-extrabold text-[var(--foreground)] mt-2">Speakly</h2>
-            <p className="text-stone-600 text-sm mt-1">Practice English with AI</p>
+            <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
+            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
           </div>
 
           {/* Heading */}
@@ -190,7 +196,7 @@ export default function RegisterPage() {
             {step === 1 ? (
               <form onSubmit={handleStep1} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1.5">
                     Your Name
                   </label>
                   <input
@@ -199,11 +205,11 @@ export default function RegisterPage() {
                     onChange={(e) => setDisplayName(e.target.value)}
                     required
                     placeholder="John Doe"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -212,11 +218,11 @@ export default function RegisterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@example.com"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-1.5">
                     Password
                   </label>
                   <div className="relative">
@@ -226,12 +232,12 @@ export default function RegisterPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       placeholder="Minimum 8 characters"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-slate-100 transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -252,7 +258,7 @@ export default function RegisterPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
                     Current English Level
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -264,7 +270,7 @@ export default function RegisterPage() {
                         className={`py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
                           cefrLevel === level
                             ? "bg-primary-600 text-white border-primary-600 shadow-sm"
-                            : "border-slate-200 bg-slate-50/50 text-slate-600 hover:border-primary-400 hover:bg-white"
+                            : "border-slate-200 bg-stone-50/50 text-stone-600 hover:border-primary-400 hover:bg-white"
                         }`}
                       >
                         {level}
@@ -274,7 +280,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
                     Main Goal
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -286,7 +292,7 @@ export default function RegisterPage() {
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs border transition-all active:scale-[0.99] font-semibold ${
                           goal === g.value
                             ? "bg-primary-50/50 border-primary-500 text-primary-700 shadow-sm"
-                            : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
+                            : "border-slate-200 bg-stone-50/20 text-stone-600 hover:border-primary-300 hover:bg-white"
                         }`}
                       >
                         <span className="text-base shrink-0">{g.icon}</span>
@@ -297,7 +303,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
                     Preferred Accent (Aria&apos;s Voice)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -309,10 +315,10 @@ export default function RegisterPage() {
                         className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-xs border transition-all active:scale-95 font-semibold ${
                           accentPreference === a.value
                             ? "bg-primary-50/50 border-primary-500 text-primary-700 shadow-sm"
-                            : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
+                            : "border-slate-200 bg-stone-50/20 text-stone-600 hover:border-primary-300 hover:bg-white"
                         }`}
                       >
-                        <span className="w-7 h-5 rounded text-[10px] font-black bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                        <span className="w-7 h-5 rounded text-[10px] font-black bg-slate-200 text-stone-600 flex items-center justify-center shrink-0">
                           {a.abbr}
                         </span>
                         {a.label}
@@ -329,7 +335,7 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-3 border border-slate-200 text-sm text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-all active:scale-95"
+                    className="flex-1 py-3 border border-slate-200 text-sm text-stone-600 font-semibold rounded-xl hover:bg-stone-50 transition-all active:scale-95"
                   >
                     Back
                   </button>
@@ -345,7 +351,7 @@ export default function RegisterPage() {
             )}
           </div>
 
-          <p className="text-center text-sm text-slate-500 mt-4">
+          <p className="text-center text-sm text-stone-500 mt-4">
             Already have an account?{" "}
             <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
               Sign in

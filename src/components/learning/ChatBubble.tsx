@@ -5,15 +5,11 @@ import { cn } from "@/lib/utils/cn";
 import { Lightbulb, X, Loader2 } from "lucide-react";
 import type { Message } from "@/hooks/useAIChat";
 
-// ── Lightweight markdown renderer (no external library) ───────────────────────
-// Handles: **bold**, *italic*, newlines → paragraphs, - bullets, 1. numbered lists
-
 function renderInline(text: string): React.ReactNode[] {
-  // Split on **bold** and *italic* markers
   const parts = text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+      return <strong key={i} className="font-semibold text-stone-900">{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("*") && part.endsWith("*")) {
       return <em key={i} className="italic">{part.slice(1, -1)}</em>;
@@ -27,15 +23,15 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
 
   const lines = text.split("\n");
   const elements: React.ReactNode[] = [];
-  let ulItems:   string[] = [];
-  let olItems:   string[] = [];
+  let ulItems: string[] = [];
+  let olItems: string[] = [];
 
   function flushUL() {
     if (!ulItems.length) return;
     elements.push(
       <ul key={`ul-${elements.length}`} className="list-disc list-outside ml-4 space-y-0.5 my-1.5">
         {ulItems.map((item, i) => (
-          <li key={i} className="text-slate-700 leading-relaxed">{renderInline(item)}</li>
+          <li key={i} className="text-stone-700 leading-relaxed">{renderInline(item)}</li>
         ))}
       </ul>
     );
@@ -47,7 +43,7 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
     elements.push(
       <ol key={`ol-${elements.length}`} className="list-decimal list-outside ml-4 space-y-0.5 my-1.5">
         {olItems.map((item, i) => (
-          <li key={i} className="text-slate-700 leading-relaxed">{renderInline(item)}</li>
+          <li key={i} className="text-stone-700 leading-relaxed">{renderInline(item)}</li>
         ))}
       </ol>
     );
@@ -58,35 +54,22 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
     const raw  = lines[i];
     const line = raw.trim();
 
-    // Bullet list
     const bulletMatch = line.match(/^[-*•]\s+(.+)/);
-    if (bulletMatch) {
-      flushOL();
-      ulItems.push(bulletMatch[1]);
-      continue;
-    }
+    if (bulletMatch) { flushOL(); ulItems.push(bulletMatch[1]); continue; }
 
-    // Numbered list
     const numMatch = line.match(/^\d+[.)]\s+(.+)/);
-    if (numMatch) {
-      flushUL();
-      olItems.push(numMatch[1]);
-      continue;
-    }
+    if (numMatch) { flushUL(); olItems.push(numMatch[1]); continue; }
 
     flushUL();
     flushOL();
 
     if (line === "") {
-      // blank line → small gap (only add if previous element exists)
-      if (elements.length > 0) {
-        elements.push(<div key={`gap-${i}`} className="h-1" />);
-      }
+      if (elements.length > 0) elements.push(<div key={`gap-${i}`} className="h-1" />);
       continue;
     }
 
     elements.push(
-      <p key={`p-${i}`} className="leading-relaxed text-slate-800">
+      <p key={`p-${i}`} className="leading-relaxed text-stone-800">
         {renderInline(line)}
       </p>
     );
@@ -100,19 +83,12 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-interface ChatBubbleProps {
-  message: Message;
-}
-
-export function ChatBubble({ message }: ChatBubbleProps) {
+export function ChatBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
   const [correctionDismissed, setCorrectionDismissed] = useState(false);
 
-  // Split AI message: main reply + optional "— Small note:" correction
-  const noteIndex   = message.content.indexOf("— Small note:");
-  const mainText    = noteIndex !== -1
-    ? message.content.slice(0, noteIndex).trim()
-    : message.content.trim();
+  const noteIndex      = message.content.indexOf("— Small note:");
+  const mainText       = noteIndex !== -1 ? message.content.slice(0, noteIndex).trim() : message.content.trim();
   const correctionText = noteIndex !== -1
     ? message.content.slice(noteIndex).replace(/^[—–-]\s*Small note:\s*/i, "").trim()
     : null;
@@ -122,7 +98,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
 
       {/* Aria avatar */}
       {!isUser && (
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1 shadow-md shadow-primary-500/10">
+        <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1 shadow-sm">
           AI
         </div>
       )}
@@ -133,12 +109,11 @@ export function ChatBubble({ message }: ChatBubbleProps) {
         <div className={cn(
           "rounded-2xl px-4 py-3 text-sm shadow-sm",
           isUser
-            ? "bg-gradient-to-br from-primary-600 to-indigo-600 text-white rounded-tr-sm"
-            : "bg-white border border-slate-100 text-slate-800 rounded-tl-sm"
+            ? "bg-stone-900 text-white rounded-tr-sm"
+            : "bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] text-stone-800 rounded-tl-sm"
         )}>
           <FormattedText text={mainText || message.content} isUser={isUser} />
 
-          {/* Streaming cursor */}
           {message.isStreaming && !isUser && (
             <span className="inline-flex items-center gap-1 mt-2">
               <span className="w-1.5 h-1.5 bg-primary-400 rounded-full animate-bounce [animation-delay:0ms]" />
@@ -148,9 +123,9 @@ export function ChatBubble({ message }: ChatBubbleProps) {
           )}
         </div>
 
-        {/* Grammar correction chip — dismissible */}
+        {/* Grammar correction chip */}
         {!isUser && correctionText && !message.isStreaming && !correctionDismissed && (
-          <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs max-w-full animate-in slide-in-from-bottom-1 duration-200">
+          <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs max-w-full">
             <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <span className="font-bold text-amber-800 block mb-0.5">Grammar note</span>
@@ -167,7 +142,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
 
         {/* Streaming status */}
         {!isUser && message.isStreaming && (
-          <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 px-3 py-1 text-xs text-stone-400">
             <Loader2 className="w-3 h-3 animate-spin" />
             <span>Aria is typing…</span>
           </div>
@@ -176,7 +151,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
 
       {/* User avatar */}
       {isUser && (
-        <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-600 text-xs font-bold shrink-0 mt-1">
           You
         </div>
       )}

@@ -4,6 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+const LOGO_SVG = (
+  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -29,79 +35,68 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[var(--background)] paper-grid">
       {/* Left Pane - Brand Info (Desktop only) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
-        {/* Decorative background circles */}
+      <div className="hidden md:flex md:w-1/2 bg-[#1f1d19] text-white flex-col justify-between p-16 relative overflow-hidden border-r border-[var(--line)]">
         <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
-        <div className="absolute w-[400px] h-[400px] bg-primary-500/20 rounded-full -bottom-20 -right-20 blur-3xl" />
+        <div className="absolute w-[400px] h-[400px] bg-primary-500/15 rounded-full -bottom-20 -right-20 blur-3xl" />
 
-        {/* Top brand */}
         <div className="flex items-center gap-2.5 z-10">
           <Link href="/login" className="flex items-center gap-2.5">
-            <span className="text-3xl">🗣️</span>
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
-              Speakly
-            </span>
+            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center">{LOGO_SVG}</div>
+            <span className="text-2xl font-black tracking-tight text-white">Speakly</span>
           </Link>
         </div>
 
-        {/* Center content */}
         <div className="space-y-6 z-10 max-w-lg">
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Recover your account.
           </h1>
-          <p className="text-indigo-100/90 leading-relaxed text-base">
-            Don&apos;t worry, it happens! Enter your email address and we&apos;ll send you a password reset link to get you back on track.
+          <p className="text-stone-400 leading-relaxed text-base">
+            Don&apos;t worry, it happens! Enter your email address and we&apos;ll send you a password reset link.
           </p>
         </div>
 
-        {/* Bottom footer */}
-        <div className="text-indigo-200/50 text-xs z-10 font-medium">
+        <div className="text-stone-600 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
 
       {/* Right Pane - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+      <div className="flex-1 flex items-center justify-center p-8 bg-[var(--background)]">
         <div className="w-full max-w-md space-y-6">
-          {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
-            <span className="text-4xl">🗣️</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-2">Speakly</h2>
-            <p className="text-slate-500 text-sm mt-1">Practice English with AI</p>
+            <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">{LOGO_SVG}</div>
+            <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
+            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              Reset Password
-            </h2>
-            <p className="text-sm text-slate-500 mt-2">
-              Enter your email and we&apos;ll email you link to reset your password.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Reset Password</h2>
+            <p className="text-sm text-stone-500 mt-2">Enter your email and we&apos;ll send you a reset link.</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+          <div className="sk-panel p-8 bg-[var(--surface-strong)]">
             {sent ? (
               <div className="text-center space-y-4 py-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mx-auto border border-emerald-100">
+                <div className="w-16 h-16 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center text-3xl mx-auto border border-primary-100">
                   ✉️
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">Email Sent!</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
+                <h3 className="text-lg font-bold text-stone-900">Email Sent!</h3>
+                <p className="text-sm text-stone-500 leading-relaxed">
                   Please check your inbox for the password reset confirmation link.
                 </p>
-                <Link 
-                  href="/login" 
-                  className="inline-block mt-4 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-95"
+                <Link
+                  href="/login"
+                  className="inline-block mt-4 px-6 py-2.5 bg-[#1f1d19] hover:bg-[#161411] text-white text-sm font-bold rounded-full transition-all shadow-sm active:scale-95"
                 >
                   Back to Sign In
                 </Link>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
                     Email Address
                   </label>
                   <input
@@ -110,7 +105,7 @@ export default function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="name@example.com"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                    className="sk-input"
                   />
                 </div>
 
@@ -123,16 +118,16 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50"
+                  className="w-full py-3 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-semibold rounded-full border border-[#1f1d19] transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
                 >
-                  {loading ? "Sending..." : "Send Reset Link"}
+                  {loading ? "Sending…" : "Send Reset Link"}
                 </button>
               </form>
             )}
           </div>
 
           {!sent && (
-            <p className="text-center text-sm text-slate-500 mt-4">
+            <p className="text-center text-sm text-stone-500">
               <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
                 Back to Sign In
               </Link>

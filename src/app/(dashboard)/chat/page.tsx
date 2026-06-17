@@ -131,17 +131,28 @@ export default function ChatPage() {
   const sortedSessions = [...sessions].sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex h-full w-full overflow-hidden relative">
+      {/* ── Mobile overlay backdrop ── */}
+      {showHistory && (
+        <div
+          className="fixed inset-0 z-30 bg-stone-900/30 backdrop-blur-sm md:hidden"
+          onClick={() => setShowHistory(false)}
+        />
+      )}
+
       {/* ── History Sidebar ── */}
       <aside
-        className={`shrink-0 flex flex-col border-r border-slate-100 bg-[var(--surface)]/60 overflow-hidden transition-all duration-200 ${
-          showHistory ? "w-64" : "w-0"
-        }`}
+        className={`
+          z-40 flex flex-col border-r border-[var(--line)] bg-[var(--surface-strong)] overflow-hidden transition-all duration-200
+          md:relative md:shrink-0
+          fixed inset-y-0 left-0 md:inset-auto
+          ${showHistory ? "w-64 translate-x-0" : "w-64 -translate-x-full md:w-0 md:translate-x-0"}
+        `}
       >
         <div className="w-64 flex flex-col h-full">
           {/* Sidebar header */}
           <div className="flex items-center justify-between px-4 h-14 border-b border-slate-100 shrink-0">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <span className="text-xs font-bold text-stone-500 uppercase tracking-widest">
               History
             </span>
             <button
@@ -171,10 +182,10 @@ export default function ChatPage() {
                   onClick={() => switchSession(s.id)}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-semibold truncate ${isActive ? "text-primary-700" : "text-slate-700"}`}>
+                    <p className={`text-xs font-semibold truncate ${isActive ? "text-primary-700" : "text-stone-700"}`}>
                       {s.title}
                     </p>
-                    <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                    <p className="text-[10px] text-stone-400 mt-0.5 font-medium">
                       {formatSessionDate(s.updatedAt)}
                       {msgCount > 0 && ` · ${msgCount} msg${msgCount !== 1 ? "s" : ""}`}
                     </p>
@@ -185,7 +196,7 @@ export default function ChatPage() {
                         e.stopPropagation();
                         deleteSession(s.id);
                       }}
-                      className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                      className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -200,7 +211,7 @@ export default function ChatPage() {
       {/* ── Main Chat Area ── */}
       <div className="flex flex-col flex-1 p-6 md:p-8 min-w-0 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border border-slate-100 bg-white rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
+        <div className="flex items-center justify-between px-4 py-3 border-[1.5px] border-[var(--line)] bg-[var(--surface-strong)] rounded-[18px] shadow-sm mb-4 shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setShowHistory(!showHistory)}
@@ -208,16 +219,16 @@ export default function ChatPage() {
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                 showHistory
                   ? "bg-primary-50 border border-primary-200 text-primary-600"
-                  : "bg-[var(--surface)] border border-slate-100 text-slate-400 hover:text-slate-600"
+                  : "bg-[var(--surface)] border border-slate-100 text-stone-400 hover:text-stone-600"
               }`}
             >
               <PanelLeft className="w-4 h-4" />
             </button>
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
               AI
             </div>
             <div className="min-w-0">
-              <p className="font-bold text-slate-900 text-sm leading-tight truncate">
+              <p className="font-bold text-stone-900 text-sm leading-tight truncate">
                 {activeSession?.title ?? "Aria"}
               </p>
               <p className="text-xs text-emerald-500 font-semibold flex items-center gap-1.5">
@@ -231,7 +242,7 @@ export default function ChatPage() {
             <button
               onClick={newSession}
               title="New session"
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-primary-600 hover:bg-primary-50 border border-transparent hover:border-primary-100 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-stone-400 hover:text-primary-600 hover:bg-primary-50 border border-transparent hover:border-primary-100 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" /> New
             </button>
@@ -241,7 +252,7 @@ export default function ChatPage() {
               className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                 ttsEnabled
                   ? "bg-primary-50 border border-primary-200 text-primary-600 shadow-sm"
-                  : "bg-[var(--surface)] border border-slate-100 text-slate-400 hover:text-slate-600"
+                  : "bg-[var(--surface)] border border-slate-100 text-stone-400 hover:text-stone-600"
               }`}
             >
               {isSpeaking ? <Volume2 className="w-4 h-4" /> : ttsEnabled ? <Volume1 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -250,7 +261,7 @@ export default function ChatPage() {
               <button
                 onClick={clearChat}
                 title="Clear this session"
-                className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-1.5 text-xs font-semibold text-stone-400 hover:text-red-500 hover:bg-red-50 border border-transparent hover:border-red-100 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" /> Clear
               </button>
@@ -263,16 +274,16 @@ export default function ChatPage() {
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-md mx-auto py-8">
               <div className="space-y-3">
-                <div className="w-14 h-14 rounded-[18px] bg-gradient-to-tr from-primary-50 to-indigo-50 border border-primary-100 flex items-center justify-center mx-auto">
+                <div className="w-14 h-14 rounded-[18px] bg-primary-50 border border-primary-100 flex items-center justify-center mx-auto">
                   <MessageSquare className="w-7 h-7 text-primary-400" />
                 </div>
-                <h2 className="text-lg font-bold text-slate-900">Chat with Aria</h2>
-                <p className="text-sm text-slate-500 leading-relaxed">
+                <h2 className="text-lg font-bold text-stone-900">Chat with Aria</h2>
+                <p className="text-sm text-stone-500 leading-relaxed">
                   Practice English conversation. Aria will reply naturally and give grammar tips inline.
                 </p>
               </div>
               <div className="w-full space-y-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest text-left">
                   Suggested topics
                 </p>
                 <div className="grid grid-cols-1 gap-2">
@@ -280,9 +291,9 @@ export default function ChatPage() {
                     <button
                       key={s.text}
                       onClick={() => handleSend(s.text)}
-                      className="w-full text-left px-4 py-3 rounded-xl bg-[var(--surface)] border border-slate-100 text-sm text-slate-700 hover:border-primary-300 hover:bg-white hover:text-primary-600 hover:shadow-sm transition-all flex items-center gap-3 cursor-pointer"
+                      className="w-full text-left px-4 py-3 rounded-xl bg-[var(--surface)] border border-slate-100 text-sm text-stone-700 hover:border-primary-300 hover:bg-white hover:text-primary-600 hover:shadow-sm transition-all flex items-center gap-3 cursor-pointer"
                     >
-                      <s.Icon className="w-4 h-4 shrink-0 text-slate-400" />
+                      <s.Icon className="w-4 h-4 shrink-0 text-stone-400" />
                       <span className="font-medium truncate">{s.text}</span>
                     </button>
                   ))}
@@ -316,7 +327,7 @@ export default function ChatPage() {
               <button
                 key={s}
                 onClick={() => handleSend(s)}
-                className="px-3 py-1.5 bg-white border border-[var(--line-soft)] text-slate-600 text-xs font-semibold rounded-xl hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 transition-all cursor-pointer"
+                className="px-3 py-1.5 bg-white border border-[var(--line-soft)] text-stone-600 text-xs font-semibold rounded-xl hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50 transition-all cursor-pointer"
               >
                 {s}
               </button>
@@ -326,14 +337,14 @@ export default function ChatPage() {
 
         {/* Input area */}
         <div className="pt-3 shrink-0">
-          <div className="flex gap-2 items-end bg-white border border-[var(--line-soft)] p-2.5 rounded-[18px] shadow-sm">
+          <div className="flex gap-2 items-end bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] p-2.5 rounded-[18px] shadow-sm">
             <button
               onClick={handleMic}
               title={isRecording ? "Stop recording" : "Record voice"}
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
                 isRecording
                   ? "bg-red-500 text-white animate-pulse shadow-sm shadow-red-500/30"
-                  : "bg-[var(--surface)] hover:bg-slate-100 border border-slate-100 text-slate-500"
+                  : "bg-[var(--surface)] hover:bg-slate-100 border border-slate-100 text-stone-500"
               }`}
             >
               {isRecording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
@@ -347,7 +358,7 @@ export default function ChatPage() {
               placeholder={isRecording ? "Listening…" : "Type in English… (Enter to send)"}
               rows={1}
               disabled={isLoading || isRecording}
-              className="flex-1 resize-none rounded-xl border-0 bg-transparent px-2 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:opacity-50 max-h-32 leading-relaxed"
+              className="flex-1 resize-none rounded-xl border-0 bg-transparent px-2 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-0 disabled:opacity-50 max-h-32 leading-relaxed"
               onInput={(e) => {
                 const t = e.currentTarget;
                 t.style.height = "auto";

@@ -28,7 +28,7 @@ export function LogoutButton({ compact }: { compact?: boolean }) {
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all cursor-pointer"
+      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-stone-500 hover:bg-red-50 hover:text-red-600 transition-all cursor-pointer"
     >
       <LogOut className="w-4 h-4 shrink-0" />
       <span>Sign out</span>

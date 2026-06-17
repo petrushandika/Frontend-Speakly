@@ -124,7 +124,7 @@ function SelectField({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-slate-700 cursor-pointer"
+      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-stone-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-stone-700 cursor-pointer"
     >
       {placeholder && <option value="">{placeholder}</option>}
       {children}
@@ -242,22 +242,22 @@ export default function SettingsPage() {
   return (
     <div className="w-full p-6 md:p-8 space-y-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-slate-500 text-sm">Manage your profile, learning preferences, and voice settings.</p>
+        <h1 className="text-3xl font-extrabold text-stone-900 tracking-tight">Settings</h1>
+        <p className="text-stone-500 text-sm">Manage your profile, learning preferences, and voice settings.</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
 
         {/* ── Profile ── */}
         <section className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-          <h2 className="font-extrabold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
-            <User className="w-4 h-4 text-slate-400" /> Profile
+          <h2 className="font-extrabold text-stone-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
+            <User className="w-4 h-4 text-stone-400" /> Profile
           </h2>
 
           {/* Avatar + Name */}
           <div className="flex items-center gap-6">
             <div className="relative shrink-0">
-              <div className="w-32 h-32 rounded-2xl overflow-hidden bg-gradient-to-tr from-primary-100 to-indigo-100 border-2 border-slate-100 flex items-center justify-center shadow-sm">
+              <div className="w-32 h-32 rounded-2xl overflow-hidden bg-primary-50 border-2 border-slate-100 flex items-center justify-center shadow-sm">
                 {displayAvatar
                   ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
                   : <span className="text-4xl font-extrabold text-primary-500 select-none">{getInitials(displayName || profile?.displayName || "?")}</span>
@@ -275,20 +275,20 @@ export default function SettingsPage() {
 
             <div className="flex-1 min-w-0 space-y-3">
               <div className="space-y-1">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Display Name</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Display Name</label>
                 <input
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-stone-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 />
               </div>
               <div className="space-y-1">
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Email</label>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Email</label>
                 <input
                   value={profile?.email ?? ""}
                   disabled
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-100 bg-slate-50 text-sm text-slate-400 cursor-not-allowed"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-100 bg-stone-50 text-sm text-stone-400 cursor-not-allowed"
                 />
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function SettingsPage() {
 
           {/* Bio */}
           <div className="space-y-1">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">
               Bio <span className="normal-case font-normal">(optional, max 200 chars)</span>
             </label>
             <textarea
@@ -314,21 +314,21 @@ export default function SettingsPage() {
               onChange={(e) => setBio(e.target.value.slice(0, 200))}
               placeholder="A short intro about yourself and your English learning journey…"
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-stone-50/50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
             />
-            <p className="text-[10px] text-slate-400 text-right">{bio.length}/200</p>
+            <p className="text-[10px] text-stone-400 text-right">{bio.length}/200</p>
           </div>
 
           {/* Native Language + Country */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Native Language</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Native Language</label>
               <SelectField value={nativeLanguage} onChange={setNativeLanguage} placeholder="Select language…">
                 {NATIVE_LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
               </SelectField>
             </div>
             <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Country</label>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Country</label>
               <SelectField value={country} onChange={setCountry} placeholder="Select country…">
                 {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </SelectField>
@@ -337,7 +337,7 @@ export default function SettingsPage() {
 
           {/* CEFR Level */}
           <div className="space-y-2.5">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">English Level (CEFR)</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">English Level (CEFR)</label>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
               {CEFR_LEVELS.map((l) => (
                 <button
@@ -345,7 +345,7 @@ export default function SettingsPage() {
                   className={`py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 cursor-pointer ${
                     cefrLevel === l
                       ? "bg-primary-600 text-white border-primary-600 shadow-sm"
-                      : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
+                      : "border-slate-200 bg-stone-50/20 text-stone-600 hover:border-primary-300 hover:bg-white"
                   }`}
                 >
                   {l}
@@ -357,13 +357,13 @@ export default function SettingsPage() {
 
         {/* ── Learning Preferences ── */}
         <section className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 space-y-5 shadow-sm">
-          <h2 className="font-extrabold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
-            <Target className="w-4 h-4 text-slate-400" /> Learning Preferences
+          <h2 className="font-extrabold text-stone-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
+            <Target className="w-4 h-4 text-stone-400" /> Learning Preferences
           </h2>
 
           {/* Goal */}
           <div className="space-y-2.5">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Main Goal</label>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400">Main Goal</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {GOALS.map((g) => (
                 <button
@@ -371,7 +371,7 @@ export default function SettingsPage() {
                   className={`flex items-center gap-2.5 text-left px-4 py-3 rounded-xl text-sm border font-semibold transition-all active:scale-[0.99] cursor-pointer ${
                     goal === g.value
                       ? "bg-primary-50 border-primary-500 text-primary-700 shadow-sm"
-                      : "border-slate-200 bg-slate-50/10 text-slate-600 hover:border-primary-300 hover:bg-white"
+                      : "border-slate-200 bg-stone-50/10 text-stone-600 hover:border-primary-300 hover:bg-white"
                   }`}
                 >
                   <g.Icon className="w-4 h-4 shrink-0" />
@@ -383,13 +383,13 @@ export default function SettingsPage() {
 
           {/* Accent */}
           <div className="space-y-3">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-400 flex items-center gap-1.5">
               <Volume2 className="w-3.5 h-3.5" /> Preferred Accent (Aria&apos;s Voice)
             </label>
 
             {ACCENT_GROUPS.map((group) => (
               <div key={group.label} className="space-y-1.5">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{group.label}</p>
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{group.label}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {group.accents.map((a) => (
                     <button
@@ -397,10 +397,10 @@ export default function SettingsPage() {
                       className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-sm border font-semibold transition-all active:scale-95 cursor-pointer ${
                         accentPreference === a.value
                           ? "bg-primary-50 border-primary-500 text-primary-700 shadow-sm"
-                          : "border-slate-200 bg-slate-50/10 text-slate-600 hover:border-primary-300 hover:bg-white"
+                          : "border-slate-200 bg-stone-50/10 text-stone-600 hover:border-primary-300 hover:bg-white"
                       }`}
                     >
-                      <span className="w-7 h-5 rounded text-[10px] font-black bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 group-[.active]:bg-primary-100 group-[.active]:text-primary-700">
+                      <span className="w-7 h-5 rounded text-[10px] font-black bg-slate-200 text-stone-600 flex items-center justify-center shrink-0 group-[.active]:bg-primary-100 group-[.active]:text-primary-700">
                         {a.abbr}
                       </span>
                       {a.label}

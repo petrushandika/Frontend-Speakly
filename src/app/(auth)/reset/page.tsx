@@ -6,6 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
+const LOGO_SVG = (
+  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+);
+
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -17,87 +23,62 @@ export default function ResetPasswordPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password !== confirm) {
-      setError("Passwords don't match");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
+    if (password !== confirm) { setError("Passwords don't match"); return; }
+    if (password.length < 8)  { setError("Password must be at least 8 characters"); return; }
 
     setLoading(true);
     setError(null);
 
     const supabase = createClient();
     const { error } = await supabase.auth.updateUser({ password });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
+    if (error) { setError(error.message); setLoading(false); return; }
     router.push("/login");
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[var(--background)] paper-grid">
       {/* Left Pane - Brand Info (Desktop only) */}
-      <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
-        {/* Decorative background circles */}
+      <div className="hidden md:flex md:w-1/2 bg-[#1f1d19] text-white flex-col justify-between p-16 relative overflow-hidden border-r border-[var(--line)]">
         <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
-        <div className="absolute w-[400px] h-[400px] bg-primary-500/20 rounded-full -bottom-20 -right-20 blur-3xl" />
+        <div className="absolute w-[400px] h-[400px] bg-primary-500/15 rounded-full -bottom-20 -right-20 blur-3xl" />
 
-        {/* Top brand */}
         <div className="flex items-center gap-2.5 z-10">
           <Link href="/login" className="flex items-center gap-2.5">
-            <span className="text-3xl">🗣️</span>
-            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
-              Speakly
-            </span>
+            <div className="w-8 h-8 rounded-xl bg-primary-600 flex items-center justify-center">{LOGO_SVG}</div>
+            <span className="text-2xl font-black tracking-tight text-white">Speakly</span>
           </Link>
         </div>
 
-        {/* Center content */}
         <div className="space-y-6 z-10 max-w-lg">
-          <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
-            Secure your account.
-          </h1>
-          <p className="text-indigo-100/90 leading-relaxed text-base">
-            Create a new, strong password. Make sure it contains at least 8 characters and combines letters, numbers, and special characters.
+          <h1 className="text-4xl font-extrabold tracking-tight leading-tight">Secure your account.</h1>
+          <p className="text-stone-400 leading-relaxed text-base">
+            Create a new, strong password with at least 8 characters combining letters, numbers, and special characters.
           </p>
         </div>
 
-        {/* Bottom footer */}
-        <div className="text-indigo-200/50 text-xs z-10 font-medium">
+        <div className="text-stone-600 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
 
       {/* Right Pane - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+      <div className="flex-1 flex items-center justify-center p-8 bg-[var(--background)]">
         <div className="w-full max-w-md space-y-6">
-          {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
-            <span className="text-4xl">🗣️</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-2">Speakly</h2>
-            <p className="text-slate-500 text-sm mt-1">Practice English with AI</p>
+            <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">{LOGO_SVG}</div>
+            <h2 className="text-3xl font-black text-[var(--foreground)] mt-2">Speakly</h2>
+            <p className="text-stone-500 text-sm mt-1">Practice English with AI</p>
           </div>
 
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              Set New Password
-            </h2>
-            <p className="text-sm text-slate-500 mt-2">
-              Update your account password below.
-            </p>
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--foreground)]">Set New Password</h2>
+            <p className="text-sm text-stone-500 mt-2">Update your account password below.</p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="sk-panel p-8 bg-[var(--surface-strong)]">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
                   New Password
                 </label>
                 <div className="relative">
@@ -107,19 +88,20 @@ export default function ResetPasswordPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Minimum 8 characters"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
+                    className="sk-input pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
+
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -129,12 +111,12 @@ export default function ResetPasswordPage() {
                     onChange={(e) => setConfirm(e.target.value)}
                     required
                     placeholder="Repeat new password"
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all pr-12"
+                    className="sk-input pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100 transition-colors"
                   >
                     {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -150,9 +132,9 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50"
+                className="w-full py-3 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-semibold rounded-full border border-[#1f1d19] transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
               >
-                {loading ? "Saving..." : "Set Password"}
+                {loading ? "Saving…" : "Set Password"}
               </button>
             </form>
           </div>
