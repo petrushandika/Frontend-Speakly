@@ -107,7 +107,7 @@ function TopBar() {
             <div className="absolute right-0 top-full mt-2 w-52 bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
               <div className="px-4 py-2.5 border-b border-[var(--line)]">
                 <p className="text-xs font-bold text-[var(--foreground)] truncate">{profile?.displayName}</p>
-                <p className="text-[10px] text-[var(--foreground)]/50 mt-0.5">{profile?.cefrLevel} · {profile?.goal}</p>
+                <p className="text-[10px] text-[var(--foreground)]/50 mt-0.5">{profile?.cefrLevel ?? "—"} · {profile?.goal ?? "—"}</p>
               </div>
               <Link
                 href="/settings"

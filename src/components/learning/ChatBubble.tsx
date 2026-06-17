@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils/cn";
-import { Lightbulb, X, Loader2 } from "lucide-react";
+import { Lightbulb, X, Loader2, BookmarkPlus, BookmarkCheck } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import type { Message } from "@/hooks/useAIChat";
 
 function renderInline(text: string): React.ReactNode[] {
@@ -81,14 +83,170 @@ function FormattedText({ text, isUser }: { text: string; isUser: boolean }) {
   return <div className="space-y-1">{elements}</div>;
 }
 
+// Extract bold words (**word**) and quoted words ("word") from AI message
+function extractWords(text: string): string[] {
+  const bold   = [...text.matchAll(/\*\*([^*\n]{1,60})\*\*/g)].map((m) => m[1].trim());
+  const quoted = [...text.matchAll(/"([^"\n]{2,60})"/g)].map((m) => m[1].trim());
+  const seen   = new Set<string>();
+  const result: string[] = [];
+  for (const w of [...bold, ...quoted]) {
+    const key = w.toLowerCase();
+    if (!seen.has(key)) { seen.add(key); result.push(w); }
+  }
+  return result.slice(0, 8); // cap at 8 chips
+}
+
+// ── Grammar correction chip ──────────────────────────────────────────────────
+
+function CorrectionChip({ text, onDismiss }: { text: string; onDismiss: () => void }) {
+  // Parse "You said: "X" → Better: "Y" — explanation" format
+  const youSaid  = text.match(/You said:\s*"([^"]+)"/i)?.[1];
+  const better   = text.match(/Better:\s*"([^"]+)"/i)?.[1];
+  const dashIdx  = better ? text.indexOf("—", text.indexOf(better)) : -1;
+  const explain  = dashIdx !== -1 ? text.slice(dashIdx + 1).trim() : (youSaid && better ? "" : text);
+
+  // If we can parse structured format, render it nicely; otherwise fall back to raw text
+  const structured = youSaid && better;
+
+  return (
+    <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl text-xs max-w-full w-full">
+      <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <span className="font-bold text-amber-800 dark:text-amber-400 text-[11px] uppercase tracking-wide">Correction ✏️</span>
+        {structured ? (
+          <>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="px-2 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 rounded-md line-through text-[11px] font-medium">{youSaid}</span>
+              <span className="text-amber-600 font-bold">→</span>
+              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-md font-bold text-[11px]">{better}</span>
+            </div>
+            {explain && <p className="text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed">{explain}</p>}
+          </>
+        ) : (
+          <p className="text-amber-800 dark:text-amber-300 text-[11px] leading-relaxed">{text}</p>
+        )}
+      </div>
+      <button
+        onClick={onDismiss}
+        className="shrink-0 p-0.5 rounded-md text-amber-400 hover:text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mt-0.5"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    </div>
+  );
+}
+
+// ── One-tap word chip ─────────────────────────────────────────────────────────
+
+function WordChip({ word, onSaved }: { word: string; onSaved: () => void }) {
+  const utils = trpc.useUtils();
+  const [state, setState] = useState<"idle" | "saving" | "saved">("idle");
+
+  const add = trpc.vocabulary.add.useMutation({
+    onSuccess: () => {
+      utils.vocabulary.getAll.invalidate();
+      utils.vocabulary.getStudyList.invalidate();
+      setState("saved");
+      toast.success(`"${word}" saved!`);
+      onSaved();
+    },
+    onError: () => {
+      setState("idle");
+      toast.error("Failed to save word");
+    },
+  });
+
+  const classify = trpc.ai.classifyWord.useMutation({
+    onSuccess: (data) => {
+      const definition = data?.definition ?? word;
+      const example    = data?.exampleSentence;
+      const cefrLevel  = data?.cefrLevel;
+      add.mutate({ word, definition, example, cefrLevel });
+    },
+    onError: () => {
+      // Fallback: save with placeholder definition so it still works
+      add.mutate({ word, definition: word });
+    },
+  });
+
+  function handleTap() {
+    if (state !== "idle") return;
+    setState("saving");
+    classify.mutate({ word });
+  }
+
+  if (state === "saved") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400 text-[10px] font-semibold rounded-lg">
+        <BookmarkCheck className="w-3 h-3" /> {word}
+      </span>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleTap}
+      disabled={state === "saving"}
+      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[var(--foreground)]/70 hover:text-primary-600 text-[10px] font-semibold rounded-lg transition-all disabled:opacity-60"
+    >
+      {state === "saving"
+        ? <Loader2 className="w-3 h-3 animate-spin" />
+        : <BookmarkPlus className="w-3 h-3" />}
+      {word}
+    </button>
+  );
+}
+
+// ── Auto-save panel ───────────────────────────────────────────────────────────
+
+function SavePanel({ text, onClose }: { text: string; onClose: () => void }) {
+  const words = extractWords(text);
+  const [savedCount, setSavedCount] = useState(0);
+
+  if (words.length === 0) {
+    return (
+      <div className="mt-1 px-3 py-2.5 bg-[var(--surface)] border border-[var(--line)] rounded-xl text-xs text-[var(--foreground)]/50 flex items-center justify-between gap-2">
+        <span>No highlighted words found in this message.</span>
+        <button onClick={onClose} className="text-[var(--foreground)]/30 hover:text-[var(--foreground)]/60">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-1 p-3 bg-[var(--surface)] border border-[var(--line)] rounded-xl space-y-2">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-bold text-[var(--foreground)]/50 uppercase tracking-wide">
+          Tap to save — auto-fills definition
+        </p>
+        <button onClick={onClose} className="text-[var(--foreground)]/30 hover:text-[var(--foreground)]/60">
+          <X className="w-3.5 h-3.5" />
+        </button>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {words.map((w) => (
+          <WordChip key={w} word={w} onSaved={() => setSavedCount((n) => n + 1)} />
+        ))}
+      </div>
+      {savedCount > 0 && (
+        <p className="text-[10px] text-emerald-600 dark:text-emerald-400">{savedCount} word{savedCount > 1 ? "s" : ""} added to your vocabulary</p>
+      )}
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function ChatBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
   const [correctionDismissed, setCorrectionDismissed] = useState(false);
+  const [showSavePanel, setShowSavePanel] = useState(false);
 
-  const noteIndex      = message.content.indexOf("— Small note:");
-  const mainText       = noteIndex !== -1 ? message.content.slice(0, noteIndex).trim() : message.content.trim();
+  // Match "— Small note:" in any dash/em-dash variant, anywhere in the message
+  const noteMatch = message.content.match(/[—–-]\s*Small note:\s*/i);
+  const noteIndex = noteMatch?.index ?? -1;
+  const mainText  = noteIndex !== -1 ? message.content.slice(0, noteIndex).trim() : message.content.trim();
   const correctionText = noteIndex !== -1
     ? message.content.slice(noteIndex).replace(/^[—–-]\s*Small note:\s*/i, "").trim()
     : null;
@@ -125,19 +283,28 @@ export function ChatBubble({ message }: { message: Message }) {
 
         {/* Grammar correction chip */}
         {!isUser && correctionText && !message.isStreaming && !correctionDismissed && (
-          <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl text-xs max-w-full">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <span className="font-bold text-amber-800 dark:text-amber-400 block mb-0.5">Grammar note</span>
-              <FormattedText text={correctionText} isUser={false} />
-            </div>
-            <button
-              onClick={() => setCorrectionDismissed(true)}
-              className="shrink-0 p-0.5 rounded-md text-amber-400 hover:text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors mt-0.5"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
+          <CorrectionChip text={correctionText} onDismiss={() => setCorrectionDismissed(true)} />
+        )}
+
+        {/* Save word button — only on completed AI messages */}
+        {!isUser && !message.isStreaming && (
+          <button
+            onClick={() => setShowSavePanel((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all",
+              showSavePanel
+                ? "bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400"
+                : "text-[var(--foreground)]/30 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 border border-transparent hover:border-primary-100 dark:hover:border-primary-800"
+            )}
+          >
+            <BookmarkPlus className="w-3 h-3" />
+            Save words
+          </button>
+        )}
+
+        {/* Auto-save panel */}
+        {!isUser && showSavePanel && (
+          <SavePanel text={message.content} onClose={() => setShowSavePanel(false)} />
         )}
 
         {/* Streaming status */}

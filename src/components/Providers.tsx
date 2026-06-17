@@ -11,7 +11,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() =>
     new QueryClient({
       defaultOptions: {
-        queries: { staleTime: 60_000, retry: 1 },
+        queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: true },
         mutations: {
           onError: (err) => {
             const message = err instanceof Error ? err.message : "Something went wrong";
@@ -56,7 +56,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster position="top-right" richColors closeButton />
+        <Toaster position="bottom-right" richColors closeButton />
       </QueryClientProvider>
     </trpc.Provider>
   );

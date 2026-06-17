@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { createClient } from "@/lib/supabase/client";
+import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 import {
   Mic, MicOff, BookOpen, RefreshCw, Play,
   CheckCircle2, XCircle, ChevronRight,
@@ -53,14 +54,46 @@ function normalizeWord(w: string) {
   return w.toLowerCase().replace(/[^a-z']/g, "");
 }
 
+// LCS-based sequence alignment: aligns original words to transcript words
+// so natural speech (skipped/extra words) doesn't cascade wrong marks
 function compareTranscript(original: string, transcript: string): WordResult[] {
   const origWords = original.split(/\s+/).filter(Boolean);
-  const transcriptWords = transcript.split(/\s+/).filter(Boolean);
-  return origWords.map((word, i) => {
-    const expected = normalizeWord(word);
-    const spoken   = normalizeWord(transcriptWords[i] ?? "");
-    return { word, expected, correct: expected === spoken };
-  });
+  const spokenWords = transcript.split(/\s+/).filter(Boolean).map(normalizeWord);
+
+  const n = origWords.length;
+  const m = spokenWords.length;
+
+  // Build LCS length table
+  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (normalizeWord(origWords[i - 1]) === spokenWords[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  // Backtrack to find matches
+  const matched = new Set<number>(); // indices in origWords that matched
+  let i = n, j = m;
+  while (i > 0 && j > 0) {
+    if (normalizeWord(origWords[i - 1]) === spokenWords[j - 1]) {
+      matched.add(i - 1);
+      i--; j--;
+    } else if (dp[i - 1][j] >= dp[i][j - 1]) {
+      i--;
+    } else {
+      j--;
+    }
+  }
+
+  return origWords.map((word, idx) => ({
+    word,
+    expected: normalizeWord(word),
+    correct: matched.has(idx),
+  }));
 }
 
 function calcScore(results: WordResult[]) {
@@ -176,23 +209,27 @@ function ReadingStep({
   const [isRecording, setIsRecording]   = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError]               = useState<string | null>(null);
-  const mediaRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const [recSeconds, setRecSeconds]     = useState(0);
+  const mediaRef    = useRef<MediaRecorder | null>(null);
+  const chunksRef   = useRef<Blob[]>([]);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fullText = text.paragraphs.join(" ");
 
   async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const mimeType = getSupportedMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       chunksRef.current = [];
       recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       recorder.onstop = async () => {
+        if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null; }
         setIsProcessing(true);
         try {
-          const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+          const blob = new Blob(chunksRef.current, { type: blobType(mimeType) });
           const formData = new FormData();
-          formData.append("audio", blob, "recording.webm");
+          formData.append("audio", blob, blobFilename(mimeType));
 
           const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8099";
           const supabase = createClient();
@@ -205,11 +242,8 @@ function ReadingStep({
           });
 
           const data = await res.json();
-          if (data.transcript) {
-            onRecordingDone(data.transcript);
-          } else {
-            setError("Could not transcribe audio. Please try again.");
-          }
+          // Always proceed to results — even empty transcript shows which words were missed
+          onRecordingDone(data.transcript ?? "");
         } catch {
           setError("Transcription failed. Check your connection and try again.");
         } finally {
@@ -220,13 +254,16 @@ function ReadingStep({
       recorder.start();
       mediaRef.current = recorder;
       setIsRecording(true);
+      setRecSeconds(0);
       setError(null);
+      recTimerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
     } catch {
       setError("Microphone access denied. Please allow microphone access and try again.");
     }
   }
 
   function stopRecording() {
+    if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null; }
     mediaRef.current?.stop();
     setIsRecording(false);
   }
@@ -315,7 +352,9 @@ function ReadingStep({
           )}
         </button>
         <p className="text-xs text-[var(--foreground)]/40">
-          {isRecording ? "Tap to stop recording" : isProcessing ? "Please wait…" : "Tap to start recording"}
+          {isRecording
+            ? `${Math.floor(recSeconds / 60)}:${String(recSeconds % 60).padStart(2, "0")} — tap to stop`
+            : isProcessing ? "Please wait…" : "Tap to start recording"}
         </p>
       </div>
     </div>
@@ -323,6 +362,18 @@ function ReadingStep({
 }
 
 // ── Step: Results ──────────────────────────────────────────────────────────────
+
+// Split a flat WordResult array back into paragraphs based on paragraph word counts
+function splitResultsByParagraph(results: WordResult[], paragraphs: string[]): WordResult[][] {
+  const groups: WordResult[][] = [];
+  let offset = 0;
+  for (const para of paragraphs) {
+    const count = para.split(/\s+/).filter(Boolean).length;
+    groups.push(results.slice(offset, offset + count));
+    offset += count;
+  }
+  return groups;
+}
 
 function ResultStep({
   text,
@@ -338,6 +389,7 @@ function ResultStep({
   const fullText = text.paragraphs.join(" ");
   const wordResults = compareTranscript(fullText, transcript);
   const score = calcScore(wordResults);
+  const paraResults = splitResultsByParagraph(wordResults, text.paragraphs);
 
   const correct   = wordResults.filter((r) => r.correct).length;
   const incorrect = wordResults.filter((r) => !r.correct).length;
@@ -365,7 +417,7 @@ function ResultStep({
           <Star className={`w-5 h-5 ${scoreColor}`} />
           <p className="text-xs font-bold uppercase tracking-widest text-[var(--foreground)]/55">Pronunciation Score</p>
         </div>
-        <p className={`text-4xl sm:text-6xl font-black ${scoreColor}`}>{score}<span className="text-xl sm:text-xl sm:text-2xl font-bold text-[var(--foreground)]/40">%</span></p>
+        <p className={`text-4xl sm:text-6xl font-black ${scoreColor}`}>{score}<span className="text-xl sm:text-2xl font-bold text-[var(--foreground)]/40">%</span></p>
         <p className={`text-sm font-semibold mt-2 ${scoreColor}`}>{scoreLabel}</p>
 
         <div className="flex items-center justify-center gap-6 mt-4">
@@ -382,33 +434,47 @@ function ResultStep({
         </div>
       </div>
 
-      {/* Word-by-word result */}
+      {/* Per-paragraph result — reads like a story */}
       <div className="space-y-3">
-        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Word-by-word result</p>
-        <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 leading-9 shadow-sm">
-          {wordResults.map((r, i) => (
-            <span
-              key={i}
-              className={`inline-block mr-1 px-1 rounded font-medium ${
-                r.correct
-                  ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50"
-                  : "text-red-700 dark:text-red-400 bg-red-50 line-through decoration-red-400"
-              }`}
-              title={r.correct ? "Correct!" : `Expected: "${r.expected}"`}
-            >
-              {r.word}
-            </span>
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Your reading</p>
+        <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 space-y-4 shadow-sm">
+          {paraResults.map((paraWords, pi) => (
+            <p key={pi} className="leading-8 text-base">
+              {paraWords.map((r, wi) => (
+                <span key={wi}>
+                  <span
+                    className={`rounded px-0.5 font-medium ${
+                      r.correct
+                        ? "text-emerald-700 dark:text-emerald-400"
+                        : "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 underline decoration-red-400 decoration-wavy underline-offset-2"
+                    }`}
+                    title={r.correct ? undefined : `Not recognized — try: "${r.expected}"`}
+                  >
+                    {r.word}
+                  </span>
+                  {wi < paraWords.length - 1 ? " " : ""}
+                </span>
+              ))}
+            </p>
           ))}
         </div>
         {incorrect > 0 && (
           <p className="text-xs text-[var(--foreground)]/40 flex items-center gap-1.5">
             <XCircle className="w-3.5 h-3.5 text-red-400" />
-            Red strikethrough words were not recognized — try pronouncing them more clearly
+            Wavy underline = not clearly recognized — say those words slower and clearer
           </p>
         )}
       </div>
 
-      {/* Your transcript */}
+      {/* What you actually said */}
+      <div className="space-y-2">
+        <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">What you said</p>
+        <div className="bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)]/70 leading-relaxed italic">
+          {transcript.trim() || <span className="text-[var(--foreground)]/30 not-italic">No speech detected — try speaking louder or closer to the mic</span>}
+        </div>
+      </div>
+
+      {/* What we heard */}
       <div className="space-y-2">
         <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">What we heard</p>
         <div className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 text-sm text-[var(--foreground)]/70 leading-relaxed italic">

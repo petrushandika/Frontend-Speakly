@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 
 export type VoiceState = "idle" | "listening" | "thinking" | "speaking";
 
@@ -28,11 +29,11 @@ interface UseVoiceChatOptions {
 const SESSIONS_KEY   = "speakly-voice-sessions";
 const MAX_SESSIONS   = 20;
 
-// VAD tuning
-const SILENCE_RMS_THRESHOLD = 12;
-const SILENCE_DURATION_MS   = 1_500;
-const MAX_RECORD_MS         = 15_000;
-const MIN_SENTENCE_WORDS    = 3;
+// VAD tuning — generous thresholds so users can speak naturally without cut-offs
+const SILENCE_RMS_THRESHOLD = 18;     // higher = less sensitive to breath/ambient noise
+const SILENCE_DURATION_MS   = 3_000;  // 3s of silence before auto-stopping (was 1.5s)
+const MAX_RECORD_MS         = 120_000; // 2-minute hard cap per turn (was 15s)
+const MIN_SENTENCE_WORDS    = 2;
 
 function autoTitle(messages: VoiceMessage[]): string {
   const first = messages.find((m) => m.role === "user");
@@ -245,10 +246,10 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
 
   // ── STT ─────────────────────────────────────────────────────────────────
 
-  async function transcribe(blob: Blob): Promise<string> {
+  async function transcribe(blob: Blob, filename = "voice.webm"): Promise<string> {
     const token = localStorage.getItem("sb-access-token") ?? "";
     const form  = new FormData();
-    form.append("audio", blob, "voice.webm");
+    form.append("audio", blob, filename);
     const res  = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/transcribe`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
@@ -327,7 +328,7 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
 
   // ── Full pipeline ─────────────────────────────────────────────────────────
 
-  async function runPipeline(blob: Blob) {
+  async function runPipeline(blob: Blob, filename?: string) {
     ttsSlots.current    = [];
     ttsPlayIdx.current  = 0;
     ttsTotalRef.current = 0;
@@ -335,7 +336,7 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
 
     try {
       setVoiceState("thinking");
-      const userText = await transcribe(blob);
+      const userText = await transcribe(blob, filename);
 
       const userMsg: VoiceMessage = {
         id: crypto.randomUUID(), role: "user", text: userText, timestamp: Date.now(),
@@ -422,7 +423,8 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
 
     try {
       const stream   = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const mimeType = getSupportedMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       chunksRef.current = [];
 
       recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
@@ -430,8 +432,8 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
         stream.getTracks().forEach((t) => t.stop());
         stopVAD();
         if (hardCapRef.current) { clearTimeout(hardCapRef.current); hardCapRef.current = null; }
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        if (blob.size > 1_000) runPipeline(blob);
+        const blob = new Blob(chunksRef.current, { type: blobType(mimeType) });
+        if (blob.size > 1_000) runPipeline(blob, blobFilename(mimeType));
         else setVoiceState("idle");
       };
 

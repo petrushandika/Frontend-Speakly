@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
+import { trpc, trpcClient } from "@/lib/trpc";
+import { getSupportedMimeType, blobType, blobFilename, speakText } from "@/lib/audio";
 import {
   BookMarked,
   Plus,
@@ -18,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
+  Volume2,
+  Sparkles,
 } from "lucide-react";
 
 type Tab = "study" | "bank";
@@ -58,29 +61,66 @@ export default function VocabularyPage() {
 
   // Study tab
   const { data: studyList = [] } = trpc.vocabulary.getStudyList.useQuery();
+  // Shuffled queue — reshuffles each round so there's always a next word
+  const [queue, setQueue] = useState<typeof studyList>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [practiceState, setPracticeState] = useState<PracticeState>("idle");
   const [spokenText, setSpokenText] = useState("");
   const [pronScore, setPronScore] = useState<PronunciationScore | null>(null);
+  const [round, setRound] = useState(1);
   const mediaRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const [recSeconds, setRecSeconds] = useState(0);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recCapRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeWord = activeIndex !== null ? studyList[activeIndex] : null;
+  // Seed the queue when the study list loads
+  useEffect(() => {
+    if (studyList.length > 0 && queue.length === 0) {
+      setQueue(shuffle(studyList));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studyList]);
+
+  const activeWord = activeIndex !== null ? queue[activeIndex] : null;
+
+  function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
 
   function openWord(idx: number) {
     setActiveIndex(idx);
     setPracticeState("idle");
     setSpokenText("");
+    setPronScore(null);
   }
 
   function goNext() {
     if (activeIndex === null) return;
     const next = activeIndex + 1;
-    if (next < studyList.length) openWord(next);
-    else {
-      setActiveIndex(null);
+    if (next < queue.length) {
+      openWord(next);
+    } else {
+      // End of round — reshuffle and start a new round
+      const newQueue = shuffle(studyList);
+      setQueue(newQueue);
+      setRound((r) => r + 1);
+      setActiveIndex(0);
       setPracticeState("idle");
-      toast.success("You've completed all words in this list!");
+      setSpokenText("");
+      setPronScore(null);
+      toast.success("Round complete! Starting next round — or generate AI words for more variety.", {
+        action: {
+          label: "Generate words",
+          onClick: () => generateWords.mutate({ count: 10 }),
+        },
+        duration: 6000,
+      });
     }
   }
 
@@ -94,7 +134,7 @@ export default function VocabularyPage() {
     const timer = setTimeout(() => goNext(), 1500);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [practiceState, activeIndex, studyList]);
+  }, [practiceState, activeIndex, queue]);
 
   // Bank tab
   const [search, setSearch] = useState("");
@@ -134,6 +174,24 @@ export default function VocabularyPage() {
     },
   });
 
+  const updateMastery = trpc.vocabulary.updateMastery.useMutation({
+    onSuccess: () => {
+      utils.vocabulary.getAll.invalidate();
+      utils.vocabulary.getStudyList.invalidate();
+    },
+  });
+
+  const generateWords = trpc.vocabulary.generateWords.useMutation({
+    onSuccess: (data) => {
+      utils.vocabulary.getStudyList.invalidate();
+      utils.vocabulary.getAll.invalidate();
+      toast.success(`${data.saved} new words added to your study list!`);
+      // Rebuild queue with fresh words
+      setQueue([]);
+    },
+    onError: () => toast.error("Failed to generate words. Please try again."),
+  });
+
   // Speaking practice
   const startPractice = useCallback(async (targetWord: string) => {
     setPracticeState("recording");
@@ -141,7 +199,8 @@ export default function VocabularyPage() {
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      const mimeType = getSupportedMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       chunksRef.current = [];
 
       recorder.ondataavailable = (e) => {
@@ -150,15 +209,17 @@ export default function VocabularyPage() {
 
       recorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
+        if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null; }
+        if (recCapRef.current) { clearTimeout(recCapRef.current); recCapRef.current = null; }
         setPracticeState("checking");
 
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        const blob = new Blob(chunksRef.current, { type: blobType(mimeType) });
         const token = localStorage.getItem("sb-access-token") ?? "";
         const formData = new FormData();
-        formData.append("audio", blob, "recording.webm");
+        formData.append("audio", blob, blobFilename(mimeType));
 
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/transcribe`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8099"}/speech/transcribe`, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: formData,
@@ -168,14 +229,23 @@ export default function VocabularyPage() {
           setSpokenText(transcript);
 
           // WER-based pronunciation scoring via backend
-          const scoreRes = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/trpc/ai.scorePronunciation?input=${encodeURIComponent(JSON.stringify({ expected: targetWord, transcript }))}`,
-            { headers: { Authorization: `Bearer ${token}` } },
-          );
-          const scoreData = await scoreRes.json();
-          const result: PronunciationScore = scoreData?.result?.data ?? { score: 0, correct: false, feedback: "", mismatchedWords: [] };
+          const result: PronunciationScore = await trpcClient.ai.scorePronunciation.query({
+            expected: targetWord,
+            transcript,
+          }).catch(() => ({ score: 0, correct: false, feedback: "Scoring unavailable", mismatchedWords: [] }));
           setPronScore(result);
           setPracticeState(result.correct ? "correct" : "wrong");
+
+          // Auto-save mastery progress to DB
+          if (activeWord) {
+            updateMastery.mutate({
+              word:       activeWord.word,
+              definition: activeWord.definition,
+              example:    activeWord.example || undefined,
+              cefrLevel:  activeWord.cefrLevel,
+              correct:    result.correct,
+            });
+          }
         } catch {
           setPracticeState("idle");
           toast.error("Could not transcribe. Check your microphone.");
@@ -184,12 +254,14 @@ export default function VocabularyPage() {
 
       recorder.start();
       mediaRef.current = recorder;
-      setTimeout(() => {
+      setRecSeconds(0);
+      recTimerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
+      recCapRef.current = setTimeout(() => {
         if (mediaRef.current?.state === "recording") {
           mediaRef.current.stop();
           mediaRef.current = null;
         }
-      }, 4000);
+      }, 30_000);
     } catch {
       setPracticeState("idle");
       toast.error("Microphone access denied.");
@@ -197,6 +269,8 @@ export default function VocabularyPage() {
   }, []);
 
   function stopRecording() {
+    if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null; }
+    if (recCapRef.current) { clearTimeout(recCapRef.current); recCapRef.current = null; }
     if (mediaRef.current?.state === "recording") {
       mediaRef.current.stop();
       mediaRef.current = null;
@@ -242,14 +316,33 @@ export default function VocabularyPage() {
       {/* ── STUDY LIST TAB ── */}
       {tab === "study" && (
         <div className="space-y-3">
-          <p className="text-xs text-[var(--foreground)]/40">
-            {studyList.length} words matched to your level — tap <strong>Practice</strong> to say each word aloud.
-          </p>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-xs text-[var(--foreground)]/40">
+              {queue.length} words matched to your level — tap <strong>Practice</strong> to say each word aloud.
+            </p>
+            <button
+              onClick={() => generateWords.mutate({ count: 10 })}
+              disabled={generateWords.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {generateWords.isPending
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
+                : <><Sparkles className="w-3.5 h-3.5" /> Generate AI words</>}
+            </button>
+          </div>
 
           {studyList.length === 0 && (
             <div className="text-center py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] flex flex-col items-center gap-2">
               <BookMarked className="w-8 h-8 text-[var(--foreground)]/25" />
-              <p className="text-sm text-[var(--foreground)]/40">No study words found for your level.</p>
+              <p className="text-sm text-[var(--foreground)]/40">No study words yet.</p>
+              <button
+                onClick={() => generateWords.mutate({ count: 10 })}
+                disabled={generateWords.isPending}
+                className="mt-2 flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
+              >
+                <Sparkles className="w-4 h-4" />
+                {generateWords.isPending ? "Generating…" : "Generate my first words"}
+              </button>
             </div>
           )}
 
@@ -265,11 +358,13 @@ export default function VocabularyPage() {
                 >
                   <ChevronLeft className="w-3.5 h-3.5" /> Prev
                 </button>
-                <span className="text-xs font-semibold text-[var(--foreground)]/40">{activeIndex + 1} / {studyList.length}</span>
+                <span className="text-xs font-semibold text-[var(--foreground)]/40">
+                  {activeIndex + 1} / {queue.length}
+                  {round > 1 && <span className="ml-1 text-primary-500">R{round}</span>}
+                </span>
                 <button
                   onClick={goNext}
-                  disabled={activeIndex === studyList.length - 1}
-                  className="flex items-center gap-1 text-xs font-semibold text-[var(--foreground)]/40 hover:text-[var(--foreground)]/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 text-xs font-semibold text-[var(--foreground)]/40 hover:text-[var(--foreground)]/80 transition-colors"
                 >
                   Next <ChevronRight className="w-3.5 h-3.5" />
                 </button>
@@ -282,6 +377,13 @@ export default function VocabularyPage() {
                     <span className="text-lg font-bold text-[var(--foreground)]">{activeWord.word}</span>
                     <span className="text-sm text-[var(--foreground)]/40 font-mono">{activeWord.phonetic}</span>
                     <span className="text-xs px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-600 rounded-full font-semibold">{activeWord.cefrLevel}</span>
+                    <button
+                      onClick={() => speakText(activeWord.word)}
+                      title="Hear pronunciation"
+                      className="p-1 rounded-lg text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                   <p className="text-sm text-[var(--foreground)]/70 mt-1">{activeWord.definition}</p>
                   <p className="text-xs text-primary-600 font-semibold mt-0.5">{activeWord.indonesian}</p>
@@ -312,9 +414,18 @@ export default function VocabularyPage() {
               {/* Practice panel */}
               <div className="border-t border-[var(--line)] px-4 pb-4 pt-3 bg-[var(--surface)]/50 rounded-b-2xl space-y-3">
                 <p className="text-xs font-semibold text-[var(--foreground)]/40 uppercase tracking-wide">Say this word aloud:</p>
-                <div>
-                  <p className="text-2xl sm:text-4xl font-bold text-primary-600 tracking-wide">{activeWord.word}</p>
-                  <p className="text-sm text-[var(--foreground)]/40 font-mono mt-0.5">{activeWord.phonetic}</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-2xl sm:text-4xl font-bold text-primary-600 tracking-wide">{activeWord.word}</p>
+                    <p className="text-sm text-[var(--foreground)]/40 font-mono mt-0.5">{activeWord.phonetic}</p>
+                  </div>
+                  <button
+                    onClick={() => speakText(activeWord.word)}
+                    title="Hear correct pronunciation"
+                    className="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-800 text-primary-600 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors"
+                  >
+                    <Volume2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 {practiceState === "idle" && (
@@ -330,7 +441,7 @@ export default function VocabularyPage() {
                     <button onClick={stopRecording} className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white text-sm font-semibold rounded-xl hover:bg-red-600 animate-pulse">
                       <Square className="w-4 h-4" /> Stop
                     </button>
-                    <span className="text-xs text-[var(--foreground)]/40">Recording… auto-stops in 4s</span>
+                    <span className="text-xs text-[var(--foreground)]/40">Recording… {recSeconds}s</span>
                   </div>
                 )}
                 {practiceState === "checking" && (
@@ -386,8 +497,8 @@ export default function VocabularyPage() {
           )}
 
           {/* Word list */}
-          {studyList.map((item, idx) => {
-            const isActive = activeIndex === idx;
+          {studyList.map((item) => {
+            const isActive = activeWord?.word === item.word;
             const defRevealed = isBeginnerLevel || revealedDefs.has(item.word);
             return (
               <div
@@ -423,10 +534,17 @@ export default function VocabularyPage() {
 
                   <div className="flex gap-2 shrink-0 items-start">
                     <button
-                      onClick={() => addFlashcard.mutate({ 
-                        front: item.word, 
-                        back: item.indonesian ? `${item.indonesian} — ${item.definition}` : item.definition, 
-                        example: item.example 
+                      onClick={() => speakText(item.word)}
+                      title="Hear pronunciation"
+                      className="p-2 rounded-lg border border-[var(--line-soft)] text-[var(--foreground)]/40 hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 transition-colors"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => addFlashcard.mutate({
+                        front: item.word,
+                        back: item.indonesian ? `${item.indonesian} — ${item.definition}` : item.definition,
+                        example: item.example
                       })}
                       disabled={addedToFlashcard.has(item.word)}
                       title={addedToFlashcard.has(item.word) ? "Added to flashcards" : "Add to flashcards"}
@@ -441,7 +559,10 @@ export default function VocabularyPage() {
 
                     {!isActive ? (
                       <button
-                        onClick={() => openWord(idx)}
+                        onClick={() => {
+                          const qIdx = queue.findIndex((w) => w.word === item.word);
+                          openWord(qIdx !== -1 ? qIdx : 0);
+                        }}
                         className="flex items-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-semibold rounded-lg hover:bg-primary-700 transition-colors"
                       >
                         <Mic className="w-3.5 h-3.5" /> Practice
@@ -536,6 +657,13 @@ export default function VocabularyPage() {
                     {entry.example && <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">"{entry.example}"</p>}
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => speakText(entry.word)}
+                      title="Hear pronunciation"
+                      className="p-2 rounded-lg border border-[var(--line-soft)] text-[var(--foreground)]/40 hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 transition-colors"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       onClick={() => addFlashcard.mutate({ front: entry.word, back: entry.definition, example: entry.example ?? undefined })}
                       disabled={alreadyAdded}

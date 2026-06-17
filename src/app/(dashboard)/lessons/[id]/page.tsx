@@ -4,7 +4,8 @@ import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
-import { SearchX, Lightbulb, ChevronRight, Eye, EyeOff, Check, X } from "lucide-react";
+import { toast } from "sonner";
+import { SearchX, Lightbulb, ChevronRight, Eye, EyeOff, Check, X, BookmarkPlus, BookmarkCheck } from "lucide-react";
 
 function parseInlineMarkdown(text: string) {
   if (!text) return "";
@@ -241,11 +242,36 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const { id } = use(params);
   const router = useRouter();
 
+  const utils = trpc.useUtils();
   const { data: lesson, isLoading } = trpc.lessons.getById.useQuery({ id });
   const { data: profile } = trpc.users.getProfile.useQuery();
   const complete = trpc.lessons.complete.useMutation({
-    onSuccess: () => router.push("/lessons"),
+    onSuccess: () => {
+      // Invalidate all relevant caches so dashboard, progress, lessons list all update
+      utils.lessons.getAll.invalidate();
+      utils.progress.getSummary.invalidate();
+      utils.users.getProfile.invalidate();
+      toast.success("Progress saved!");
+    },
   });
+
+  const [savedExamples, setSavedExamples] = useState<Set<number>>(new Set());
+  const saveVocab = trpc.vocabulary.add.useMutation({
+    onSuccess: (_, vars) => {
+      utils.vocabulary.getAll.invalidate();
+      utils.vocabulary.getStudyList.invalidate();
+      toast.success(`"${vars.word}" saved to vocabulary!`);
+    },
+    onError: () => toast.error("Failed to save word"),
+  });
+
+  function saveExample(exIndex: number, enText: string, idText?: string) {
+    const phrase = enText.split("\n")[0].trim().replace(/\.$/, "");
+    if (!phrase) return;
+    setSavedExamples((prev) => new Set([...prev, exIndex]));
+    const definition = idText?.trim() || ("From lesson: " + (lesson?.title ?? ""));
+    saveVocab.mutate({ word: phrase, definition, example: enText });
+  }
 
   // For B1+: translations hidden by default (immersion), user can reveal
   // For A1/A2: translations always visible
@@ -368,7 +394,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                     <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
                     Explanation
                   </h2>
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0 overflow-x-hidden">
                     {renderMarkdown(section.text)}
                   </div>
                 </div>
@@ -401,6 +427,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                     {section.items.map((ex, j) => {
                       const isCode = ex.en.includes("\n");
                       const parts = isCode ? null : parseGrammar(ex.en);
+                      const isSaved = savedExamples.has(j);
                       return (
                         <li key={j} className="bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-2xl overflow-hidden">
                           {/* Number strip */}
@@ -408,9 +435,9 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                             <div className="w-9 bg-[var(--surface-strong)] border-r border-[var(--line)] flex items-center justify-center shrink-0">
                               <span className="text-[11px] font-black text-[var(--foreground)]/40">{j + 1}</span>
                             </div>
-                            <div className="flex-1 px-4 py-3.5 space-y-2.5">
+                            <div className="flex-1 min-w-0 px-4 py-3.5 space-y-2.5 overflow-x-hidden">
                               {isCode ? (
-                                <pre className="font-mono bg-stone-950 text-stone-100 p-4 rounded-xl whitespace-pre overflow-x-auto text-xs border border-stone-800 shadow-inner">
+                                <pre className="font-mono bg-stone-950 text-stone-100 p-3 rounded-xl whitespace-pre overflow-x-auto text-xs border border-stone-800 shadow-inner">
                                   {ex.en}
                                 </pre>
                               ) : parts ? (
@@ -430,6 +457,23 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                                     {ex.id}
                                   </p>
                                 </div>
+                              )}
+
+                              {/* Save to vocabulary */}
+                              {!isCode && (
+                                <button
+                                  onClick={() => saveExample(j, ex.en, ex.id)}
+                                  disabled={isSaved}
+                                  className={`flex items-center gap-1 text-[10px] font-bold transition-all ${
+                                    isSaved
+                                      ? "text-emerald-600 dark:text-emerald-400"
+                                      : "text-[var(--foreground)]/30 hover:text-primary-500"
+                                  }`}
+                                >
+                                  {isSaved
+                                    ? <><BookmarkCheck className="w-3 h-3" /> Saved to vocab</>
+                                    : <><BookmarkPlus className="w-3 h-3" /> Save to vocab</>}
+                                </button>
                               )}
                             </div>
                           </div>
@@ -529,11 +573,17 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
           {!submitted && (
             <div className="pt-2">
               <button
-                onClick={() => setSubmitted(true)}
-                disabled={Object.keys(answers).length < exercises.length}
+                onClick={() => {
+                  setSubmitted(true);
+                  // Auto-save progress when answers are checked
+                  const finalScore = calculateScore();
+                  const xpEarned = Math.max(10, Math.round((finalScore / 100) * 50));
+                  complete.mutate({ lessonId: id, score: finalScore, xpEarned });
+                }}
+                disabled={Object.keys(answers).length < exercises.length || complete.isPending}
                 className="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm rounded-2xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Check Answers
+                {complete.isPending ? "Saving…" : "Check Answers"}
               </button>
               {Object.keys(answers).length < exercises.length && (
                 <p className="text-center text-xs text-[var(--foreground)]/40 mt-3 font-medium">Please answer all questions before checking.</p>
@@ -543,7 +593,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
         </div>
       )}
 
-      {/* Complete Button */}
+      {/* Score + continue — shown after exercises checked */}
       {(!exercises.length || submitted) && (
         <div className="pt-2">
           {submitted && exercises.length > 0 && (
@@ -552,18 +602,32 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
               <span className="text-2xl font-extrabold text-primary-600">{calculateScore()}%</span>
             </div>
           )}
-          <button
-            onClick={() => {
-              const finalScore = calculateScore();
-              // Calculate XP based on score (max 50)
-              const xpEarned = Math.round((finalScore / 100) * 50);
-              complete.mutate({ lessonId: id, score: finalScore, xpEarned: xpEarned || 10 });
-            }}
-            disabled={complete.isPending}
-            className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {complete.isPending ? "Saving…" : "Complete Lesson"}
-          </button>
+          {/* Lesson with no exercises — still need to explicitly complete */}
+          {!exercises.length && (
+            <button
+              onClick={() => complete.mutate({ lessonId: id, score: 100, xpEarned: 20 })}
+              disabled={complete.isPending}
+              className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {complete.isPending ? "Saving…" : "Mark as Complete"}
+            </button>
+          )}
+          {submitted && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setAnswers({}); setSubmitted(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                className="flex-1 py-3.5 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-primary-400 text-[var(--foreground)] font-bold text-sm rounded-2xl transition-all active:scale-[0.98] cursor-pointer"
+              >
+                Try Again
+              </button>
+              <button
+                onClick={() => router.push("/lessons")}
+                className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] cursor-pointer"
+              >
+                Back to Lessons
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

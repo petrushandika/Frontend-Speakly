@@ -53,8 +53,8 @@ function TrendBadge({ trend }: { trend: "improving" | "stable" | "needs_attentio
 
 export default function ProgressPage() {
   const FIVE_MIN = 5 * 60 * 1000;
-  const { data: summary }               = trpc.progress.getSummary.useQuery(undefined, { staleTime: 60_000 });
-  const { data: recent = [] }           = trpc.progress.getRecentProgress.useQuery(undefined, { staleTime: 60_000 });
+  const { data: summary }               = trpc.progress.getSummary.useQuery();
+  const { data: recent = [] }           = trpc.progress.getRecentProgress.useQuery();
   const { data: analytics }             = trpc.ai.getErrorAnalytics.useQuery(undefined, { staleTime: FIVE_MIN });
   const { data: recommendations = [] }  = trpc.ai.getRecommendations.useQuery(undefined, { staleTime: FIVE_MIN });
   const { data: learningCtx }           = trpc.ai.getLearningContext.useQuery(undefined, { staleTime: FIVE_MIN });

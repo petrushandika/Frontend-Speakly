@@ -3,9 +3,20 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 import {
-  Mic2, User, Send, MessageSquare, X, LogIn, LogOut,
+  Mic2, User, Send, MessageSquare, X, LogIn, LogOut, Mic, MicOff, Loader2, Plus,
 } from "lucide-react";
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface ChatMessage {
+  id: string;
+  userId: string;
+  displayName: string;
+  text: string;
+  ts: number;
+}
 
 // ── Room Chat Panel ───────────────────────────────────────────────────────────
 
@@ -22,30 +33,112 @@ function RoomChat({
 }) {
   const utils = trpc.useUtils();
   const [text, setText] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const mediaRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: messages = [] } = trpc.rooms.getMessages.useQuery(
-    { roomId },
-    { refetchInterval: 3000 },
-  );
+  // Load initial messages
+  const { data: initialMessages = [] } = trpc.rooms.getMessages.useQuery({ roomId });
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages as ChatMessage[]);
+    }
+  }, [initialMessages]);
+
+  // SSE real-time updates
+  useEffect(() => {
+    const token = localStorage.getItem("sb-access-token") ?? "";
+    const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8099"}/rooms/${roomId}/events`;
+    const es = new EventSource(`${url}?token=${encodeURIComponent(token)}`);
+
+    es.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data) as ChatMessage;
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+      } catch {}
+    };
+
+    es.onerror = () => {
+      // SSE auto-reconnects; silently ignore transient errors
+    };
+
+    return () => es.close();
+  }, [roomId]);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const send = trpc.rooms.sendMessage.useMutation({
     onSuccess: () => {
       utils.rooms.getMessages.invalidate({ roomId });
       setText("");
+      inputRef.current?.focus();
     },
     onError: () => toast.error("Failed to send message"),
   });
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   function handleSend(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
     send.mutate({ roomId, text: trimmed });
+  }
+
+  async function startVoice() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = getSupportedMimeType();
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      chunksRef.current = [];
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        setIsRecording(false);
+        setIsTranscribing(true);
+        try {
+          const blob = new Blob(chunksRef.current, { type: blobType(mimeType) });
+          const token = localStorage.getItem("sb-access-token") ?? "";
+          const formData = new FormData();
+          formData.append("audio", blob, blobFilename(mimeType));
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8099"}/speech/transcribe`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: formData,
+          });
+          const data = await res.json();
+          if (data.transcript) {
+            send.mutate({ roomId, text: data.transcript });
+          } else {
+            toast.error("Could not transcribe — please try again");
+          }
+        } catch {
+          toast.error("Voice transcription failed");
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+      recorder.start();
+      mediaRef.current = recorder;
+      setIsRecording(true);
+    } catch {
+      toast.error("Microphone access denied");
+    }
+  }
+
+  function stopVoice() {
+    if (mediaRef.current?.state === "recording") {
+      mediaRef.current.stop();
+      mediaRef.current = null;
+    }
   }
 
   function formatTime(ts: number) {
@@ -59,10 +152,14 @@ function RoomChat({
         <div className="flex items-center gap-2 min-w-0">
           <MessageSquare className="w-4 h-4 text-primary-600 shrink-0" />
           <p className="text-sm font-bold text-[var(--foreground)] truncate">{roomName}</p>
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded-full shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
+            Live
+          </span>
         </div>
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 hover:bg-[var(--surface)] transition-all"
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70 hover:bg-[var(--surface)] transition-all shrink-0"
         >
           <X className="w-4 h-4" />
         </button>
@@ -87,7 +184,7 @@ function RoomChat({
                 <div className={`px-3 py-2 rounded-xl text-sm leading-relaxed ${
                   isMe
                     ? "bg-primary-600 text-white rounded-tr-sm"
-                    : "bg-[var(--surface-strong)] text-[var(--foreground)] rounded-tl-sm"
+                    : "bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)] rounded-tl-sm"
                 }`}>
                   {msg.text}
                 </div>
@@ -103,16 +200,38 @@ function RoomChat({
 
       {/* Input */}
       <form onSubmit={handleSend} className="flex items-center gap-2 px-3 py-3 border-t border-[var(--line)] shrink-0">
+        <button
+          type="button"
+          onClick={isRecording ? stopVoice : startVoice}
+          disabled={isTranscribing}
+          title={isRecording ? "Stop recording" : "Speak a message"}
+          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+            isRecording
+              ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+              : isTranscribing
+              ? "bg-[var(--surface-strong)] text-[var(--foreground)]/40 opacity-60"
+              : "bg-[var(--surface-strong)] border border-[var(--line)] text-[var(--foreground)]/50 hover:text-primary-600 hover:border-primary-300 dark:hover:border-primary-700"
+          }`}
+        >
+          {isTranscribing
+            ? <Loader2 className="w-4 h-4 animate-spin" />
+            : isRecording
+            ? <MicOff className="w-4 h-4" />
+            : <Mic className="w-4 h-4" />}
+        </button>
+
         <input
+          ref={inputRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message…"
+          placeholder={isRecording ? "Recording… tap mic to stop" : "Type or speak a message…"}
           maxLength={500}
-          className="flex-1 px-3 py-2 rounded-xl border border-[var(--line-soft)] bg-[var(--surface)] text-sm focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all"
+          disabled={isRecording || isTranscribing}
+          className="flex-1 px-3 py-2 rounded-xl border border-[var(--line-soft)] bg-[var(--surface)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-all disabled:opacity-60"
         />
         <button
           type="submit"
-          disabled={!text.trim() || send.isPending}
+          disabled={!text.trim() || send.isPending || isRecording || isTranscribing}
           className="w-9 h-9 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white flex items-center justify-center transition-all shrink-0 cursor-pointer"
         >
           <Send className="w-4 h-4" />
@@ -131,7 +250,7 @@ export default function RoomsPage() {
   const currentUserId = profile?.id ?? "";
 
   const { data: rooms = [], isLoading } = trpc.rooms.getActive.useQuery(undefined, {
-    refetchInterval: 10_000,
+    refetchInterval: 15_000,
   });
 
   const createRoom = trpc.rooms.create.useMutation({
@@ -177,85 +296,85 @@ export default function RoomsPage() {
   const openChatRoom = rooms.find((r) => r.id === openChatId);
 
   return (
-    <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
-            <Mic2 className="w-5 h-5 text-primary-600" />
+    <div className="h-full flex flex-col overflow-hidden">
+
+      {/* ── Top bar (shrinks, doesn't scroll) ── */}
+      <div className="shrink-0 p-3 md:p-6 pb-0 space-y-3">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+              <Mic2 className="w-5 h-5 text-primary-600" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] truncate">Speaking Rooms</h1>
+              <p className="text-xs sm:text-sm text-[var(--foreground)]/55">Practice conversation with other learners in real-time</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] truncate">Speaking Rooms</h1>
-            <p className="text-xs sm:text-sm text-[var(--foreground)]/55">Practice conversation with other learners</p>
-          </div>
+          <button
+            onClick={() => setShowCreate(!showCreate)}
+            className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            {showCreate ? "Cancel" : "New Room"}
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
-        >
-          {showCreate ? "Cancel" : "New Room"}
-        </button>
+
+        {/* Create room form */}
+        {showCreate && (
+          <form
+            onSubmit={handleCreate}
+            className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 sm:p-5 space-y-3 shadow-md"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Room Name</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. IELTS Speaking Part 1"
+                  required
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--line-soft)] bg-[var(--surface)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Topic (Optional)</label>
+                <input
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="e.g. Travel, Job Interviews…"
+                  className="w-full px-3 py-2 rounded-xl border border-[var(--line-soft)] bg-[var(--surface)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowCreate(false)}
+                className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-[var(--foreground)]/55 hover:bg-[var(--surface)] transition-all active:scale-95 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={createRoom.isPending}
+                className="px-5 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 cursor-pointer shadow-sm"
+              >
+                {createRoom.isPending ? "Creating…" : "Create Room"}
+              </button>
+            </div>
+          </form>
+        )}
       </div>
 
-      {/* Create room form */}
-      {showCreate && (
-        <form
-          onSubmit={handleCreate}
-          className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 sm:p-6 space-y-4 shadow-md shadow-slate-100/50"
-        >
-          <div className="space-y-1 border-b border-[var(--line)] pb-3">
-            <h2 className="font-extrabold text-[var(--foreground)] text-base">Host a Speaking Room</h2>
-            <p className="text-xs text-[var(--foreground)]/40">Host a session for other learners to join and practice.</p>
-          </div>
+      {/* ── Body: room list + chat panel (fills remaining height) ── */}
+      <div className="flex-1 min-h-0 flex gap-3 p-3 md:p-6 pt-3">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Room Name</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. IELTS Speaking Part 1"
-                required
-                className="w-full px-4 py-2.5 rounded-xl border border-[var(--line-soft)] bg-[var(--surface)]/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Discussion Topic (Optional)</label>
-              <input
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Travel, Job Interviews, Daily Life"
-                className="w-full px-4 py-2.5 rounded-xl border border-[var(--line-soft)] bg-[var(--surface)]/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2 justify-end pt-2">
-            <button
-              type="button"
-              onClick={() => setShowCreate(false)}
-              className="px-5 py-2.5 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-[var(--foreground)]/55 hover:bg-[var(--surface)] transition-all active:scale-95 cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={createRoom.isPending}
-              className="px-6 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 cursor-pointer shadow-sm"
-            >
-              {createRoom.isPending ? "Creating…" : "Create Room"}
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Room list + chat split */}
-      <div className={`flex gap-4 ${openChatRoom ? "flex-col lg:flex-row" : ""}`}>
-        {/* Room list */}
-        <div className={`space-y-3 ${openChatRoom ? "lg:w-1/2 w-full" : "w-full"}`}>
+        {/* Room list — always visible, independently scrollable */}
+        <div className={`flex flex-col min-h-0 overflow-y-auto space-y-2 ${openChatRoom ? "w-full md:w-72 lg:w-80 shrink-0" : "w-full"}`}>
           {isLoading ? (
             [...Array(3)].map((_, i) => (
-              <div key={i} className="h-24 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
+              <div key={i} className="shrink-0 h-24 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
             ))
           ) : rooms.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm text-center">
@@ -263,8 +382,8 @@ export default function RoomsPage() {
                 <Mic2 className="w-6 h-6 text-primary-400" />
               </div>
               <h3 className="font-bold text-[var(--foreground)]">No Active Rooms</h3>
-              <p className="text-[var(--foreground)]/40 text-sm max-w-xs">
-                No active sessions. Host the first room to start practicing!
+              <p className="text-[var(--foreground)]/40 text-sm max-w-xs px-4">
+                No active sessions. Create the first room to start practicing!
               </p>
             </div>
           ) : (
@@ -281,73 +400,72 @@ export default function RoomsPage() {
               return (
                 <div
                   key={room.id}
-                  className={`bg-[var(--surface-strong)] border rounded-[18px] p-5 flex items-center justify-between gap-4 transition-all duration-200 ${
-                    isOpen ? "border-primary-300 shadow-md" : "border-[var(--line)] hover:shadow-md"
+                  className={`shrink-0 bg-[var(--surface-strong)] border rounded-[18px] p-3 sm:p-4 transition-all duration-200 ${
+                    isOpen ? "border-primary-300 dark:border-primary-700 shadow-md" : "border-[var(--line)] hover:shadow-sm"
                   }`}
                 >
-                  <div className="min-w-0 space-y-1 flex-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <p className="font-extrabold text-[var(--foreground)] text-base truncate">
-                        {room.name}
-                      </p>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-md uppercase tracking-wider flex items-center gap-1.5 ${
-                        isFull
-                          ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600"
-                          : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400"
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full inline-block ${isFull ? "bg-red-500" : "bg-green-500 animate-ping"}`} />
-                        {memberCount}/{maxMembers}
-                      </span>
-                      {isMember && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 text-primary-700 dark:text-primary-300 rounded-md uppercase tracking-wider">
-                          Joined
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 space-y-1 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-extrabold text-[var(--foreground)] text-sm truncate">{room.name}</p>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-md flex items-center gap-1.5 ${
+                          isFull
+                            ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-600"
+                            : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400"
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full inline-block ${isFull ? "bg-red-500" : "bg-green-500 animate-ping"}`} />
+                          {memberCount}/{maxMembers}
                         </span>
+                        {isMember && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 text-primary-700 dark:text-primary-300 rounded-md">
+                            Joined
+                          </span>
+                        )}
+                      </div>
+                      {room.topic && (
+                        <p className="text-xs text-[var(--foreground)]/55 truncate">{room.topic}</p>
+                      )}
+                      <div className="flex items-center gap-1.5 text-[10px] text-[var(--foreground)]/40 font-medium">
+                        <User className="w-3 h-3" />
+                        <span className="font-semibold text-[var(--foreground)]/60">{host}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-1.5 shrink-0 flex-col sm:flex-row">
+                      {isMember ? (
+                        <>
+                          <button
+                            onClick={() => setOpenChatId(isOpen ? null : room.id)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 ${
+                              isOpen
+                                ? "bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-700"
+                                : "bg-primary-600 hover:bg-primary-700 text-white shadow-sm"
+                            }`}
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            {isOpen ? "Hide" : "Chat"}
+                          </button>
+                          <button
+                            onClick={() => leaveRoom.mutate({ roomId: room.id })}
+                            disabled={leaveRoom.isPending}
+                            className="flex items-center justify-center w-8 h-8 border border-[var(--line-soft)] text-[var(--foreground)]/55 text-xs font-bold rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-500 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
+                            title="Leave room"
+                          >
+                            <LogOut className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => joinRoom.mutate({ roomId: room.id })}
+                          disabled={joinRoom.isPending || isFull}
+                          title={isFull ? "Room is full" : "Join this room"}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm active:scale-95"
+                        >
+                          <LogIn className="w-3.5 h-3.5" />
+                          {isFull ? "Full" : "Join"}
+                        </button>
                       )}
                     </div>
-                    {room.topic && (
-                      <p className="text-sm font-semibold text-[var(--foreground)]/55 truncate">{room.topic}</p>
-                    )}
-                    <div className="flex items-center gap-1.5 text-xs text-[var(--foreground)]/40 pt-1 font-medium">
-                      <User className="w-3.5 h-3.5" />
-                      <span>Host:</span>
-                      <span className="font-semibold text-[var(--foreground)]/70">{host}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 shrink-0">
-                    {isMember ? (
-                      <>
-                        <button
-                          onClick={() => setOpenChatId(isOpen ? null : room.id)}
-                          className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 ${
-                            isOpen
-                              ? "bg-primary-100 text-primary-700 dark:text-primary-300 border border-primary-200"
-                              : "bg-primary-600 hover:bg-primary-700 text-white shadow-sm"
-                          }`}
-                        >
-                          <MessageSquare className="w-3.5 h-3.5 inline mr-1.5" />
-                          {isOpen ? "Hide Chat" : "Open Chat"}
-                        </button>
-                        <button
-                          onClick={() => leaveRoom.mutate({ roomId: room.id })}
-                          disabled={leaveRoom.isPending}
-                          className="px-3 py-2.5 border border-[var(--line-soft)] text-[var(--foreground)]/55 text-xs font-bold rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
-                          title="Leave room"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => joinRoom.mutate({ roomId: room.id })}
-                        disabled={joinRoom.isPending || isFull}
-                        title={isFull ? "Room is full" : "Join this room"}
-                        className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm active:scale-95"
-                      >
-                        <LogIn className="w-3.5 h-3.5" />
-                        {isFull ? "Full" : "Join"}
-                      </button>
-                    )}
                   </div>
                 </div>
               );
@@ -355,9 +473,9 @@ export default function RoomsPage() {
           )}
         </div>
 
-        {/* Chat panel */}
+        {/* Chat panel — full height, sticky next to room list */}
         {openChatRoom && currentUserId && (
-          <div className="lg:w-1/2 w-full" style={{ height: "min(480px, 60vh)" }}>
+          <div className="flex-1 min-w-0 min-h-0 hidden md:flex flex-col">
             <RoomChat
               roomId={openChatRoom.id}
               currentUserId={currentUserId}
@@ -367,6 +485,18 @@ export default function RoomsPage() {
           </div>
         )}
       </div>
+
+      {/* Mobile: chat panel as overlay/bottom sheet when open */}
+      {openChatRoom && currentUserId && (
+        <div className="md:hidden fixed inset-x-0 bottom-0 top-14 z-30 flex flex-col p-3 bg-[var(--background)]/95 backdrop-blur-sm">
+          <RoomChat
+            roomId={openChatRoom.id}
+            currentUserId={currentUserId}
+            roomName={openChatRoom.name}
+            onClose={() => setOpenChatId(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }
