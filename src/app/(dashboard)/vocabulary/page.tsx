@@ -17,6 +17,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 
 type Tab = "study" | "bank";
@@ -42,6 +43,18 @@ const MASTERY_COLOR = [
 export default function VocabularyPage() {
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<Tab>("study");
+  const { data: profile } = trpc.users.getProfile.useQuery();
+  const cefrLevel = profile?.cefrLevel ?? "B1";
+  const isBeginnerLevel = cefrLevel === "A1" || cefrLevel === "A2";
+  // For B1+: track which word cards have their definition revealed
+  const [revealedDefs, setRevealedDefs] = useState<Set<string>>(new Set());
+  function toggleDef(word: string) {
+    setRevealedDefs((prev) => {
+      const next = new Set(prev);
+      if (next.has(word)) next.delete(word); else next.add(word);
+      return next;
+    });
+  }
 
   // Study tab
   const { data: studyList = [] } = trpc.vocabulary.getStudyList.useQuery();
@@ -359,9 +372,18 @@ export default function VocabularyPage() {
             </div>
           )}
 
+          {/* Immersion hint for B1+ */}
+          {!isBeginnerLevel && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-primary-50 border border-primary-100 rounded-xl text-xs text-primary-700 font-medium">
+              <Eye className="w-3.5 h-3.5 shrink-0" />
+              Mode immersion aktif — definisi tersembunyi. Tap kata untuk reveal.
+            </div>
+          )}
+
           {/* Word list */}
           {studyList.map((item, idx) => {
             const isActive = activeIndex === idx;
+            const defRevealed = isBeginnerLevel || revealedDefs.has(item.word);
             return (
               <div
                 key={item.word}
@@ -378,8 +400,19 @@ export default function VocabularyPage() {
                         {item.cefrLevel}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 mt-1">{item.definition}</p>
-                    <p className="text-xs text-slate-400 italic mt-0.5">"{item.example}"</p>
+                    {defRevealed ? (
+                      <>
+                        <p className="text-sm text-slate-600 mt-1">{item.definition}</p>
+                        <p className="text-xs text-slate-400 italic mt-0.5">"{item.example}"</p>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() => toggleDef(item.word)}
+                        className="mt-1.5 text-xs text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1"
+                      >
+                        <Eye className="w-3 h-3" /> Lihat definisi
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex gap-2 shrink-0 items-start">

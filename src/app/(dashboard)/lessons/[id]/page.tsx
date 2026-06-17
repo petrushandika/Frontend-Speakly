@@ -1,9 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc";
-import { SearchX, Lightbulb, ChevronLeft } from "lucide-react";
+import { SearchX, Lightbulb, ChevronLeft, Eye, EyeOff } from "lucide-react";
 
 type Section = {
   type: "explanation" | "examples" | "tip";
@@ -23,9 +23,16 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const router = useRouter();
 
   const { data: lesson, isLoading } = trpc.lessons.getById.useQuery({ id });
+  const { data: profile } = trpc.users.getProfile.useQuery();
   const complete = trpc.lessons.complete.useMutation({
     onSuccess: () => router.push("/lessons"),
   });
+
+  // For B1+: translations hidden by default (immersion), user can reveal
+  // For A1/A2: translations always visible
+  const cefrLevel = profile?.cefrLevel ?? "B1";
+  const isBeginnerLevel = cefrLevel === "A1" || cefrLevel === "A2";
+  const [showTranslations, setShowTranslations] = useState(isBeginnerLevel);
 
   if (isLoading) {
     return (
@@ -79,11 +86,28 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
           </span>
         </div>
         
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
-          {lesson.title}
-        </h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+            {lesson.title}
+          </h1>
+          {/* Translation toggle for B1+ */}
+          {!isBeginnerLevel && (
+            <button
+              onClick={() => setShowTranslations((v) => !v)}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shrink-0 transition-colors"
+            >
+              {showTranslations ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              {showTranslations ? "Sembunyikan terjemahan" : "Lihat terjemahan"}
+            </button>
+          )}
+        </div>
         {lesson.description && (
           <p className="text-slate-500 text-sm leading-relaxed max-w-2xl">{lesson.description}</p>
+        )}
+        {isBeginnerLevel && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 font-semibold">
+            Terjemahan Bahasa Indonesia selalu ditampilkan untuk level {cefrLevel}
+          </div>
         )}
       </div>
 
@@ -115,7 +139,11 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                     {section.items.map((ex, j) => (
                       <li key={j} className="bg-slate-50 border border-slate-100/70 px-4 py-3.5 rounded-2xl hover:bg-white hover:border-primary-100 hover:shadow-sm transition-all duration-200">
                         <p className="text-sm font-bold text-slate-900">{ex.en}</p>
-                        <p className="text-xs font-semibold text-slate-400 mt-1 italic">{ex.id}</p>
+                        {showTranslations && ex.id && (
+                          <p className={`text-xs font-semibold mt-1 italic ${isBeginnerLevel ? "text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md inline-block" : "text-slate-400"}`}>
+                            {ex.id}
+                          </p>
+                        )}
                       </li>
                     ))}
                   </ul>
