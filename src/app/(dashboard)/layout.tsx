@@ -27,7 +27,7 @@ import {
 const NAV_ITEMS = [
   { href: "/home",        label: "Home",           icon: LayoutDashboard },
   { href: "/chat",        label: "Chat with Aria", icon: MessageSquare },
-  { href: "/voice-call",  label: "Voice Call",     icon: PhoneCall },
+  { href: "/call",  label: "Call",     icon: PhoneCall },
   { href: "/speaking",    label: "Speaking",       icon: Mic2 },
   { href: "/lessons",     label: "Lessons",        icon: BookOpen },
   { href: "/vocabulary",  label: "Vocabulary",     icon: BookMarked },
