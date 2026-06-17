@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 type ReviewState = "idle" | "reviewing" | "done";
 
 const QUALITY_BUTTONS = [
-  { quality: 0, label: "Forgot",   color: "bg-red-100 text-red-700 hover:bg-red-200" },
-  { quality: 2, label: "Hard",     color: "bg-orange-100 text-orange-700 hover:bg-orange-200" },
-  { quality: 4, label: "Good",     color: "bg-green-100 text-green-700 hover:bg-green-200" },
-  { quality: 5, label: "Easy",     color: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" },
+  { quality: 0, label: "Forgot 🔴",   color: "bg-red-50 border-red-200 text-red-700 hover:bg-red-100/70" },
+  { quality: 2, label: "Hard 🟡",     color: "bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100/70" },
+  { quality: 4, label: "Good 🔵",     color: "bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100/70" },
+  { quality: 5, label: "Easy 🟢",     color: "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100/70" },
 ];
 
 export default function FlashcardsPage() {
@@ -22,7 +23,11 @@ export default function FlashcardsPage() {
   const { data: dueCards = [], isLoading } = trpc.srs.getDue.useQuery();
   const submitReview = trpc.srs.submitReview.useMutation();
   const addCard = trpc.srs.addCard.useMutation({
-    onSuccess: () => utils.srs.getDue.invalidate(),
+    onSuccess: () => {
+      utils.srs.getDue.invalidate();
+      toast.success("Card added successfully!");
+    },
+    onError: () => toast.error("Failed to add card"),
   });
 
   const [showAdd, setShowAdd] = useState(false);
@@ -68,15 +73,20 @@ export default function FlashcardsPage() {
   // ── Done state ──
   if (state === "done") {
     return (
-      <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-        <div className="text-6xl">🎉</div>
-        <h1 className="text-2xl font-bold text-gray-900">Session complete!</h1>
-        <p className="text-gray-500">You reviewed {reviewed} card{reviewed !== 1 ? "s" : ""}.</p>
+      <div className="max-w-xl mx-auto px-6 py-16 text-center space-y-6 bg-white border border-slate-100 rounded-3xl shadow-sm">
+        <div className="text-6xl animate-float">🎉</div>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Session Complete!</h1>
+          <p className="text-slate-500 text-sm md:text-base leading-relaxed">
+            Excellent work! You reviewed <span className="text-indigo-600 font-bold">{reviewed} flashcard{reviewed !== 1 ? "s" : ""}</span> and refreshed your memory.
+          </p>
+        </div>
+        
         <button
           onClick={() => setState("idle")}
-          className="px-6 py-2.5 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-colors"
+          className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-primary-500/10 active:scale-95 cursor-pointer"
         >
-          Back to flashcards
+          Back to Flashcards
         </button>
       </div>
     );
@@ -84,53 +94,73 @@ export default function FlashcardsPage() {
 
   // ── Reviewing state ──
   if (state === "reviewing" && current) {
+    const progressPercent = Math.round((currentIndex / dueCards.length) * 100);
     return (
-      <div className="max-w-md mx-auto px-4 py-8 space-y-6">
-        {/* Progress */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="max-w-xl mx-auto px-6 space-y-6">
+        {/* Progress Tracker */}
+        <div className="flex items-center gap-4 bg-white px-5 py-3.5 border border-slate-100 rounded-2xl shadow-sm">
+          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary-600 rounded-full transition-all"
-              style={{ width: `${(currentIndex / dueCards.length) * 100}%` }}
+              className="h-full bg-gradient-to-r from-primary-500 to-indigo-600 rounded-full transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <span className="text-xs text-gray-400 shrink-0">
+          <span className="text-xs font-bold text-slate-400 shrink-0">
             {currentIndex + 1} / {dueCards.length}
           </span>
         </div>
 
-        {/* Card */}
+        {/* Physical-style Card Container */}
         <div
           onClick={() => setFlipped(!flipped)}
-          className="cursor-pointer select-none min-h-52 bg-white border border-gray-100 rounded-3xl p-8 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-shadow"
+          className="cursor-pointer select-none min-h-[260px] bg-white border border-slate-100 rounded-3xl p-8 flex flex-col items-center justify-between shadow-md hover:shadow-lg transition-all duration-300 relative group overflow-hidden"
         >
+          {/* Subtle styling cue on top */}
+          <div className="w-12 h-1 bg-slate-100 group-hover:bg-primary-100 rounded-full transition-colors" />
+
           {!flipped ? (
-            <div className="text-center space-y-2">
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Front — tap to reveal</p>
-              <p className="text-2xl font-bold text-gray-900">{current.front}</p>
+            <div className="text-center space-y-3 py-6">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2.5 py-0.5 bg-slate-50 border border-slate-150 rounded-full">
+                Front (Tap to flip)
+              </span>
+              <p className="text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+                {current.front}
+              </p>
             </div>
           ) : (
-            <div className="text-center space-y-3">
-              <p className="text-xs text-gray-400 uppercase tracking-wide">Back</p>
-              <p className="text-xl font-semibold text-gray-800">{current.back}</p>
+            <div className="text-center space-y-4 py-4 w-full">
+              <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest px-2.5 py-0.5 bg-primary-50 border border-primary-100 rounded-full">
+                Back (Answer)
+              </span>
+              <p className="text-2xl font-extrabold text-indigo-950 tracking-tight leading-snug">
+                {current.back}
+              </p>
               {current.example && (
-                <p className="text-sm text-gray-400 italic mt-2">"{current.example}"</p>
+                <div className="max-w-md mx-auto p-3 bg-slate-50/50 border border-slate-100 rounded-2xl text-xs text-slate-500 leading-relaxed italic mt-3">
+                  &ldquo;{current.example}&rdquo;
+                </div>
               )}
             </div>
           )}
+
+          <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest flex items-center gap-1.5">
+            <span>🔄</span> Click card to flip
+          </div>
         </div>
 
-        {/* Quality buttons */}
+        {/* Action Controls */}
         {flipped ? (
-          <div>
-            <p className="text-xs text-center text-gray-400 mb-3">How well did you remember?</p>
-            <div className="grid grid-cols-4 gap-2">
+          <div className="space-y-4 bg-white p-5 border border-slate-100 rounded-3xl shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center">
+              How well did you recall?
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {QUALITY_BUTTONS.map((b) => (
                 <button
                   key={b.quality}
                   onClick={() => handleQuality(b.quality)}
                   disabled={submitReview.isPending}
-                  className={`py-2.5 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 ${b.color}`}
+                  className={`py-3 px-2 border rounded-xl text-xs font-bold transition-all disabled:opacity-50 active:scale-95 cursor-pointer ${b.color}`}
                 >
                   {b.label}
                 </button>
@@ -140,9 +170,9 @@ export default function FlashcardsPage() {
         ) : (
           <button
             onClick={() => setFlipped(true)}
-            className="w-full py-3 bg-primary-600 text-white font-medium rounded-2xl hover:bg-primary-700 transition-colors"
+            className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-sm md:text-base rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] cursor-pointer"
           >
-            Reveal answer
+            Reveal Answer
           </button>
         )}
       </div>
@@ -151,80 +181,106 @@ export default function FlashcardsPage() {
 
   // ── Idle state ──
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Flashcards</h1>
-          <p className="text-sm text-gray-500 mt-1">Spaced repetition review</p>
+    <div className="w-full px-6 md:px-8 space-y-6">
+      {/* Header Panel */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Flashcard Deck</h1>
+          <p className="text-slate-500 text-sm font-medium">
+            Train your memory using Spaced Repetition (SM-2) intervals.
+          </p>
         </div>
+        
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
+          className="px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-95 cursor-pointer shrink-0"
         >
-          + Add card
+          {showAdd ? "Close Panel" : "+ Create New Card"}
         </button>
       </div>
 
       {/* Add card form */}
       {showAdd && (
-        <form onSubmit={handleAddCard} className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
-          <h2 className="font-semibold text-gray-800">New flashcard</h2>
-          <input
-            value={front}
-            onChange={(e) => setFront(e.target.value)}
-            placeholder="Front (word / question)"
-            required
-            className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <input
-            value={back}
-            onChange={(e) => setBack(e.target.value)}
-            placeholder="Back (definition / answer)"
-            required
-            className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <input
-            value={example}
-            onChange={(e) => setExample(e.target.value)}
-            placeholder="Example sentence (optional)"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <div className="flex gap-2">
+        <form onSubmit={handleAddCard} className="bg-white border border-slate-150 rounded-2xl p-6 space-y-4 shadow-md shadow-slate-100/50">
+          <div className="space-y-1 border-b border-slate-100 pb-3">
+            <h2 className="font-extrabold text-slate-800 text-base">Create Flashcard</h2>
+            <p className="text-xs text-slate-400">Add custom questions, concepts or words to review later.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Front (Prompt)</label>
+              <input
+                value={front}
+                onChange={(e) => setFront(e.target.value)}
+                placeholder="e.g. have Went (grammar error)"
+                required
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Back (Answer)</label>
+              <input
+                value={back}
+                onChange={(e) => setBack(e.target.value)}
+                placeholder="e.g. went (simple past)"
+                required
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Context Example</label>
+              <input
+                value={example}
+                onChange={(e) => setExample(e.target.value)}
+                placeholder="e.g. I went to school yesterday."
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 justify-end pt-2">
             <button type="button" onClick={() => setShowAdd(false)}
-              className="flex-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+              className="px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer">
               Cancel
             </button>
             <button type="submit" disabled={addCard.isPending}
-              className="flex-1 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50">
-              {addCard.isPending ? "Saving…" : "Save"}
+              className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 cursor-pointer shadow-sm">
+              {addCard.isPending ? "Creating..." : "Save Card"}
             </button>
           </div>
         </form>
       )}
 
-      {/* Due cards CTA */}
+      {/* Due Cards Notification Banner / CTA */}
       {isLoading ? (
-        <div className="h-32 rounded-2xl bg-gray-100 animate-pulse" />
+        <div className="h-32 rounded-3xl bg-white border border-slate-100 animate-pulse" />
       ) : dueCards.length > 0 ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-amber-800 text-lg">
-              {dueCards.length} card{dueCards.length !== 1 ? "s" : ""} due
+        <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+          <div className="space-y-1">
+            <h3 className="font-extrabold text-amber-800 text-lg flex items-center gap-2">
+              <span>🃏</span> {dueCards.length} review{dueCards.length !== 1 ? "s" : ""} pending!
+            </h3>
+            <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-semibold">
+              Take a few minutes to review your due cards and boost your long-term memory score.
             </p>
-            <p className="text-sm text-amber-600 mt-0.5">Review them now to retain your memory</p>
           </div>
           <button
             onClick={startReview}
-            className="px-5 py-2.5 bg-amber-500 text-white font-medium rounded-xl hover:bg-amber-600 transition-colors"
+            className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-amber-500/10 active:scale-95 cursor-pointer shrink-0"
           >
-            Start review
+            Start Review Session
           </button>
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-400 bg-white rounded-2xl border border-gray-100">
-          <p className="text-4xl mb-3">✅</p>
-          <p className="font-medium text-gray-600">All caught up!</p>
-          <p className="text-sm mt-1">No cards due right now. Add new ones above.</p>
+        <div className="text-center py-16 bg-white border border-slate-100 rounded-3xl shadow-sm space-y-3">
+          <p className="text-5xl animate-float-disabled">✅</p>
+          <h3 className="font-extrabold text-slate-900 text-lg">You&apos;re All Caught Up!</h3>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">
+            No cards are due for review today. Keep checking your lessons or add new cards manually!
+          </p>
         </div>
       )}
     </div>

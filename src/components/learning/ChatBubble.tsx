@@ -14,52 +14,62 @@ export function ChatBubble({ message }: ChatBubbleProps) {
   const parts = message.content.split(/(— Small note:[^.]+\.)/g);
 
   return (
-    <div className={cn("flex gap-3", isUser ? "justify-end" : "justify-start")}>
-      {/* Avatar */}
+    <div className={cn("flex gap-3.5 my-4", isUser ? "justify-end" : "justify-start")}>
+      {/* Aria Avatar */}
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-1">
-          A
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary-600 to-indigo-600 flex items-center justify-center text-white text-sm font-bold shrink-0 mt-1 shadow-md shadow-primary-500/10 animate-pulse">
+          🤖
         </div>
       )}
 
       <div
         className={cn(
-          "max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
+          "max-w-[80%] rounded-2xl px-4.5 py-3.5 text-sm leading-relaxed shadow-sm transition-all duration-300",
           isUser
-            ? "bg-primary-600 text-white rounded-br-sm"
-            : "bg-white border border-gray-100 text-gray-800 rounded-bl-sm shadow-sm",
+            ? "bg-gradient-to-br from-primary-600 to-indigo-600 text-white rounded-tr-sm"
+            : "bg-white border border-slate-100 text-slate-800 rounded-tl-sm"
         )}
       >
         {isUser ? (
-          <p>{message.content}</p>
+          <p className="font-medium">{message.content}</p>
         ) : (
-          <div>
-            {parts.map((part, i) =>
-              part.startsWith("— Small note:") ? (
-                <span
-                  key={i}
-                  className="inline-block mt-2 px-2 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded text-xs leading-relaxed"
-                >
-                  {part}
-                </span>
-              ) : (
-                <span key={i}>{part}</span>
-              ),
-            )}
+          <div className="space-y-2">
+            <div>
+              {parts.map((part, i) =>
+                part.startsWith("— Small note:") ? (
+                  <div
+                    key={i}
+                    className="mt-3 p-3.5 bg-amber-500/5 border border-amber-500/15 text-amber-800 rounded-xl text-xs space-y-1 block shadow-inner"
+                  >
+                    <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                      <span>💡</span>
+                      <span>Grammar Correction</span>
+                    </div>
+                    <p className="leading-relaxed font-medium text-slate-700 italic">
+                      {part.replace("— Small note:", "").trim()}
+                    </p>
+                  </div>
+                ) : (
+                  <span key={i} className="font-medium text-slate-800">{part}</span>
+                )
+              )}
+            </div>
+            
             {message.isStreaming && (
-              <span className="inline-flex gap-0.5 ml-1">
-                <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce [animation-delay:300ms]" />
+              <span className="inline-flex items-center gap-1.5 py-1 px-2 bg-slate-50 border border-slate-100 rounded-lg">
+                <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce [animation-delay:150ms]" />
+                <span className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-bounce [animation-delay:300ms]" />
               </span>
             )}
           </div>
         )}
       </div>
 
+      {/* User Avatar */}
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-bold shrink-0 mt-1">
-          U
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-200 to-slate-300 border border-slate-300/20 flex items-center justify-center text-slate-700 text-sm font-bold shrink-0 mt-1 shadow-sm">
+          👤
         </div>
       )}
     </div>

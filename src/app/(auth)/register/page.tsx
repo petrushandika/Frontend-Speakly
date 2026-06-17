@@ -9,18 +9,18 @@ import { trpcClient } from "@/lib/trpc";
 const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 const GOALS = [
-  { value: "general",  label: "General English" },
-  { value: "business", label: "Business / Work" },
-  { value: "academic", label: "Academic / IELTS" },
-  { value: "travel",   label: "Travel & Daily Life" },
-  { value: "tech",     label: "Tech / IT" },
+  { value: "general",  label: "General English", icon: "🌐" },
+  { value: "business", label: "Business & Work", icon: "💼" },
+  { value: "academic", label: "Academic & IELTS", icon: "🎓" },
+  { value: "travel",   label: "Travel & Daily Life", icon: "✈️" },
+  { value: "tech",     label: "Tech & IT", icon: "💻" },
 ] as const;
 
 const ACCENTS = [
-  { value: "american",   label: "🇺🇸 American" },
-  { value: "british",    label: "🇬🇧 British" },
-  { value: "australian", label: "🇦🇺 Australian" },
-  { value: "neutral",    label: "🌐 Neutral" },
+  { value: "american",   label: "American", flag: "🇺🇸" },
+  { value: "british",    label: "British", flag: "🇬🇧" },
+  { value: "australian", label: "Australian", flag: "🇦🇺" },
+  { value: "neutral",    label: "Neutral / Global", flag: "🌐" },
 ] as const;
 
 export default function RegisterPage() {
@@ -89,166 +89,243 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <span className="text-3xl font-bold text-primary-600">Speakly</span>
-          <p className="text-gray-500 text-sm mt-1">Practice English with AI</p>
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
+      {/* Left Pane - Brand Info (Desktop only) */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-tr from-primary-700 via-indigo-700 to-violet-800 text-white flex-col justify-between p-16 relative overflow-hidden">
+        {/* Decorative background circles */}
+        <div className="absolute w-[500px] h-[500px] bg-white/5 rounded-full -top-40 -left-40 blur-3xl" />
+        <div className="absolute w-[400px] h-[400px] bg-primary-500/20 rounded-full -bottom-20 -right-20 blur-3xl" />
+
+        {/* Top brand */}
+        <div className="flex items-center gap-2.5 z-10">
+          <Link href="/login" className="flex items-center gap-2.5">
+            <span className="text-3xl">🗣️</span>
+            <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
+              Speakly
+            </span>
+          </Link>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="h-1.5 flex-1 rounded-full bg-primary-600" />
-            <div className={`h-1.5 flex-1 rounded-full transition-colors ${step === 2 ? "bg-primary-600" : "bg-gray-200"}`} />
+        {/* Center content */}
+        <div className="space-y-8 z-10 max-w-lg">
+          <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
+            Start your journey to fluent English.
+          </h1>
+          <p className="text-indigo-100/90 leading-relaxed text-base">
+            Personalize your target learning goals, practice speaking asynchronously, and master pronunciation with immediate automated feedback.
+          </p>
+
+          {/* Marketing features list */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm">🔥</span>
+              <span className="text-sm font-semibold">90-Day Practice Streaks & Badges</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm">🤖</span>
+              <span className="text-sm font-semibold">Aria: Generative Conversational AI</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm">📊</span>
+              <span className="text-sm font-semibold">CEFR Aligned Progress Tracking</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom footer */}
+        <div className="text-indigo-200/50 text-xs z-10 font-medium">
+          Speakly AI © 2026. Elevating language mastery.
+        </div>
+      </div>
+
+      {/* Right Pane - Form steps */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50">
+        <div className="w-full max-w-md space-y-6">
+          {/* Mobile brand header (Visible only on mobile) */}
+          <div className="text-center md:hidden mb-6">
+            <span className="text-4xl">🗣️</span>
+            <h2 className="text-3xl font-extrabold text-slate-900 mt-2">Speakly</h2>
+            <p className="text-slate-500 text-sm mt-1">Practice English with AI</p>
           </div>
 
-          <h1 className="text-xl font-semibold text-gray-900 mb-6">
-            {step === 1 ? "Create your account" : "Personalize your learning"}
-          </h1>
+          {/* Heading */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+                {step === 1 ? "Sign Up" : "Personalize"}
+              </h2>
+              <span className="text-xs font-semibold px-2.5 py-1 bg-primary-100 text-primary-700 rounded-full">
+                Step {step} of 2
+              </span>
+            </div>
+            <p className="text-sm text-slate-500">
+              {step === 1 
+                ? "Let's create your account to get started." 
+                : "Help us tailor Speakly's AI lessons to your level."}
+            </p>
+          </div>
 
-          {step === 1 ? (
-            <form onSubmit={handleStep1} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Your name</label>
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  required
-                  placeholder="John"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@email.com"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Min. 8 characters"
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
+          <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+            {/* Step indicators */}
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-1.5 flex-1 rounded-full bg-primary-600" />
+              <div className={`h-1.5 flex-1 rounded-full transition-colors ${step === 2 ? "bg-primary-600" : "bg-slate-200"}`} />
+            </div>
 
-              {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
-              )}
-
-              <button
-                type="submit"
-                className="w-full py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors"
-              >
-                Continue
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Current English level
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {CEFR_LEVELS.map((level) => (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => setCefrLevel(level)}
-                      className={`py-2 rounded-lg text-sm font-medium border transition-colors ${
-                        cefrLevel === level
-                          ? "bg-primary-600 text-white border-primary-600"
-                          : "border-gray-200 text-gray-600 hover:border-primary-400"
-                      }`}
-                    >
-                      {level}
-                    </button>
-                  ))}
+            {step === 1 ? (
+              <form onSubmit={handleStep1} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                    placeholder="John Doe"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Main goal</label>
-                <div className="space-y-2">
-                  {GOALS.map((g) => (
-                    <button
-                      key={g.value}
-                      type="button"
-                      onClick={() => setGoal(g.value)}
-                      className={`w-full text-left px-4 py-2.5 rounded-lg text-sm border transition-colors ${
-                        goal === g.value
-                          ? "bg-primary-50 border-primary-500 text-primary-700 font-medium"
-                          : "border-gray-200 text-gray-600 hover:border-primary-300"
-                      }`}
-                    >
-                      {g.label}
-                    </button>
-                  ))}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="name@example.com"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Preferred accent
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {ACCENTS.map((a) => (
-                    <button
-                      key={a.value}
-                      type="button"
-                      onClick={() => setAccentPreference(a.value)}
-                      className={`py-2.5 px-3 text-left rounded-lg text-sm border transition-colors ${
-                        accentPreference === a.value
-                          ? "bg-primary-50 border-primary-500 text-primary-700 font-medium"
-                          : "border-gray-200 text-gray-600 hover:border-primary-300"
-                      }`}
-                    >
-                      {a.label}
-                    </button>
-                  ))}
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    placeholder="Minimum 8 characters"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                  />
                 </div>
-              </div>
 
-              {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
-              )}
+                {error && (
+                  <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+                )}
 
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="flex-1 py-2.5 border border-gray-200 text-sm text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Back
-                </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="flex-1 py-2.5 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98]"
                 >
-                  {loading ? "Creating…" : "Start learning"}
+                  Continue
                 </button>
-              </div>
-            </form>
-          )}
-        </div>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                    Current English Level
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {CEFR_LEVELS.map((level) => (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setCefrLevel(level)}
+                        className={`py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
+                          cefrLevel === level
+                            ? "bg-primary-600 text-white border-primary-600 shadow-sm"
+                            : "border-slate-200 bg-slate-50/50 text-slate-600 hover:border-primary-400 hover:bg-white"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-primary-600 font-medium hover:underline">
-            Sign in
-          </Link>
-        </p>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                    Main Goal
+                  </label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {GOALS.map((g) => (
+                      <button
+                        key={g.value}
+                        type="button"
+                        onClick={() => setGoal(g.value)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm border transition-all active:scale-[0.99] ${
+                          goal === g.value
+                            ? "bg-primary-50/50 border-primary-500 text-primary-700 font-semibold shadow-sm"
+                            : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
+                        }`}
+                      >
+                        <span className="text-lg">{g.icon}</span>
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                    Preferred Accent
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ACCENTS.map((a) => (
+                      <button
+                        key={a.value}
+                        type="button"
+                        onClick={() => setAccentPreference(a.value)}
+                        className={`py-3 px-4 flex items-center gap-2 rounded-xl text-sm border transition-all active:scale-95 ${
+                          accentPreference === a.value
+                            ? "bg-primary-50/50 border-primary-500 text-primary-700 font-semibold shadow-sm"
+                            : "border-slate-200 bg-slate-50/20 text-slate-600 hover:border-primary-300 hover:bg-white"
+                        }`}
+                      >
+                        <span>{a.flag}</span>
+                        <span>{a.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {error && (
+                  <p className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+                )}
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex-1 py-3 border border-slate-200 text-sm text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-all active:scale-95"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Creating account…" : "Start Learning"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          <p className="text-center text-sm text-slate-500 mt-4">
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary-600 font-semibold hover:text-primary-700 hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

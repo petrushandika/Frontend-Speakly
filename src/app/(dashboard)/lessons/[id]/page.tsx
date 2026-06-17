@@ -28,18 +28,26 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-4">
-        <div className="h-8 w-48 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="h-64 bg-gray-100 rounded-2xl animate-pulse" />
+      <div className="max-w-3xl mx-auto px-6 space-y-4">
+        <div className="h-6 w-24 bg-white/60 border border-slate-100 rounded-xl animate-pulse" />
+        <div className="h-40 bg-white border border-slate-100 rounded-3xl animate-pulse" />
+        <div className="h-64 bg-white border border-slate-100 rounded-3xl animate-pulse" />
       </div>
     );
   }
 
   if (!lesson) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8 text-center text-gray-400">
-        <p className="text-4xl mb-3">🔍</p>
-        <p className="font-medium">Lesson not found</p>
+      <div className="max-w-3xl mx-auto px-6 text-center py-20 bg-white border border-slate-100 rounded-3xl shadow-sm">
+        <p className="text-5xl mb-4">🔍</p>
+        <h3 className="font-extrabold text-slate-900 text-lg">Lesson Not Found</h3>
+        <p className="text-slate-400 text-sm mt-1">We couldn&apos;t retrieve the requested lesson details.</p>
+        <button
+          onClick={() => router.push("/lessons")}
+          className="mt-6 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all"
+        >
+          Back to Lessons
+        </button>
       </div>
     );
   }
@@ -49,38 +57,45 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const exercises = content.exercises ?? [];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      {/* Header */}
-      <div>
+    <div className="w-full px-6 md:px-8 space-y-6">
+      {/* Top Navigation & Header */}
+      <div className="space-y-4">
         <button
           onClick={() => router.back()}
-          className="text-sm text-gray-400 hover:text-gray-600 mb-4 flex items-center gap-1"
+          className="text-xs font-bold text-slate-400 hover:text-slate-900 flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-100 border border-slate-150 rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
         >
-          ← Back
+          ← Back to Library
         </button>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full font-medium">
+        
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-primary-100 border border-primary-200 text-primary-700 rounded-md">
             {lesson.cefrLevel}
           </span>
-          <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full capitalize">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-500 rounded-md uppercase tracking-wider">
             {lesson.category}
           </span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
+        
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+          {lesson.title}
+        </h1>
         {lesson.description && (
-          <p className="text-gray-500 text-sm mt-1">{lesson.description}</p>
+          <p className="text-slate-500 text-sm leading-relaxed max-w-2xl">{lesson.description}</p>
         )}
       </div>
 
       {/* Content sections */}
       {sections.length > 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 space-y-6 shadow-sm">
           {sections.map((section, i) => {
             if (section.type === "explanation" && section.text) {
               return (
-                <div key={i}>
-                  <h2 className="font-semibold text-gray-800 mb-2">Explanation</h2>
-                  <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                <div key={i} className="space-y-3">
+                  <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
+                    Explanation
+                  </h2>
+                  <p className="text-slate-700 text-sm md:text-base leading-relaxed whitespace-pre-line font-medium">
                     {section.text.replace(/\*\*(.*?)\*\*/g, "$1")}
                   </p>
                 </div>
@@ -88,13 +103,16 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
             }
             if (section.type === "examples" && section.items) {
               return (
-                <div key={i}>
-                  <h2 className="font-semibold text-gray-800 mb-2">Examples</h2>
-                  <ul className="space-y-2">
+                <div key={i} className="space-y-3 pt-2">
+                  <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
+                    Examples
+                  </h2>
+                  <ul className="grid grid-cols-1 gap-2.5">
                     {section.items.map((ex, j) => (
-                      <li key={j} className="bg-gray-50 px-4 py-2.5 rounded-lg">
-                        <p className="text-sm font-medium text-gray-800">{ex.en}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{ex.id}</p>
+                      <li key={j} className="bg-slate-50 border border-slate-100/70 px-4 py-3.5 rounded-2xl hover:bg-white hover:border-primary-100 hover:shadow-sm transition-all duration-200">
+                        <p className="text-sm font-bold text-slate-900">{ex.en}</p>
+                        <p className="text-xs font-semibold text-slate-400 mt-1 italic">{ex.id}</p>
                       </li>
                     ))}
                   </ul>
@@ -103,9 +121,11 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
             }
             if (section.type === "tip" && section.text) {
               return (
-                <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-                  <p className="text-xs font-semibold text-amber-700 mb-1">💡 Tip</p>
-                  <p className="text-sm text-amber-800 leading-relaxed whitespace-pre-line">
+                <div key={i} className="bg-gradient-to-tr from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 rounded-2xl p-4.5 shadow-sm">
+                  <p className="text-xs font-bold text-amber-800 flex items-center gap-1.5 uppercase tracking-wider mb-1">
+                    <span>💡</span> Tip / Remember
+                  </p>
+                  <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-semibold whitespace-pre-line">
                     {section.text}
                   </p>
                 </div>
@@ -115,28 +135,34 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <p className="text-gray-400 text-sm text-center py-8">Content coming soon…</p>
+        <div className="bg-white rounded-3xl border border-slate-100 p-8 text-center shadow-sm">
+          <p className="text-slate-400 text-sm py-4">Lesson content is currently being updated...</p>
         </div>
       )}
 
       {/* Exercises */}
       {exercises.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-          <h2 className="font-semibold text-gray-800">Practice Exercises</h2>
+        <div className="bg-white rounded-3xl border border-slate-100 p-6 md:p-8 space-y-4 shadow-sm">
+          <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-primary-500 rounded-full inline-block" />
+            Practice Exercises
+          </h2>
           <ol className="space-y-3">
             {exercises.map((ex, i) => (
-              <li key={i} className="bg-gray-50 rounded-xl px-4 py-3">
-                <p className="text-sm text-gray-700 font-medium mb-1">
+              <li key={i} className="bg-slate-50 border border-slate-100/70 rounded-2xl p-4.5 space-y-3 hover:bg-white hover:border-primary-100 transition-all duration-200">
+                <p className="text-sm text-slate-800 font-extrabold leading-relaxed">
                   {i + 1}. {ex.question}
                 </p>
+                
                 <details className="group">
-                  <summary className="text-xs text-primary-600 cursor-pointer select-none list-none">
-                    Show answer ▾
+                  <summary className="text-xs font-bold text-primary-600 cursor-pointer select-none list-none flex items-center gap-1 hover:text-primary-700">
+                    <span>Show Answer</span>
+                    <span className="transition-transform group-open:rotate-180">▾</span>
                   </summary>
-                  <p className="mt-1 text-sm font-semibold text-primary-700 bg-primary-50 px-3 py-1.5 rounded-lg inline-block">
-                    {ex.answer}
-                  </p>
+                  <div className="mt-2.5 bg-primary-50 border border-primary-100 px-4 py-2.5 rounded-xl inline-block shadow-inner">
+                    <p className="text-xs font-bold text-primary-800 uppercase tracking-wider mb-0.5">Correct Answer</p>
+                    <p className="text-sm font-extrabold text-indigo-950">{ex.answer}</p>
+                  </div>
                 </details>
               </li>
             ))}
@@ -144,13 +170,23 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
         </div>
       )}
 
-      {/* Complete button */}
+      {/* Complete Button */}
       <button
         onClick={() => complete.mutate({ lessonId: id, score: 100, xpEarned: 50 })}
         disabled={complete.isPending}
-        className="w-full py-3 bg-primary-600 text-white font-semibold rounded-2xl hover:bg-primary-700 transition-colors disabled:opacity-50"
+        className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-sm md:text-base rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
       >
-        {complete.isPending ? "Saving…" : "Mark as complete (+50 XP)"}
+        {complete.isPending ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Saving progress...
+          </span>
+        ) : (
+          "Mark as Complete (+50 XP)"
+        )}
       </button>
     </div>
   );

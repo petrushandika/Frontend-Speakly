@@ -7,23 +7,32 @@ import { trpc } from "@/lib/trpc";
 export default function RoomsPage() {
   const utils = trpc.useUtils();
   const { data: rooms = [], isLoading } = trpc.rooms.getActive.useQuery();
+  
   const createRoom = trpc.rooms.create.useMutation({
     onSuccess: () => {
       utils.rooms.getActive.invalidate();
       setName("");
       setTopic("");
       setShowCreate(false);
-      toast.success("Room created!");
+      toast.success("Room created successfully!");
     },
+    onError: () => toast.error("Failed to create room"),
   });
+  
   const joinRoom = trpc.rooms.join.useMutation({
     onSuccess: () => {
       utils.rooms.getActive.invalidate();
       toast.success("Joined room!");
     },
+    onError: () => toast.error("Failed to join room"),
   });
+  
   const leaveRoom = trpc.rooms.leave.useMutation({
-    onSuccess: () => utils.rooms.getActive.invalidate(),
+    onSuccess: () => {
+      utils.rooms.getActive.invalidate();
+      toast.success("Left room");
+    },
+    onError: () => toast.error("Failed to leave room"),
   });
 
   const [showCreate, setShowCreate] = useState(false);
@@ -37,17 +46,21 @@ export default function RoomsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Speaking Rooms</h1>
-          <p className="text-sm text-gray-500 mt-1">Practice with other learners</p>
+    <div className="w-full px-6 md:px-8 space-y-6">
+      {/* Header Panel */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Speaking Rooms</h1>
+          <p className="text-slate-500 text-sm font-medium">
+            Practice conversational English live with other students in peer rooms.
+          </p>
         </div>
+        
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors"
+          className="px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-95 cursor-pointer shrink-0"
         >
-          + Create room
+          {showCreate ? "Close Panel" : "+ Create New Room"}
         </button>
       </div>
 
@@ -55,36 +68,50 @@ export default function RoomsPage() {
       {showCreate && (
         <form
           onSubmit={handleCreate}
-          className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3"
+          className="bg-white border border-slate-150 rounded-2xl p-6 space-y-4 shadow-md shadow-slate-100/50"
         >
-          <h2 className="font-semibold text-gray-800">New room</h2>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Room name"
-            required
-            className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <input
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Topic (optional) — e.g. Business English, Travel"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <div className="flex gap-2">
+          <div className="space-y-1 border-b border-slate-100 pb-3">
+            <h2 className="font-extrabold text-slate-800 text-base">Host a Speaking Room</h2>
+            <p className="text-xs text-slate-400">Host a session for other learners to join and practice conversational skills.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Room Name</label>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. IELTS Speaking Part 1"
+                required
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Discussion Topic (Optional)</label>
+              <input
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g. Travel, Job Interviews, Daily Life"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 justify-end pt-2">
             <button
               type="button"
               onClick={() => setShowCreate(false)}
-              className="flex-1 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+              className="px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={createRoom.isPending}
-              className="flex-1 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
+              className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 cursor-pointer shadow-sm"
             >
-              {createRoom.isPending ? "Creating…" : "Create"}
+              {createRoom.isPending ? "Creating..." : "Create Room"}
             </button>
           </div>
         </form>
@@ -92,58 +119,70 @@ export default function RoomsPage() {
 
       {/* Room list */}
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-gray-100 animate-pulse" />
+            <div key={i} className="h-24 rounded-2xl bg-white border border-slate-100 animate-pulse" />
           ))}
         </div>
       ) : rooms.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
-          <p className="text-4xl mb-3">🎙️</p>
-          <p className="font-medium text-gray-600">No active rooms</p>
-          <p className="text-sm mt-1">Create the first room and start practicing!</p>
+        <div className="text-center py-16 bg-white border border-slate-100 rounded-3xl shadow-sm space-y-3">
+          <p className="text-5xl animate-float">🎙️</p>
+          <h3 className="font-extrabold text-slate-900 text-lg">No Active Rooms</h3>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">
+            There are currently no active speaking sessions. Host the first room to start practicing!
+          </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3.5">
           {rooms.map((room) => {
-            const host = (room.host as { displayName?: string } | null)?.displayName ?? "Unknown";
+            const host = (room.host as { displayName?: string } | null)?.displayName ?? "Learner";
             const memberCount = Array.isArray(room.members) ? room.members.length : 0;
             const maxMembers = room.maxMembers ?? 4;
+            const isFull = memberCount >= maxMembers;
 
             return (
               <div
                 key={room.id}
-                className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center justify-between gap-4"
+                className="bg-white border border-slate-100 rounded-2xl p-5 flex items-center justify-between gap-4 hover:shadow-md transition-all duration-300 group"
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-gray-900 truncate">{room.name}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      memberCount >= maxMembers
-                        ? "bg-red-100 text-red-600"
-                        : "bg-green-100 text-green-700"
+                <div className="min-w-0 space-y-1 flex-1">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <p className="font-extrabold text-slate-950 text-base group-hover:text-primary-600 transition-colors truncate">
+                      {room.name}
+                    </p>
+                    
+                    <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-md uppercase tracking-wider flex items-center gap-1.5 ${
+                      isFull
+                        ? "bg-red-50 border-red-200 text-red-600"
+                        : "bg-green-50 border-green-200 text-green-700"
                     }`}>
-                      {memberCount}/{maxMembers}
+                      <span className={`w-1.5 h-1.5 rounded-full inline-block ${isFull ? "bg-red-500" : "bg-green-500 animate-ping"}`} />
+                      {memberCount}/{maxMembers} Slots Taken
                     </span>
                   </div>
+                  
                   {room.topic && (
-                    <p className="text-sm text-gray-400 mt-0.5 truncate">{room.topic}</p>
+                    <p className="text-sm font-semibold text-slate-500 truncate">{room.topic}</p>
                   )}
-                  <p className="text-xs text-gray-400 mt-1">Host: {host}</p>
+                  
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-1 font-medium">
+                    <span>👤 Host:</span>
+                    <span className="font-semibold text-slate-600">{host}</span>
+                  </div>
                 </div>
 
                 <div className="flex gap-2 shrink-0">
                   <button
                     onClick={() => joinRoom.mutate({ roomId: room.id })}
-                    disabled={joinRoom.isPending || memberCount >= maxMembers}
-                    className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors disabled:opacity-50"
+                    disabled={joinRoom.isPending || isFull}
+                    className="px-4.5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm active:scale-95"
                   >
-                    Join
+                    Join Session
                   </button>
                   <button
                     onClick={() => leaveRoom.mutate({ roomId: room.id })}
                     disabled={leaveRoom.isPending}
-                    className="px-4 py-2 border border-gray-200 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    className="px-4 py-2.5 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
                   >
                     Leave
                   </button>
