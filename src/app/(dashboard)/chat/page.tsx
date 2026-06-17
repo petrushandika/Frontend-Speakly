@@ -5,6 +5,7 @@ import { useAIChat } from "@/hooks/useAIChat";
 import { useSpeech } from "@/hooks/useSpeech";
 import { ChatBubble } from "@/components/learning/ChatBubble";
 import { trpc } from "@/lib/trpc";
+import { Send, Mic, Square, Volume2, VolumeX, Volume1 } from "lucide-react";
 
 const SUGGESTED_STARTERS = [
   { text: "Tell me about yourself and what you do for work.", icon: "💼" },
@@ -78,7 +79,7 @@ export default function ChatPage() {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] w-full px-6 md:px-8">
+    <div className="flex flex-col h-full w-full p-6 md:p-8">
       {/* Premium Header */}
       <div className="flex items-center justify-between px-5 py-4 border border-slate-100 bg-white/80 backdrop-blur-md rounded-2xl shadow-sm mb-4">
         <div className="flex items-center gap-3">
@@ -104,7 +105,7 @@ export default function ChatPage() {
                 : "bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-100"
             }`}
           >
-            {isSpeaking ? "🔊" : ttsEnabled ? "🔈" : "🔇"}
+            {isSpeaking ? <Volume2 className="w-4 h-4" /> : ttsEnabled ? <Volume1 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
           {!isEmpty && (
             <button
@@ -180,7 +181,7 @@ export default function ChatPage() {
                 : "bg-slate-50 hover:bg-slate-100 border border-slate-100 text-slate-500"
             }`}
           >
-            🎙️
+            {isRecording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
           </button>
 
           <textarea
@@ -210,9 +211,7 @@ export default function ChatPage() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
             ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
+              <Send className="w-4 h-4" />
             )}
           </button>
         </div>

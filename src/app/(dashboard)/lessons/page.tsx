@@ -32,7 +32,7 @@ export default function LessonsPage() {
   const percentage  = totalCount > 0 ? Math.round((completed / totalCount) * 100) : 0;
 
   return (
-    <div className="w-full px-6 md:px-8 space-y-6">
+    <div className="w-full p-6 md:p-8 space-y-6">
       {/* Header and Progress panel */}
       <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">

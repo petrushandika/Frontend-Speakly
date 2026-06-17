@@ -31,7 +31,7 @@ export default function HomePage() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
-    <div className="w-full px-6 md:px-8 space-y-8">
+    <div className="w-full p-6 md:p-8 space-y-8">
       {/* Welcome Banner Card */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-600 via-indigo-600 to-violet-700 text-white p-8 md:p-10 shadow-xl shadow-primary-500/10">
         <div className="absolute w-[300px] h-[300px] bg-white/5 rounded-full -top-20 -right-20 blur-2xl animate-pulse" />

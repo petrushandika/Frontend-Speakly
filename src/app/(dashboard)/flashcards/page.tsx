@@ -73,21 +73,23 @@ export default function FlashcardsPage() {
   // ── Done state ──
   if (state === "done") {
     return (
-      <div className="max-w-xl mx-auto px-6 py-16 text-center space-y-6 bg-white border border-slate-100 rounded-3xl shadow-sm">
-        <div className="text-6xl animate-float">🎉</div>
-        <div className="space-y-2">
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Session Complete!</h1>
-          <p className="text-slate-500 text-sm md:text-base leading-relaxed">
-            Excellent work! You reviewed <span className="text-indigo-600 font-bold">{reviewed} flashcard{reviewed !== 1 ? "s" : ""}</span> and refreshed your memory.
-          </p>
+      <div className="w-full p-6 md:p-8 flex flex-col items-center">
+        <div className="w-full max-w-xl text-center space-y-6 bg-white border border-slate-100 rounded-3xl p-8 md:p-12 shadow-sm">
+          <div className="text-6xl animate-float">🎉</div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Session Complete!</h1>
+            <p className="text-slate-500 text-sm md:text-base leading-relaxed">
+              Excellent work! You reviewed <span className="text-indigo-600 font-bold">{reviewed} flashcard{reviewed !== 1 ? "s" : ""}</span> and refreshed your memory.
+            </p>
+          </div>
+          
+          <button
+            onClick={() => setState("idle")}
+            className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-primary-500/10 active:scale-95 cursor-pointer w-full"
+          >
+            Back to Flashcards
+          </button>
         </div>
-        
-        <button
-          onClick={() => setState("idle")}
-          className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-primary-500/10 active:scale-95 cursor-pointer"
-        >
-          Back to Flashcards
-        </button>
       </div>
     );
   }
@@ -96,7 +98,8 @@ export default function FlashcardsPage() {
   if (state === "reviewing" && current) {
     const progressPercent = Math.round((currentIndex / dueCards.length) * 100);
     return (
-      <div className="max-w-xl mx-auto px-6 space-y-6">
+      <div className="w-full p-6 md:p-8 space-y-6 flex flex-col items-center">
+        <div className="w-full max-w-2xl space-y-6">
         {/* Progress Tracker */}
         <div className="flex items-center gap-4 bg-white px-5 py-3.5 border border-slate-100 rounded-2xl shadow-sm">
           <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -175,13 +178,14 @@ export default function FlashcardsPage() {
             Reveal Answer
           </button>
         )}
+        </div>
       </div>
     );
   }
 
   // ── Idle state ──
   return (
-    <div className="w-full px-6 md:px-8 space-y-6">
+    <div className="w-full p-6 md:p-8 space-y-6">
       {/* Header Panel */}
       <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">

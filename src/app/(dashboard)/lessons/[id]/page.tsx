@@ -28,7 +28,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto px-6 space-y-4">
+      <div className="w-full p-6 md:p-8 space-y-4">
         <div className="h-6 w-24 bg-white/60 border border-slate-100 rounded-xl animate-pulse" />
         <div className="h-40 bg-white border border-slate-100 rounded-3xl animate-pulse" />
         <div className="h-64 bg-white border border-slate-100 rounded-3xl animate-pulse" />
@@ -38,7 +38,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
   if (!lesson) {
     return (
-      <div className="max-w-3xl mx-auto px-6 text-center py-20 bg-white border border-slate-100 rounded-3xl shadow-sm">
+      <div className="w-full px-6 md:px-8 text-center py-20 bg-white border border-slate-100 rounded-3xl shadow-sm">
         <p className="text-5xl mb-4">🔍</p>
         <h3 className="font-extrabold text-slate-900 text-lg">Lesson Not Found</h3>
         <p className="text-slate-400 text-sm mt-1">We couldn&apos;t retrieve the requested lesson details.</p>
@@ -57,7 +57,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const exercises = content.exercises ?? [];
 
   return (
-    <div className="w-full px-6 md:px-8 space-y-6">
+    <div className="w-full p-6 md:p-8 space-y-6">
       {/* Top Navigation & Header */}
       <div className="space-y-4">
         <button

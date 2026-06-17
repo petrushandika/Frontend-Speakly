@@ -75,7 +75,7 @@ export default function ProgressPage() {
   const isEmpty = recent.length === 0 && errorData.length === 0;
 
   return (
-    <div className="w-full px-6 md:px-8 space-y-6">
+    <div className="w-full p-6 md:p-8 space-y-6">
       {/* Title */}
       <div className="space-y-1">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Your Progress</h1>

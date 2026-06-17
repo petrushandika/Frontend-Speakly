@@ -46,7 +46,7 @@ export default function RoomsPage() {
   }
 
   return (
-    <div className="w-full px-6 md:px-8 space-y-6">
+    <div className="w-full p-6 md:p-8 space-y-6">
       {/* Header Panel */}
       <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
