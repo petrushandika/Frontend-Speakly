@@ -108,6 +108,16 @@ function formatSessionDate(ts: number): string {
 export default function ChatPage() {
   const { data: profile } = trpc.users.getProfile.useQuery();
   const accent = profile?.accentPreference ?? "american";
+  const utils = trpc.useUtils();
+
+  const awardXP = trpc.progress.awardXP.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
+  const updateStreak = trpc.progress.updateStreak.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
+  // Track last message count so we award XP exactly once per AI reply
+  const lastAiCountRef = useRef(0);
 
   const {
     messages,
@@ -143,6 +153,17 @@ export default function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Award XP once per completed AI reply (5 XP per reply, streak on first reply)
+  useEffect(() => {
+    const aiReplies = messages.filter((m) => m.role === "assistant" && !m.isStreaming).length;
+    if (aiReplies > lastAiCountRef.current) {
+      const gained = aiReplies - lastAiCountRef.current;
+      if (lastAiCountRef.current === 0) updateStreak.mutate();
+      awardXP.mutate({ amount: gained * 5 });
+      lastAiCountRef.current = aiReplies;
+    }
+  }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-speak last AI message when TTS is enabled
   const lastMsg = messages[messages.length - 1];

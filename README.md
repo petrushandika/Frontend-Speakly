@@ -6,17 +6,19 @@ Next.js 16 frontend for the Speakly AI-powered English learning platform.
 
 ## Tech Stack
 
-| Layer        | Technology                     | Version |
-| ------------ | ------------------------------ | ------- |
-| Framework    | Next.js (App Router)           | 16+     |
-| Language     | TypeScript                     | 5+      |
-| Styling      | Tailwind CSS                   | 4+      |
-| Server state | TanStack Query                 | 5+      |
-| API layer    | tRPC Client                    | 11+     |
-| Client state | Zustand                        | 5+      |
-| Forms        | React Hook Form + Zod          | 7+ / 4+ |
-| Auth         | Supabase SSR                   | latest  |
-| HTTP         | Axios (for non-tRPC endpoints) | 1+      |
+| Layer        | Technology                  | Version |
+| ------------ | --------------------------- | ------- |
+| Framework    | Next.js (App Router)        | 16+     |
+| Language     | TypeScript                  | 5+      |
+| Styling      | Tailwind CSS                | 4+      |
+| Server state | TanStack Query              | 5+      |
+| API layer    | tRPC Client                 | 11+     |
+| Client state | Zustand                     | 5+      |
+| Forms        | React Hook Form + Zod       | 7+ / 4+ |
+| Auth         | Supabase SSR                | latest  |
+| Charts       | Recharts                    | 3+      |
+| Toasts       | sonner                      | 2+      |
+| Icons        | lucide-react                | 1.20+   |
 
 ---
 
@@ -24,7 +26,7 @@ Next.js 16 frontend for the Speakly AI-powered English learning platform.
 
 - Node.js 22+
 - npm 10+
-- Backend running on `http://localhost:8099`
+- Backend running on `http://localhost:8099` with Redis on `localhost:6379`
 
 ---
 
@@ -36,9 +38,9 @@ npm install
 
 # 2. Set up environment variables
 cp .env.example .env.local
-# Fill in your Supabase keys (see Environment Variables section)
+# Fill in your Supabase keys
 
-# 3. Start development server
+# 3. Start development server (Turbopack)
 npm run dev
 # → http://localhost:3099
 ```
@@ -47,13 +49,11 @@ npm run dev
 
 ## Environment Variables
 
-Create `.env.local` from `.env.example`:
-
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:8099      # Backend URL
-NEXT_PUBLIC_SUPABASE_URL=                      # Supabase → Settings → API → Project URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=                 # Supabase → Settings → API → anon public
-NEXT_PUBLIC_APP_URL=http://localhost:3099      # This app's public URL
+NEXT_PUBLIC_API_URL=http://localhost:8099
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_APP_URL=http://localhost:3099
 ```
 
 ---
@@ -63,69 +63,43 @@ NEXT_PUBLIC_APP_URL=http://localhost:3099      # This app's public URL
 ```
 src/
 ├── app/
-│   ├── (auth)/                     # Auth route group — no sidebar
+│   ├── (auth)/                       # Auth route group — no sidebar
 │   │   ├── login/page.tsx
 │   │   ├── register/page.tsx
 │   │   └── onboarding/
-│   │       ├── assessment/page.tsx  # CEFR placement test
-│   │       ├── goals/page.tsx       # Learning goal selection
-│   │       └── preferences/page.tsx # Accent + daily time
-│   ├── (dashboard)/                # Dashboard route group — with sidebar
+│   │       ├── assessment/page.tsx   # CEFR placement test
+│   │       ├── goals/page.tsx
+│   │       └── preferences/page.tsx
+│   ├── (dashboard)/                  # Dashboard route group — with sidebar
 │   │   ├── layout.tsx
-│   │   ├── page.tsx                # Daily dashboard
-│   │   ├── verb/page.tsx
+│   │   ├── home/page.tsx             # Daily dashboard
+│   │   ├── lessons/
+│   │   │   └── [id]/page.tsx
 │   │   ├── vocabulary/
-│   │   │   ├── page.tsx
-│   │   │   └── flashcards/page.tsx
-│   │   ├── grammar/
-│   │   │   ├── page.tsx
-│   │   │   ├── tenses/page.tsx
-│   │   │   └── [slug]/page.tsx
-│   │   ├── speaking/
-│   │   │   ├── page.tsx
-│   │   │   ├── challenge/page.tsx
-│   │   │   ├── call/page.tsx        # AI voice call
-│   │   │   └── room/page.tsx        # Peer speaking room
-│   │   ├── reading/page.tsx
-│   │   ├── writing/page.tsx
-│   │   ├── listening/page.tsx
-│   │   ├── pronunciation/page.tsx
-│   │   ├── progress/page.tsx
-│   │   └── settings/page.tsx
+│   │   │   ├── page.tsx             # CEFR word bank with accent-aware speaker
+│   │   │   └── flashcards/page.tsx  # SRS flashcard review
+│   │   ├── chat/page.tsx            # AI chat with SSE streaming
+│   │   ├── call/page.tsx            # Voice call (VAD + STT + TTS pipeline)
+│   │   ├── speaking/page.tsx        # Speaking challenge
+│   │   ├── rooms/page.tsx           # Live speaking rooms (SSE real-time chat)
+│   │   ├── progress/page.tsx        # XP, streak, error analytics
+│   │   └── settings/page.tsx        # Profile, CEFR level, accent preference
 │   ├── globals.css                  # Tailwind 4 @theme design tokens
-│   └── layout.tsx                   # Root layout
+│   └── layout.tsx                   # Root layout (suppressHydrationWarning)
 ├── components/
-│   ├── ui/                          # Design system primitives (shadcn/ui)
-│   ├── learning/                    # Feature-specific components
-│   │   ├── VerbCard.tsx
-│   │   ├── FlashCard.tsx
-│   │   ├── GrammarDrill.tsx
-│   │   ├── ReadingPassage.tsx
-│   │   ├── SpeechRecorder.tsx
-│   │   ├── AICallInterface.tsx
-│   │   └── TenseTimeline.tsx
-│   └── layout/
-│       ├── Sidebar.tsx
-│       ├── TopBar.tsx
-│       └── MobileNav.tsx
-├── lib/
-│   ├── api.ts                       # Axios client → backend streaming routes
-│   ├── trpc.ts                      # tRPC React client — fully typed via AppRouter
-│   ├── supabase/
-│   │   ├── client.ts                # Browser Supabase client
-│   │   └── server.ts                # Server-side Supabase client (RSC + actions)
-│   └── utils/
-│       └── cn.ts                    # clsx + tailwind-merge helper
-├── stores/
-│   ├── user.ts                      # User profile + CEFR level (persisted to localStorage)
-│   └── lesson.ts                    # Today's lesson activity state
+│   └── Providers.tsx                # tRPC + QueryClient + Supabase auth sync + Toaster
 ├── hooks/
-│   ├── useSpeechRecorder.ts         # MediaRecorder wrapper
-│   ├── useAIChat.ts                 # SSE streaming chat hook
-│   └── useProgress.ts               # XP + streak helpers
-└── types/
-    ├── api.ts                        # Response envelope types
-    └── lesson.ts                     # Lesson domain types
+│   ├── useAIChat.ts                 # SSE streaming chat — multi-session, localStorage persistence
+│   ├── useVoiceChat.ts              # Voice call — VAD, STT, TTS queue, session history
+│   ├── useSpeech.ts                 # TTS hook — sequential chunk synthesis with ElevenLabs
+│   └── useSpeak.ts                  # Simple TTS hook — reads accent from tRPC profile cache
+├── lib/
+│   ├── audio.ts                     # MediaRecorder MIME helpers, blob utils
+│   ├── trpc.ts                      # tRPC React client + typed trpcClient singleton
+│   └── supabase/
+│       ├── client.ts                # Browser Supabase client
+│       └── server.ts                # Server-side Supabase client (RSC + actions)
+└── types/                           # Shared TypeScript types
 ```
 
 ---
@@ -133,7 +107,7 @@ src/
 ## Available Scripts
 
 ```bash
-npm run dev        # Dev server on :3099 with HMR
+npm run dev        # Dev server on :3099 with Turbopack HMR
 npm run build      # Production build
 npm run start      # Production server on :3099
 npm run lint       # ESLint
@@ -143,89 +117,111 @@ npm run lint       # ESLint
 
 ## Key Patterns
 
-### Calling the Backend (tRPC)
+### tRPC Calls
 
-All typed API calls use the tRPC client — no manual fetch, full autocomplete:
+All typed API calls go through tRPC. The access token is automatically injected from `localStorage`:
 
 ```tsx
 import { trpc } from "@/lib/trpc";
 
 // Query — cached via TanStack Query
-const { data, isLoading } = trpc.lessons.getDaily.useQuery();
+const { data: profile } = trpc.users.getProfile.useQuery();
 
 // Mutation
-const complete = trpc.lessons.complete.useMutation();
-await complete.mutateAsync({ lessonId: "...", activity: "verb", xp: 10 });
-
-// Type-safe error handling
-const { data } = trpc.grammar.getTenseBySlug.useQuery(
-  { slug: "present-simple" },
-  { enabled: !!slug }
-);
+const update = trpc.users.updateProfile.useMutation();
+update.mutate({ cefrLevel: "B2", accentPreference: "british" });
 ```
 
-### SSE Streaming (AI Chat)
+### AI Chat Streaming
 
-Real-time AI responses use native `EventSource` — not tRPC:
+`useAIChat` handles SSE streaming with session persistence in `localStorage`:
 
 ```tsx
-import { api } from "@/lib/api";
+import { useAIChat } from "@/hooks/useAIChat";
 
-const source = new EventSource(`${process.env.NEXT_PUBLIC_API_URL}/ai/stream`);
-source.onmessage = (e) => {
-  const { type, content } = JSON.parse(e.data);
-  if (type === "token") setResponse((prev) => prev + content);
-  if (type === "done") source.close();
-};
+const { messages, sendMessage, isLoading } = useAIChat();
+await sendMessage("Tell me about yourself.");
+// History is capped to last 20 messages before sending to backend
 ```
 
-### Server Components with Supabase
+### Voice Call Pipeline
+
+`useVoiceChat` orchestrates the full pipeline:
+1. `getUserMedia` → VAD silence detection (3s threshold) → MediaRecorder
+2. Audio blob → `POST /speech/transcribe` (Groq Whisper STT)
+3. Transcript → `POST /ai/stream` (Groq LLM, SSE, voiceMode=true)
+4. Response sentences → sequential ElevenLabs TTS with 1-chunk lookahead
 
 ```tsx
-import { createClient } from "@/lib/supabase/server";
+import { useVoiceChat } from "@/hooks/useVoiceChat";
 
-export default async function Page() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-  // render page
-}
+const { voiceState, messages, startListening, stopListening } = useVoiceChat({
+  accent: "australian",
+  mode: "free_talk",
+});
 ```
 
-### Tailwind 4 Design Tokens
+### Accent-Aware TTS
 
-Colors and fonts are defined in `globals.css` via `@theme`:
+`useSpeak` reads the user's saved accent preference from the tRPC profile cache:
 
 ```tsx
-// Use as standard Tailwind utility classes
-<div className="bg-primary-600 text-white font-display rounded-lg">
-  Speakly
-</div>
+import { useSpeak } from "@/hooks/useSpeak";
 
-<span className="text-accent-600 animate-xp-gain">+50 XP</span>
+const speak = useSpeak(); // auto-reads accent from profile
+await speak("Good morning! How are you today?");
 ```
 
-### Zustand Store
+### Supabase Auth Sync
 
-```tsx
-import { useUserStore } from "@/stores/user";
-
-const { user, setUser } = useUserStore();
-```
+`Providers.tsx` syncs the Supabase session token to `localStorage` on every auth state change. All tRPC and Hono fetch calls read from `localStorage.getItem("sb-access-token")`.
 
 ---
 
-## Backend API Endpoints
+## Backend API Reference
 
-| Type  | Endpoint                          | Description                  |
-| ----- | --------------------------------- | ---------------------------- |
-| tRPC  | `POST /trpc/lessons.getDaily`     | Today's lesson plan          |
-| tRPC  | `POST /trpc/srs.getDue`           | SRS cards due today          |
-| tRPC  | `POST /trpc/grammar.getAllTenses` | All 12 tenses with progress  |
-| tRPC  | `POST /trpc/progress.getSummary`  | XP, streak, skill radar      |
-| tRPC  | `POST /trpc/rooms.create`         | Create peer speaking room    |
-| Hono  | `POST /ai/stream`                 | SSE — Groq LLM token stream  |
-| Hono  | `POST /speech/transcribe`         | Whisper STT audio upload     |
-| Hono  | `POST /speech/synthesize`         | ElevenLabs TTS audio stream  |
+### tRPC Procedures
 
-All tRPC calls require `Authorization: Bearer <token>` header.
+All calls go to `POST /trpc/<router>.<procedure>` and require a valid Bearer token.
+
+| Router       | Key Procedures                                                          |
+| ------------ | ----------------------------------------------------------------------- |
+| `users`      | `getProfile`, `createProfile`, `updateProfile`, `getAvatarUploadUrl`   |
+| `lessons`    | `getAll`, `getById`, `complete`                                         |
+| `srs`        | `getDue`, `submitReview`, `addCard`, `deleteCard`                       |
+| `progress`   | `getSummary`, `getErrors`, `getRecentProgress`, `getDueFlashcardsCount`, `updateStreak` |
+| `grammar`    | `getErrors`, `saveError`, `saveBatch`                                   |
+| `vocabulary` | `getWords`, `getFlashcards`                                             |
+| `rooms`      | `getActive`, `create`, `join`, `leave`, `close`, `getMessages`, `sendMessage` |
+| `ai`         | `analyzeFeedback`, `generateQuiz`, `explainGrammar`, `scorePronunciation`, `getRecommendations`, `classifyWord`, `getErrorAnalytics`, `generateReadingText`, `analyzeReadingAloud`, `getDailySpeakingChallenge` |
+
+### Native Hono Endpoints
+
+Called directly with `fetch()` using `Authorization: Bearer <token>`:
+
+| Method   | Path                      | Description                              |
+| -------- | ------------------------- | ---------------------------------------- |
+| `POST`   | `/ai/stream`              | SSE — Groq LLM token stream              |
+| `POST`   | `/ai/summarize`           | Summarize session to long-term memory    |
+| `GET`    | `/ai/memory`              | Get stored conversation summary          |
+| `DELETE` | `/ai/memory`              | Clear conversation summary               |
+| `POST`   | `/speech/transcribe`      | Whisper STT — multipart/form-data audio  |
+| `POST`   | `/speech/synthesize`      | ElevenLabs TTS — returns audio/mpeg blob |
+| `GET`    | `/rooms/:roomId/events`   | SSE — real-time room chat (token in query param) |
+
+---
+
+## Design System
+
+Colors, fonts, and spacing are defined in `globals.css` via Tailwind 4 `@theme`. Use standard utility classes:
+
+```tsx
+<div className="bg-primary-600 text-white rounded-[18px]">
+  Card
+</div>
+<span className="text-[var(--foreground)]/55">
+  Muted text
+</span>
+```
+
+Toast notifications appear top-center via `<Toaster position="top-center" richColors />`.

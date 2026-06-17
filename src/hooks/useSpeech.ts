@@ -9,12 +9,26 @@ interface UseSpeechOptions {
 }
 
 const SENTENCE_RE = /^([\s\S]*?[.?!]+)\s+([\s\S]*)$/;
-const MAX_CHUNK_CHARS = 900;
+const MAX_CHUNK_CHARS = 800;
+
+// Strip markdown so TTS doesn't read "asterisk asterisk word asterisk asterisk"
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")   // **bold**
+    .replace(/\*(.+?)\*/g, "$1")        // *italic*
+    .replace(/`(.+?)`/g, "$1")          // `code`
+    .replace(/#+\s/g, "")               // ## headings
+    .replace(/^[-•]\s/gm, "")           // bullet points
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // [link](url)
+    .replace(/\n{2,}/g, " ")
+    .replace(/\n/g, " ")
+    .trim();
+}
 
 function splitText(text: string): string[] {
-  // First split into sentences
+  const cleaned = stripMarkdown(text);
   const sentences: string[] = [];
-  let buf = text.trim();
+  let buf = cleaned;
   let m = buf.match(SENTENCE_RE);
   while (m) {
     sentences.push(m[1].trim());
@@ -23,7 +37,6 @@ function splitText(text: string): string[] {
   }
   if (buf.trim()) sentences.push(buf.trim());
 
-  // Then split any sentence that's still too long
   const pieces: string[] = [];
   for (const s of sentences) {
     if (s.length <= MAX_CHUNK_CHARS) {
@@ -104,20 +117,29 @@ export function useSpeech({ onTranscript, onError }: UseSpeechOptions) {
 
   async function fetchAudioUrl(text: string, accent: string): Promise<string | null> {
     const token = localStorage.getItem("sb-access-token") ?? "";
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15_000); // 15s timeout per chunk
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/synthesize`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ text, accent }),
+        signal: controller.signal,
       });
       if (!res.ok) return null;
       return URL.createObjectURL(await res.blob());
     } catch {
       return null;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
   const speak = useCallback(async (text: string, accent = "american") => {
+    // Stop any ongoing speech first
+    stoppedRef.current = true;
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    await new Promise((r) => setTimeout(r, 50)); // let any in-flight play settle
     stoppedRef.current = false;
 
     const pieces = splitText(text);
@@ -125,18 +147,36 @@ export function useSpeech({ onTranscript, onError }: UseSpeechOptions) {
 
     setIsSpeaking(true);
 
-    // Fetch all chunks in parallel, play in order
-    const urlPromises = pieces.map((chunk) => fetchAudioUrl(chunk, accent));
+    // Fetch next chunk in background while current one plays (1-chunk lookahead)
+    let nextFetch: Promise<string | null> | null = pieces.length > 0
+      ? fetchAudioUrl(pieces[0], accent)
+      : null;
 
     for (let i = 0; i < pieces.length; i++) {
       if (stoppedRef.current) break;
-      const url = await urlPromises[i];
-      if (!url || stoppedRef.current) continue;
+
+      // Start fetching the chunk after next
+      const lookahead = i + 1 < pieces.length
+        ? fetchAudioUrl(pieces[i + 1], accent)
+        : null;
+
+      const url = await nextFetch;
+      nextFetch = lookahead;
+
+      if (stoppedRef.current) { if (url) URL.revokeObjectURL(url); break; }
+
+      // Retry once if fetch failed
+      const finalUrl = url ?? await fetchAudioUrl(pieces[i], accent);
+      if (!finalUrl || stoppedRef.current) continue;
 
       await new Promise<void>((resolve) => {
-        const audio = new Audio(url);
+        const audio = new Audio(finalUrl);
         audioRef.current = audio;
-        const done = () => { URL.revokeObjectURL(url); audioRef.current = null; resolve(); };
+        const done = () => {
+          URL.revokeObjectURL(finalUrl);
+          audioRef.current = null;
+          resolve();
+        };
         audio.onended = done;
         audio.onerror = done;
         audio.play().catch(done);

@@ -3,7 +3,8 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc, trpcClient } from "@/lib/trpc";
-import { getSupportedMimeType, blobType, blobFilename, speakText } from "@/lib/audio";
+import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
+import { useSpeak } from "@/hooks/useSpeak";
 import {
   BookMarked,
   Plus,
@@ -47,6 +48,7 @@ export default function VocabularyPage() {
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<Tab>("study");
   const { data: profile } = trpc.users.getProfile.useQuery();
+  const speakText = useSpeak();
   const cefrLevel = profile?.cefrLevel ?? "B1";
   const isBeginnerLevel = cefrLevel === "A1" || cefrLevel === "A2";
   // For B1+: track which word cards have their definition revealed

@@ -9,12 +9,21 @@ import {
   GraduationCap, Plane, BookOpen, Volume2,
   Camera, Loader2, X, ChevronDown,
   HeartPulse, TrendingUp, Palette, School,
-  Coffee, Scale,
+  Coffee, Scale, Play, Square,
 } from "lucide-react";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const CEFR_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+const CEFR_LEVELS = [
+  { value: "A1", label: "A1", name: "Pemula",         desc: "Belum bisa bahasa Inggris sama sekali" },
+  { value: "A2", label: "A2", name: "Dasar",          desc: "Bisa kalimat sederhana sehari-hari" },
+  { value: "B1", label: "B1", name: "Menengah",       desc: "Bisa percakapan umum dengan lancar" },
+  { value: "B2", label: "B2", name: "Atas Menengah",  desc: "Bisa diskusi dan memahami teks kompleks" },
+  { value: "C1", label: "C1", name: "Mahir",          desc: "Bahasa Inggris lancar dan natural" },
+  { value: "C2", label: "C2", name: "Fasih",          desc: "Setara penutur asli / native" },
+] as const;
+
+type CefrValue = typeof CEFR_LEVELS[number]["value"];
 
 const GOALS = [
   { value: "general",     label: "General English",      Icon: Globe },
@@ -106,7 +115,61 @@ function getInitials(name: string): string {
 
 type GoalValue    = typeof GOALS[number]["value"];
 type AccentValue  = typeof ACCENT_GROUPS[number]["accents"][number]["value"];
-type CefrValue    = typeof CEFR_LEVELS[number];
+// CefrValue is defined near CEFR_LEVELS above
+
+// ── Accent Preview ────────────────────────────────────────────────────────────
+
+const ACCENT_PREVIEW_TEXT: Record<string, string> = {
+  american:      "Hi! I'm Aria, your English tutor. Let's practice together!",
+  british:       "Hello! I'm Aria, your English tutor. Shall we get started?",
+  australian:    "G'day! I'm Aria, your English tutor. Ready to practice?",
+  canadian:      "Hi there! I'm Aria, your English tutor. Let's get going!",
+  irish:         "Hello! I'm Aria, your English tutor. Let's have a great session!",
+  newzealand:    "Hi! I'm Aria, your English tutor. Let's start our lesson!",
+  south_african: "Hello! I'm Aria, your English tutor. Let's begin today!",
+  indian:        "Hello! I'm Aria, your English tutor. Let's practice English!",
+  singaporean:   "Hi! I'm Aria, your English tutor. Let's start learning!",
+  neutral:       "Hello! I'm Aria, your English tutor. Let's begin together!",
+};
+
+function useAccentPreview() {
+  const [playing, setPlaying] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const preview = async (accentValue: string) => {
+    // Stop current if playing same
+    if (playing === accentValue) {
+      audioRef.current?.pause();
+      audioRef.current = null;
+      setPlaying(null);
+      return;
+    }
+    // Stop previous
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    setPlaying(accentValue);
+
+    try {
+      const token = localStorage.getItem("sb-access-token") ?? "";
+      const text = ACCENT_PREVIEW_TEXT[accentValue] ?? ACCENT_PREVIEW_TEXT.american;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/synthesize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ text, accent: accentValue }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const url = URL.createObjectURL(await res.blob());
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { URL.revokeObjectURL(url); audioRef.current = null; setPlaying(null); };
+      audio.onerror = () => { URL.revokeObjectURL(url); audioRef.current = null; setPlaying(null); };
+      await audio.play();
+    } catch {
+      setPlaying(null);
+    }
+  };
+
+  return { playing, preview };
+}
 
 // Native select fields for native scrolling and overflow handling
 function SelectField({
@@ -151,6 +214,7 @@ export default function SettingsPage() {
   const [cefrLevel,        setCefrLevel]        = useState<CefrValue>("B1");
   const [goal,             setGoal]             = useState<GoalValue>("general");
   const [accentPreference, setAccentPreference] = useState<AccentValue>("american");
+  const { playing: previewPlaying, preview: playAccentPreview } = useAccentPreview();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -168,8 +232,18 @@ export default function SettingsPage() {
   }, [profile]);
 
   const update = trpc.users.updateProfile.useMutation({
-    onSuccess: () => { utils.users.getProfile.invalidate(); toast.success("Profile updated!"); },
-    onError:   (err) => toast.error(err.message),
+    onSuccess: (_, vars) => {
+      utils.users.getProfile.invalidate();
+      // If CEFR level changed, clear chat & voice sessions so AI starts fresh with the new level
+      if (vars.cefrLevel && vars.cefrLevel !== profile?.cefrLevel) {
+        localStorage.removeItem("speakly-chat-sessions");
+        localStorage.removeItem("speakly-voice-sessions");
+        toast.success("Profile updated! Chat & voice sessions reset to match your new level.");
+      } else {
+        toast.success("Profile updated!");
+      }
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -337,18 +411,25 @@ export default function SettingsPage() {
 
           {/* CEFR Level */}
           <div className="space-y-2.5">
-            <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">English Level (CEFR)</label>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="flex items-baseline gap-2">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Level Bahasa Inggris</label>
+              <span className="text-[10px] text-[var(--foreground)]/30">Pilih yang paling sesuai kemampuanmu saat ini</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {CEFR_LEVELS.map((l) => (
                 <button
-                  key={l} type="button" onClick={() => setCefrLevel(l)}
-                  className={`py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 cursor-pointer ${
-                    cefrLevel === l
+                  key={l.value} type="button" onClick={() => setCefrLevel(l.value)}
+                  className={`flex flex-col items-start text-left px-4 py-3 rounded-xl border transition-all active:scale-[0.99] cursor-pointer ${
+                    cefrLevel === l.value
                       ? "bg-primary-600 text-white border-primary-600 shadow-sm"
                       : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-[var(--surface-strong)]"
                   }`}
                 >
-                  {l}
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className={`text-base font-black ${cefrLevel === l.value ? "text-white" : "text-primary-600 dark:text-primary-400"}`}>{l.label}</span>
+                    <span className={`text-xs font-bold ${cefrLevel === l.value ? "text-white/80" : "text-[var(--foreground)]/70"}`}>{l.name}</span>
+                  </div>
+                  <span className={`text-[11px] leading-snug ${cefrLevel === l.value ? "text-white/70" : "text-[var(--foreground)]/45"}`}>{l.desc}</span>
                 </button>
               ))}
             </div>
@@ -386,24 +467,56 @@ export default function SettingsPage() {
             <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40 flex items-center gap-1.5">
               <Volume2 className="w-3.5 h-3.5" /> Preferred Accent (Aria&apos;s Voice)
             </label>
+            <p className="text-[11px] text-[var(--foreground)]/40">Tap <Play className="w-3 h-3 inline" /> to preview the voice before choosing</p>
 
             {ACCENT_GROUPS.map((group) => (
               <div key={group.label} className="space-y-1.5">
                 <p className="text-[10px] font-bold text-[var(--foreground)]/40 uppercase tracking-wider">{group.label}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {group.accents.map((a) => (
-                    <button
-                      key={a.value} type="button" onClick={() => setAccentPreference(a.value)}
-                      className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-sm border font-semibold transition-all active:scale-95 cursor-pointer ${
-                        accentPreference === a.value
-                          ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300 shadow-sm"
-                          : "border-[var(--line)] bg-[var(--surface)]/10 text-[var(--foreground)]/70 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-[var(--surface-strong)]"
-                      }`}
-                    >
-                      <span className="text-xl leading-none shrink-0">{a.flag}</span>
-                      {a.label}
-                    </button>
-                  ))}
+                  {group.accents.map((a) => {
+                    const isSelected = accentPreference === a.value;
+                    const isPreviewing = previewPlaying === a.value;
+                    return (
+                      <div
+                        key={a.value}
+                        className={`flex items-center rounded-xl border transition-all overflow-hidden ${
+                          isSelected
+                            ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 shadow-sm"
+                            : "border-[var(--line)] bg-[var(--surface)]/10 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-[var(--surface-strong)]"
+                        }`}
+                      >
+                        {/* Select accent */}
+                        <button
+                          type="button"
+                          onClick={() => setAccentPreference(a.value)}
+                          className={`flex-1 py-2.5 px-3 flex items-center gap-2 text-sm font-semibold cursor-pointer ${
+                            isSelected ? "text-primary-700 dark:text-primary-300" : "text-[var(--foreground)]/70"
+                          }`}
+                        >
+                          <span className="text-xl leading-none shrink-0">{a.flag}</span>
+                          {a.label}
+                        </button>
+                        {/* Preview button */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); playAccentPreview(a.value); }}
+                          title={isPreviewing ? "Stop preview" : "Preview voice"}
+                          className={`shrink-0 w-8 h-full flex items-center justify-center border-l transition-all cursor-pointer ${
+                            isSelected ? "border-primary-200 dark:border-primary-700" : "border-[var(--line)]"
+                          } ${
+                            isPreviewing
+                              ? "bg-primary-600 text-white"
+                              : "text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30"
+                          }`}
+                        >
+                          {isPreviewing
+                            ? <Square className="w-3 h-3 fill-current" />
+                            : <Play className="w-3 h-3 fill-current" />
+                          }
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}

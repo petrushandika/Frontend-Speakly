@@ -214,7 +214,8 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
 
       setIsLoading(true);
 
-      const history = messages.map((m) => ({ role: m.role, content: m.content }));
+      // Cap to last 20 messages to keep token cost reasonable
+      const history = messages.slice(-20).map((m) => ({ role: m.role, content: m.content }));
 
       let cancelled = false;
       abortRef.current = () => { cancelled = true; };
@@ -333,7 +334,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
     if (userMsgs.length < 4) return; // not enough to summarize
     try {
       const token = localStorage.getItem("sb-access-token") ?? "";
-      const payload = sessionMessages.map((m) => ({ role: m.role, content: m.content }));
+      const payload = sessionMessages.slice(-40).map((m) => ({ role: m.role, content: m.content }));
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ai/summarize`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

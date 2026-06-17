@@ -69,6 +69,9 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
   const abortRef   = useRef<AbortController | null>(null);
   const historyRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
 
+  // Always-current ref so closures inside recorder.onstop never use stale state
+  const activeSessionIdRef = useRef<string | null>(null);
+
   // VAD
   const vadCtxRef      = useRef<AudioContext | null>(null);
   const vadAnalyserRef = useRef<AnalyserNode | null>(null);
@@ -99,6 +102,22 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cleanup on unmount — stop recording, cancel fetches, release audio
+  useEffect(() => {
+    return () => {
+      if (mediaRef.current?.state === "recording") mediaRef.current.stop();
+      abortRef.current?.abort();
+      if (vadAnimRef.current !== null) cancelAnimationFrame(vadAnimRef.current);
+      if (silenceRef.current) clearTimeout(silenceRef.current);
+      if (hardCapRef.current) clearTimeout(hardCapRef.current);
+      vadCtxRef.current?.close().catch(() => {});
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    };
+  }, []);
+
+  // Keep ref in sync with state so callbacks always see the latest value
+  activeSessionIdRef.current = activeSessionId;
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
   const messages = activeSession?.messages ?? [];
@@ -167,9 +186,10 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
   }, [activeSessionId]);
 
   function appendMessages(newMsgs: VoiceMessage[]) {
+    const currentId = activeSessionIdRef.current;
     setSessions((prev) => {
       const next = prev.map((s) => {
-        if (s.id !== activeSessionId) return s;
+        if (s.id !== currentId) return s;
         const updated = [...s.messages, ...newMsgs];
         return {
           ...s,

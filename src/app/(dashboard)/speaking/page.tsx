@@ -439,7 +439,22 @@ function ResultStep({
   const incorrect = wordResults.filter((r) => !r.correct).length;
   const missedWords = wordResults.filter((r) => !r.correct).map((r) => r.expected).slice(0, 15);
 
-  const analyze = trpc.ai.analyzeReadingAloud.useMutation();
+  const utils = trpc.useUtils();
+  const awardXP = trpc.progress.awardXP.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
+  const updateStreak = trpc.progress.updateStreak.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
+
+  const analyze = trpc.ai.analyzeReadingAloud.useMutation({
+    onSuccess: () => {
+      // XP: base 20 + bonus based on score (max 50 total)
+      const xpAmount = Math.round(20 + (score / 100) * 30);
+      awardXP.mutate({ amount: xpAmount });
+      updateStreak.mutate();
+    },
+  });
 
   function triggerAnalysis() {
     analyze.mutate({ expected: fullText, transcript, cefrLevel: text.cefrLevel, missedWords });
@@ -492,6 +507,11 @@ function ResultStep({
             <span className="text-[var(--foreground)]/55">incorrect</span>
           </div>
         </div>
+        {awardXP.data && (
+          <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-3">
+            ⚡ +{awardXP.data.awarded} XP earned
+          </p>
+        )}
       </div>
 
       {/* Per-paragraph result — reads like a story */}

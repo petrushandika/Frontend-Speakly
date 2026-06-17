@@ -33,6 +33,14 @@ export default function FlashcardsPage() {
 
   const { data: dueCards = [], isLoading } = trpc.srs.getDue.useQuery();
   const submitReview = trpc.srs.submitReview.useMutation();
+  const awardXP = trpc.progress.awardXP.useMutation({
+    onSuccess: () => {
+      utils.progress.getSummary.invalidate();
+    },
+  });
+  const updateStreak = trpc.progress.updateStreak.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
   const addCard = trpc.srs.addCard.useMutation({
     onSuccess: () => {
       utils.srs.getDue.invalidate();
@@ -73,6 +81,11 @@ export default function FlashcardsPage() {
       setState("done");
       utils.srs.getDue.invalidate();
       utils.progress.getDueFlashcardsCount.invalidate();
+      // Award XP: 5 per card reviewed (min 5, max 100 per session)
+      const reviewedCount = currentIndex + 1;
+      const xpAmount = Math.min(reviewedCount * 5, 100);
+      awardXP.mutate({ amount: xpAmount });
+      updateStreak.mutate();
     } else {
       setCurrentIndex((i) => i + 1);
       setFlipped(false);
@@ -89,6 +102,7 @@ export default function FlashcardsPage() {
   // ── Done state ──
   if (state === "done") {
     const accuracy = total > 0 ? Math.round(((correct) / total) * 100) : 0;
+    const xpEarned = Math.min(total * 5, 100);
     return (
       <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
         <div className="w-full bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 shadow-sm space-y-6">
@@ -99,6 +113,9 @@ export default function FlashcardsPage() {
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">Session Complete!</h1>
             <p className="text-sm text-[var(--foreground)]/55">You reviewed all {total} due cards.</p>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400 rounded-full text-xs font-bold mt-1">
+              ⚡ +{xpEarned} XP earned
+            </span>
           </div>
 
           {/* Stats */}

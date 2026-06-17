@@ -209,10 +209,20 @@ function HistorySidebar({
 export default function VoiceCallPage() {
   const { data: profile } = trpc.users.getProfile.useQuery();
   const accent = profile?.accentPreference ?? "american";
+  const utils = trpc.useUtils();
+
+  const awardXP = trpc.progress.awardXP.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
+  const updateStreak = trpc.progress.updateStreak.useMutation({
+    onSuccess: () => utils.progress.getSummary.invalidate(),
+  });
 
   const [error, setError]             = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // Track XP awarded per session to avoid double-awarding
+  const awardedSessionRef = useRef<string | null>(null);
 
   const {
     voiceState, messages, sessions, activeSession,
@@ -223,6 +233,20 @@ export default function VoiceCallPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText]);
+
+  // Award XP once per session when the first AI reply completes (voiceState returns to idle with messages)
+  useEffect(() => {
+    const sessionId = activeSession?.id;
+    if (!sessionId || awardedSessionRef.current === sessionId) return;
+    const hasAiReply = messages.some((m) => m.role === "assistant");
+    if (voiceState === "idle" && hasAiReply) {
+      awardedSessionRef.current = sessionId;
+      // 10 XP per AI exchange, capped at 50 per session
+      const exchanges = messages.filter((m) => m.role === "assistant").length;
+      awardXP.mutate({ amount: Math.min(exchanges * 10, 50) });
+      updateStreak.mutate();
+    }
+  }, [voiceState, messages, activeSession?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const isEmpty = messages.length === 0 && !streamingText;
 
