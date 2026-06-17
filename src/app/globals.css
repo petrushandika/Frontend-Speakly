@@ -1,16 +1,34 @@
 @import "tailwindcss";
 
+/* ── Light mode tokens ──────────────────────────────────────────────────────── */
 :root {
-  --background: #f4f0e3;
-  --foreground: #1e1a14;
-  --surface: #f8f5ea;
+  --background:     #f4f0e3;
+  --foreground:     #1e1a14;
+  --surface:        #f8f5ea;
   --surface-strong: #fffdf6;
-  --line: #2d2922;
-  --line-soft: #b9b09d;
-  --highlight: #aee8ee;
-  --pink: #f7b4c4;
-  --yellow: #f7e6b2;
+  --line:           #2d2922;
+  --line-soft:      #b9b09d;
+  --highlight:      #aee8ee;
+  --pink:           #f7b4c4;
+  --yellow:         #f7e6b2;
 }
+
+/* ── Dark mode tokens ───────────────────────────────────────────────────────── */
+.dark {
+  --background:     #17140e;
+  --foreground:     #e8e2d4;
+  --surface:        #1d1a13;
+  --surface-strong: #242018;
+  --line:           #3a3629;
+  --line-soft:      #2d2a23;
+  --highlight:      #1a4a50;
+  --pink:           #5c1e30;
+  --yellow:         #3d2e08;
+  color-scheme:     dark;
+}
+
+/* ── Tailwind v4 dark variant (class-based) ─────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -51,23 +69,33 @@ body {
   color-scheme: light;
 }
 
+.dark body, body.dark {
+  color-scheme: dark;
+}
+
 @layer base {
-  * {
-    border-color: var(--line-soft);
-  }
+  * { border-color: var(--line-soft); }
 }
 
 @layer components {
+  /* ── Paper grid bg ── */
   .paper-grid {
-    background-image: radial-gradient(circle at 1px 1px, rgba(45, 41, 34, 0.08) 1px, transparent 0);
+    background-image: radial-gradient(circle at 1px 1px, rgba(45,41,34,0.08) 1px, transparent 0);
     background-size: 18px 18px;
   }
+  .dark .paper-grid {
+    background-image: radial-gradient(circle at 1px 1px, rgba(200,190,165,0.05) 1px, transparent 0);
+  }
 
+  /* ── Card panel ── */
   .sk-panel {
     background: var(--surface-strong);
     border: 1.5px solid var(--line);
     border-radius: 18px;
-    box-shadow: 0 2px 0 rgba(45, 41, 34, 0.85);
+    box-shadow: 0 2px 0 rgba(45,41,34,0.6);
+  }
+  .dark .sk-panel {
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
   }
 
   .sk-panel-soft {
@@ -76,6 +104,7 @@ body {
     border-radius: 16px;
   }
 
+  /* ── Pill ── */
   .sk-pill {
     border: 1.5px solid var(--line);
     border-radius: 999px;
@@ -86,6 +115,7 @@ body {
     background: var(--surface-strong);
   }
 
+  /* ── Buttons ── */
   .sk-btn-primary {
     background: #1f1d19;
     color: #fff;
@@ -96,11 +126,12 @@ body {
     font-weight: 700;
     transition: all 160ms ease;
   }
-
-  .sk-btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 0 rgba(31, 29, 25, 0.3);
+  .dark .sk-btn-primary {
+    background: #e8e2d4;
+    color: #1a1611;
+    border-color: #e8e2d4;
   }
+  .sk-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 0 rgba(31,29,25,0.3); }
 
   .sk-btn-ghost {
     background: var(--surface-strong);
@@ -112,42 +143,38 @@ body {
     font-weight: 700;
     transition: all 160ms ease;
   }
+  .sk-btn-ghost:hover { background: var(--surface); }
 
-  .sk-btn-ghost:hover {
-    background: #efe9d9;
-  }
-
+  /* ── Input ── */
   .sk-input {
     width: 100%;
     border: 1.5px solid var(--line);
     border-radius: 12px;
-    background: #fffdf7;
+    background: var(--surface-strong);
     padding: 0.7rem 0.85rem;
     font-size: 0.88rem;
     color: var(--foreground);
   }
-
   .sk-input:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(44, 183, 195, 0.35);
+    box-shadow: 0 0 0 2px rgba(44,183,195,0.35);
   }
+  .sk-input::placeholder { color: var(--line-soft); }
 }
 
 input, textarea, select {
-  color: #1a1208;
+  color: var(--foreground);
   background-color: transparent;
 }
 
 /* Custom Scrollbars */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar       { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.25);
+  background: rgba(148,163,184,0.25);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.45);
-}
+::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.45); }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }

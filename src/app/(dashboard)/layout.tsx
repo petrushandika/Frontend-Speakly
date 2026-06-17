@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { trpc } from "@/lib/trpc";
 import {
   LayoutDashboard,
@@ -70,13 +71,15 @@ function TopBar() {
 
   return (
     <header className="hidden md:flex h-14 shrink-0 items-center justify-end gap-3 px-6 bg-[var(--surface)] border-b border-[var(--line)] w-full">
+      <ThemeToggle compact />
+
       {/* XP badge */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] rounded-full text-xs font-bold text-stone-700">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] rounded-full text-xs font-bold text-[var(--foreground)]">
         <Zap className="w-3.5 h-3.5 text-amber-500" />
         {profile?.xpTotal?.toLocaleString() ?? 0} XP
       </div>
       {/* Streak */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] rounded-full text-xs font-bold text-stone-700">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] rounded-full text-xs font-bold text-[var(--foreground)]">
         <Flame className="w-3.5 h-3.5 text-orange-400" />
         {profile?.streakDays ?? 0} days
       </div>
