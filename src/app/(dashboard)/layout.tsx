@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -19,7 +20,6 @@ import {
   X,
   PhoneCall,
   Zap,
-  Users2,
   Flame,
   ChevronDown,
 } from "lucide-react";
@@ -92,7 +92,7 @@ function TopBar() {
         >
           <div className="w-7 h-7 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
             {profile?.avatarUrl
-              ? <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ? <Image src={profile.avatarUrl} alt="avatar" width={28} height={28} className="w-full h-full object-cover" />
               : initials}
           </div>
           <span className="text-sm font-semibold text-[var(--foreground)]">
@@ -196,6 +196,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setOpen(false); }, [pathname]);
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";

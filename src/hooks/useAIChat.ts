@@ -325,6 +325,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
         abortRef.current = null;
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [messages, isLoading, activeId, onError],
   );
 

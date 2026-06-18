@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { createClient } from "@/lib/supabase/client";
 import {
   User, Target, Globe, Briefcase, Cpu,
   GraduationCap, Plane, BookOpen, Volume2,
-  Camera, Loader2, X, ChevronDown,
+  Camera, Loader2, X,
   HeartPulse, TrendingUp, Palette, School,
   Coffee, Scale, Play, Square,
 } from "lucide-react";
@@ -220,6 +221,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (profile) {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setDisplayName(profile.displayName ?? "");
       setBio(profile.bio ?? "");
       setNativeLanguage(profile.nativeLanguage ?? "");
@@ -228,6 +230,7 @@ export default function SettingsPage() {
       setCefrLevel((profile.cefrLevel as CefrValue) ?? "B1");
       setGoal((profile.goal as GoalValue) ?? "general");
       setAccentPreference((profile.accentPreference as AccentValue) ?? "american");
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [profile]);
 
@@ -333,7 +336,7 @@ export default function SettingsPage() {
             <div className="relative shrink-0">
               <div className="w-32 h-32 rounded-2xl overflow-hidden bg-primary-50 dark:bg-primary-900/30 border-2 border-[var(--line)] flex items-center justify-center shadow-sm">
                 {displayAvatar
-                  ? <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  ? <Image src={displayAvatar} alt="Avatar" width={128} height={128} className="w-full h-full object-cover" />
                   : <span className="text-3xl sm:text-4xl font-extrabold text-primary-500 select-none">{getInitials(displayName || profile?.displayName || "?")}</span>
                 }
               </div>

@@ -5,13 +5,8 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
   Layers,
-  Plus,
-  X,
   CheckCircle2,
   XCircle,
-  RotateCcw,
-  Loader2,
-  ChevronRight,
 } from "lucide-react";
 
 type ReviewState = "idle" | "reviewing" | "done";
@@ -214,7 +209,7 @@ export default function FlashcardsPage() {
                 </p>
                 {current.example && (
                   <p className="text-xs text-[var(--foreground)]/40 italic text-center border-t border-[var(--line)] pt-3 max-w-sm">
-                    "{current.example}"
+                    &quot;{current.example}&quot;
                   </p>
                 )}
               </>

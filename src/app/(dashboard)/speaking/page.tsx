@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { createClient } from "@/lib/supabase/client";
 import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 import {
-  Mic, MicOff, BookOpen, RefreshCw, Play,
+  Mic, MicOff, BookOpen,
   CheckCircle2, XCircle, ChevronRight,
   Loader2, Star, BookMarked, Lightbulb, Zap,
   Globe, Coffee, Cpu, FlaskConical, Palette,
@@ -258,7 +258,6 @@ function ReadingStep({
   const chunksRef   = useRef<Blob[]>([]);
   const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fullText = text.paragraphs.join(" ");
 
   async function startRecording() {
     try {

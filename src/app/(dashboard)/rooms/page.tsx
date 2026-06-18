@@ -52,6 +52,7 @@ function RoomChat({
   const { data: initialMessages = [] } = trpc.rooms.getMessages.useQuery({ roomId });
   useEffect(() => {
     if (initialMessages.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMessages(initialMessages as ChatMessage[]);
     }
   }, [initialMessages]);

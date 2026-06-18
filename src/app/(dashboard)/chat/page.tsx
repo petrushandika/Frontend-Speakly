@@ -134,7 +134,6 @@ export default function ChatPage() {
   } = useAIChat({ onError: (e) => setError(e) });
 
   const [showModeMenu, setShowModeMenu] = useState(false);
-  const activeMode = CONVERSATION_MODES.find((m) => m.id === mode) ?? CONVERSATION_MODES[0];
 
   const { isRecording, isSpeaking, startRecording, stopRecording, speak, stopSpeaking } =
     useSpeech({

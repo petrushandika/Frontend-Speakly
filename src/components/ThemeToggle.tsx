@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 
 export function ThemeToggle({ compact }: { compact?: boolean }) {
-  const [dark, setDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [dark, setDark] = useState(false);
 
+  // Runs only on the client after hydration — avoids mismatch with SSR
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     setDark(document.documentElement.classList.contains("dark"));
   }, []);

@@ -90,6 +90,7 @@ export default function VocabularyPage() {
   // Seed the queue when the study list loads
   useEffect(() => {
     if (studyList.length > 0 && queue.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQueue(shuffle(studyList));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -285,6 +286,7 @@ export default function VocabularyPage() {
       setPracticeState("idle");
       toast.error("Microphone access denied.");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function stopRecording() {
@@ -406,7 +408,7 @@ export default function VocabularyPage() {
                   </div>
                   <p className="text-sm text-[var(--foreground)]/70 mt-1">{activeWord.definition}</p>
                   <p className="text-xs text-primary-600 font-semibold mt-0.5">{activeWord.indonesian}</p>
-                  <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">"{activeWord.example}"</p>
+                  <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">&ldquo;{activeWord.example}&rdquo;</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button
@@ -496,7 +498,7 @@ export default function VocabularyPage() {
                       )}
                     </div>
                     {pronScore?.feedback && <p className="text-xs text-[var(--foreground)]/55 italic">{pronScore.feedback}</p>}
-                    {spokenText && <p className="text-xs text-[var(--foreground)]/40">You said: "<span className="font-medium">{spokenText}</span>"</p>}
+                    {spokenText && <p className="text-xs text-[var(--foreground)]/40">You said: &ldquo;<span className="font-medium">{spokenText}</span>&rdquo;</p>}
                     <p className="text-xs text-[var(--foreground)]/40">Target: <span className="font-semibold text-[var(--foreground)]/70">{activeWord.word}</span></p>
                     <button onClick={() => resetPractice()} className="flex items-center gap-1 text-xs text-primary-600 hover:underline">
                       <RotateCcw className="w-3 h-3" /> Try again
@@ -539,7 +541,7 @@ export default function VocabularyPage() {
                       <>
                         <p className="text-sm text-[var(--foreground)]/70 mt-1">{item.definition}</p>
                         <p className="text-xs text-primary-600 font-semibold mt-0.5">{item.indonesian}</p>
-                        <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">"{item.example}"</p>
+                        <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">&ldquo;{item.example}&rdquo;</p>
                       </>
                     ) : (
                       <button
@@ -673,7 +675,7 @@ export default function VocabularyPage() {
                       </span>
                     </div>
                     <p className="text-sm text-[var(--foreground)]/55">{entry.definition}</p>
-                    {entry.example && <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">"{entry.example}"</p>}
+                    {entry.example && <p className="text-xs text-[var(--foreground)]/40 italic mt-0.5">&ldquo;{entry.example}&rdquo;</p>}
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button

@@ -59,15 +59,28 @@ function saveSessions(sessions: VoiceSession[]) {
 
 export function useVoiceChat({ accent = "american", onError, mode = "free_talk" }: UseVoiceChatOptions = {}) {
   const [voiceState, setVoiceState]       = useState<VoiceState>("idle");
-  const [sessions, setSessions]           = useState<VoiceSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sessions, setSessions]           = useState<VoiceSession[]>(() => loadSessions());
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(
+    () => loadSessions()[0]?.id ?? null,
+  );
   const [streamingText, setStreamingText] = useState("");
 
   // Recording
   const mediaRef   = useRef<MediaRecorder | null>(null);
   const chunksRef  = useRef<Blob[]>([]);
   const abortRef   = useRef<AbortController | null>(null);
-  const historyRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const historyRef = useRef<Array<{ role: "user" | "assistant"; content: string }>>(
+    (() => {
+      const stored = loadSessions();
+      if (stored.length > 0) {
+        return stored[0].messages.map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.text.split("— Small note:")[0].trim(),
+        }));
+      }
+      return [];
+    })(),
+  );
 
   // Always-current ref so closures inside recorder.onstop never use stale state
   const activeSessionIdRef = useRef<string | null>(null);
@@ -87,19 +100,9 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
   const playingRef  = useRef(false);
   const audioRef    = useRef<HTMLAudioElement | null>(null);
 
-  // Load sessions on mount
+  // Start a new session on first mount if none exist in localStorage
   useEffect(() => {
-    const stored = loadSessions();
-    setSessions(stored);
-    if (stored.length > 0) {
-      setActiveSessionId(stored[0].id);
-      historyRef.current = stored[0].messages.map((m) => ({
-        role: m.role,
-        content: m.text.split("— Small note:")[0].trim(),
-      }));
-    } else {
-      startNewSession();
-    }
+    if (sessions.length === 0) startNewSession();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -182,7 +185,6 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
       }
       return next;
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSessionId]);
 
   function appendMessages(newMsgs: VoiceMessage[]) {
@@ -465,6 +467,7 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
     } catch {
       onError?.("Microphone access denied");
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voiceState, stopListening]);
 
   const interrupt = useCallback(() => {

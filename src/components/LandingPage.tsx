@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
-  MessageSquare, PhoneCall, BookOpen, Users2, Layers, BarChart2,
+  PhoneCall, BookOpen, Users2, Layers, BarChart2,
   Mic, Volume2, Check, ArrowUpRight, Menu, X, Play,
 } from "lucide-react";
 
@@ -43,7 +43,7 @@ const FEATURES = [
           ))}
         </div>
         <p className="text-[11px] italic text-primary-200/80 font-mono border-t border-white/5 pt-3">
-          "Great job! What did you do last weekend?"
+          &ldquo;Great job! What did you do last weekend?&rdquo;
         </p>
       </div>
     ),
@@ -69,12 +69,12 @@ const FEATURES = [
           <div className="flex items-start gap-2">
             <Mic className="w-3.5 h-3.5 text-accent-400 mt-0.5 shrink-0 animate-pulse" />
             <p className="text-xs font-mono text-[var(--foreground)]/70">
-              "I <span className="text-accent-500 dark:text-accent-400 line-through">go</span>{" "}
-              <span className="text-primary-600 dark:text-primary-400 font-bold underline">went</span> to the market."
+              &ldquo;I <span className="text-accent-500 dark:text-accent-400 line-through">go</span>{" "}
+              <span className="text-primary-600 dark:text-primary-400 font-bold underline">went</span> to the market.&rdquo;
             </p>
           </div>
           <div className="bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-xl px-3 py-2 text-[10px] text-primary-700 dark:text-primary-300">
-            Use past tense "went" — past simple tense!
+            Use past tense &ldquo;went&rdquo; — past simple tense!
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@ const FEATURES = [
           <span className="text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-700 px-2 py-0.5 rounded-full">1.0×</span>
         </div>
         <p className="text-xs text-[var(--foreground)]/70 leading-relaxed">
-          "An irregular verb does not follow the standard rule of adding -ed for past tense."
+          &ldquo;An irregular verb does not follow the standard rule of adding -ed for past tense.&rdquo;
         </p>
         <div className="flex items-center gap-2">
           <button className="w-6 h-6 rounded-full bg-primary-600 flex items-center justify-center shrink-0">

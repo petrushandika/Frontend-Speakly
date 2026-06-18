@@ -65,6 +65,25 @@ export function useSpeech({ onTranscript, onError }: UseSpeechOptions) {
   const audioRef  = useRef<HTMLAudioElement | null>(null);
   const stoppedRef = useRef(false);
 
+  // Defined before startRecording so the closure in recorder.onstop can reference it
+  const sendToWhisper = useCallback(async (blob: Blob, filename = "recording.webm") => {
+    const token = localStorage.getItem("sb-access-token") ?? "";
+    const formData = new FormData();
+    formData.append("audio", blob, filename);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/transcribe`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.transcript) onTranscript(data.transcript);
+      else onError?.("Could not transcribe audio");
+    } catch {
+      onError?.("Transcription failed");
+    }
+  }, [onTranscript, onError]);
+
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -88,32 +107,13 @@ export function useSpeech({ onTranscript, onError }: UseSpeechOptions) {
     } catch {
       onError?.("Microphone access denied");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onError]);
+  }, [onError, sendToWhisper]);
 
   const stopRecording = useCallback(() => {
     mediaRef.current?.stop();
     mediaRef.current = null;
     setIsRecording(false);
   }, []);
-
-  async function sendToWhisper(blob: Blob, filename = "recording.webm") {
-    const token = localStorage.getItem("sb-access-token") ?? "";
-    const formData = new FormData();
-    formData.append("audio", blob, filename);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/speech/transcribe`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.transcript) onTranscript(data.transcript);
-      else onError?.("Could not transcribe audio");
-    } catch {
-      onError?.("Transcription failed");
-    }
-  }
 
   async function fetchAudioUrl(text: string, accent: string): Promise<string | null> {
     const token = localStorage.getItem("sb-access-token") ?? "";
