@@ -213,7 +213,7 @@ function RoomChat({
           onClick={isRecording ? stopVoice : startVoice}
           disabled={isTranscribing}
           title={isRecording ? "Stop recording" : "Speak a message"}
-          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+          className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
             isRecording
               ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
               : isTranscribing
@@ -240,7 +240,7 @@ function RoomChat({
         <button
           type="submit"
           disabled={!text.trim() || send.isPending || isRecording || isTranscribing}
-          className="w-9 h-9 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white flex items-center justify-center transition-all shrink-0 cursor-pointer"
+          className="w-9 h-9 rounded-xl bg-primary-600 hover:bg-primary-700 disabled:opacity-40 text-white flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none"
         >
           <Send className="w-4 h-4" />
         </button>
@@ -307,21 +307,21 @@ export default function RoomsPage() {
     <div className="h-full flex flex-col overflow-hidden">
 
       {/* ── Top bar (shrinks, doesn't scroll) ── */}
-      <div className="shrink-0 p-3 md:p-6 pb-0 space-y-3">
+      <div className="shrink-0 p-4 md:p-8 pb-0 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0 border border-primary-100 dark:border-primary-800">
               <Mic2 className="w-5 h-5 text-primary-600" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] truncate">Speaking Rooms</h1>
-              <p className="text-xs sm:text-sm text-[var(--foreground)]/55">Practice conversation with other learners in real-time</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] truncate tracking-tight">Speaking Rooms</h1>
+              <p className="text-xs sm:text-sm text-[var(--foreground)]/55 mt-0.5">Practice conversation with other learners in real-time</p>
             </div>
           </div>
           <button
             onClick={() => setShowCreate(!showCreate)}
-            className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs sm:text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer shrink-0"
+            className="flex items-center gap-2 px-3 sm:px-4 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs sm:text-sm font-bold rounded-xl transition-all shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none cursor-pointer shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             {showCreate ? "Cancel" : "New Room"}
@@ -359,14 +359,14 @@ export default function RoomsPage() {
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
-                className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-[var(--foreground)]/55 hover:bg-[var(--surface)] transition-all active:scale-95 cursor-pointer"
+                className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-[var(--foreground)]/55 hover:bg-[var(--surface)] transition-all shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={createRoom.isPending}
-                className="px-5 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 cursor-pointer shadow-sm"
+                className="px-5 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-xl text-xs font-bold disabled:opacity-50 transition-all shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none cursor-pointer"
               >
                 {createRoom.isPending ? "Creating…" : "Create Room"}
               </button>
@@ -376,7 +376,7 @@ export default function RoomsPage() {
       </div>
 
       {/* ── Body: room list + chat panel (fills remaining height) ── */}
-      <div className="flex-1 min-h-0 flex gap-3 p-3 md:p-6 pt-3">
+      <div className="flex-1 min-h-0 flex gap-3 p-4 md:p-8 pt-3">
 
         {/* Room list — always visible, independently scrollable */}
         <div className={`flex flex-col min-h-0 overflow-y-auto space-y-2 ${openChatRoom ? "w-full md:w-72 lg:w-80 shrink-0" : "w-full"}`}>
@@ -408,8 +408,8 @@ export default function RoomsPage() {
               return (
                 <div
                   key={room.id}
-                  className={`shrink-0 bg-[var(--surface-strong)] border rounded-[18px] p-3 sm:p-4 transition-all duration-200 ${
-                    isOpen ? "border-primary-300 dark:border-primary-700 shadow-md" : "border-[var(--line)] hover:shadow-sm"
+                  className={`shrink-0 bg-[var(--surface-strong)] border rounded-[18px] p-3 sm:p-4 transition-all duration-200 shadow-[0_2px_0_var(--line)] ${
+                    isOpen ? "border-primary-300 dark:border-primary-700" : "border-[var(--line)]"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -444,10 +444,10 @@ export default function RoomsPage() {
                         <>
                           <button
                             onClick={() => setOpenChatId(isOpen ? null : room.id)}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer active:scale-95 ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                               isOpen
                                 ? "bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border border-primary-200 dark:border-primary-700"
-                                : "bg-primary-600 hover:bg-primary-700 text-white shadow-sm"
+                                : "bg-primary-600 hover:bg-primary-700 text-white"
                             }`}
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
@@ -456,7 +456,7 @@ export default function RoomsPage() {
                           <button
                             onClick={() => leaveRoom.mutate({ roomId: room.id })}
                             disabled={leaveRoom.isPending}
-                            className="flex items-center justify-center w-8 h-8 border border-[var(--line-soft)] text-[var(--foreground)]/55 text-xs font-bold rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-500 transition-all disabled:opacity-50 cursor-pointer active:scale-95"
+                            className="flex items-center justify-center w-8 h-8 border border-[var(--line-soft)] text-[var(--foreground)]/55 text-xs font-bold rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 hover:text-red-500 transition-all disabled:opacity-50 cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none"
                             title="Leave room"
                           >
                             <LogOut className="w-3.5 h-3.5" />
@@ -467,7 +467,7 @@ export default function RoomsPage() {
                           onClick={() => joinRoom.mutate({ roomId: room.id })}
                           disabled={joinRoom.isPending || isFull}
                           title={isFull ? "Room is full" : "Join this room"}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-sm active:scale-95"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none"
                         >
                           <LogIn className="w-3.5 h-3.5" />
                           {isFull ? "Full" : "Join"}

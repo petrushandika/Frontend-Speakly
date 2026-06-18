@@ -281,14 +281,14 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href={isLoggedIn ? "/home" : "/register"}
-              className="flex items-center gap-2 px-7 py-3.5 bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] font-bold text-sm rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-7 py-3.5 bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] font-bold text-sm rounded-2xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none"
             >
               {isLoggedIn ? "Ke Dashboard" : "Mulai Belajar Gratis"}
               <ArrowUpRight className="w-4 h-4" />
             </Link>
             <button
               onClick={() => scrollTo("ai-technology")}
-              className="flex items-center gap-2 px-7 py-3.5 bg-[var(--surface-strong)] hover:bg-[var(--surface)] text-[var(--foreground)] font-bold text-sm rounded-2xl border border-[var(--line)] hover:border-[var(--line-soft)] transition-all cursor-pointer"
+              className="flex items-center gap-2 px-7 py-3.5 bg-[var(--surface-strong)] hover:bg-[var(--surface)] text-[var(--foreground)] font-bold text-sm rounded-2xl border border-[var(--line)] hover:border-[var(--line-soft)] transition-all cursor-pointer shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none"
             >
               <Play className="w-4 h-4 text-primary-600 fill-primary-600" />
               Lihat Cara Kerja
@@ -325,7 +325,7 @@ export function LandingPage() {
               return (
                 <div
                   key={card.title}
-                  className="group p-6 bg-[var(--background)] border-2 border-[var(--line)] hover:border-[var(--line-soft)] rounded-2xl hover:shadow-md transition-all duration-200 space-y-4 cursor-default"
+                  className="group p-6 bg-[var(--background)] border-2 border-[var(--line)] hover:border-[var(--line-soft)] rounded-2xl transition-all duration-200 space-y-4 shadow-[0_2px_0_var(--line)] hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.08)]"
                 >
                   <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${card.color}`}>
                     <Icon className="w-4.5 h-4.5" />
@@ -365,9 +365,9 @@ export function LandingPage() {
                 <button
                   key={f.id}
                   onClick={() => setActiveTab(f.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                     active
-                      ? "bg-stone-900 dark:bg-[var(--surface-strong)] border-stone-900 dark:border-[var(--line)] text-white dark:text-[var(--foreground)] shadow-md"
+                      ? "bg-stone-900 dark:bg-[var(--surface-strong)] border-stone-900 dark:border-[var(--line)] text-white dark:text-[var(--foreground)]"
                       : "bg-[var(--surface-strong)] border-[var(--line)] text-[var(--foreground)]/70 hover:border-[var(--line-soft)] hover:text-[var(--foreground)]"
                   }`}
                 >
@@ -471,7 +471,7 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/register" className="block w-full py-3.5 bg-[var(--surface)] hover:bg-[var(--background)] text-[var(--foreground)] text-center font-bold rounded-2xl transition-all border border-[var(--line)]">
+              <Link href="/register" className="block w-full py-3.5 bg-[var(--surface)] hover:bg-[var(--background)] text-[var(--foreground)] text-center font-bold rounded-2xl transition-all border border-[var(--line)] shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none">
                 Daftar Gratis
               </Link>
             </div>
@@ -498,7 +498,7 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/register" className="block w-full py-3.5 bg-primary-500 hover:bg-primary-400 text-white text-center font-bold rounded-2xl transition-all shadow-lg shadow-primary-500/20">
+              <Link href="/register" className="block w-full py-3.5 bg-primary-500 hover:bg-primary-400 text-white text-center font-bold rounded-2xl transition-all shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[3px] active:shadow-none">
                 Langganan Sekarang
               </Link>
             </div>
@@ -519,7 +519,7 @@ export function LandingPage() {
               Bergabung dengan ribuan pelajar yang sudah berlatih bersama Aria, tutor AI personal Speakly.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <Link href="/register" className="flex items-center gap-2 px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-bold rounded-2xl transition-all shadow-lg shadow-primary-500/20">
+              <Link href="/register" className="flex items-center gap-2 px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-bold rounded-2xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none">
                 Mulai Latihan Sekarang <ArrowUpRight className="w-4 h-4" />
               </Link>
               <Link href="/login" className="flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-[var(--surface)]/15 text-white font-bold rounded-2xl transition-all border border-white/10">

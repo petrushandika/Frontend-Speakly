@@ -307,26 +307,28 @@ export default function VocabularyPage() {
   const displayed = search.length >= 2 ? (searchResults ?? []) : vocab;
 
   return (
-    <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
+    <div className="w-full p-4 md:p-8 space-y-5 md:space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0 border border-primary-100 dark:border-primary-800">
           <BookMarked className="w-5 h-5 text-primary-600" />
         </div>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">Vocabulary</h1>
-          <p className="text-sm text-[var(--foreground)]/55">Learn words and practice pronunciation</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">Vocabulary</h1>
+          <p className="text-sm text-[var(--foreground)]/55 mt-0.5">Learn words and practice pronunciation</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-[var(--surface-strong)] p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-[var(--surface)] border border-[var(--line)] p-1 rounded-xl w-fit">
         {(["study", "bank"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              tab === t ? "bg-[var(--surface-strong)] text-[var(--foreground)] shadow-sm" : "text-[var(--foreground)]/55 hover:text-[var(--foreground)]/80"
+            className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all cursor-pointer ${
+              tab === t
+                ? "bg-[var(--surface-strong)] text-[var(--foreground)] shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none"
+                : "text-[var(--foreground)]/55 hover:text-[var(--foreground)]/80 active:opacity-70"
             }`}
           >
             {t === "study" ? "Study List" : "My Bank"}
@@ -344,7 +346,7 @@ export default function VocabularyPage() {
             <button
               onClick={() => generateWords.mutate({ count: 10 })}
               disabled={generateWords.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 text-primary-700 dark:text-primary-300 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer"
             >
               {generateWords.isPending
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
@@ -359,7 +361,7 @@ export default function VocabularyPage() {
               <button
                 onClick={() => generateWords.mutate({ count: 10 })}
                 disabled={generateWords.isPending}
-                className="mt-2 flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
+                className="mt-2 flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-bold hover:bg-primary-700 disabled:opacity-50 transition-all shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[3px] active:shadow-none cursor-pointer"
               >
                 <Sparkles className="w-4 h-4" />
                 {generateWords.isPending ? "Generating…" : "Generate my first words"}
@@ -452,14 +454,14 @@ export default function VocabularyPage() {
                 {practiceState === "idle" && (
                   <button
                     onClick={() => startPractice(activeWord.word)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-bold rounded-xl hover:bg-primary-700 transition-all shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[3px] active:shadow-none cursor-pointer"
                   >
                     <Mic className="w-4 h-4" /> Start recording
                   </button>
                 )}
                 {practiceState === "recording" && (
                   <div className="flex items-center gap-3">
-                    <button onClick={stopRecording} className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white text-sm font-semibold rounded-xl hover:bg-red-600 animate-pulse">
+                    <button onClick={stopRecording} className="flex items-center gap-2 px-4 py-2.5 bg-red-500 text-white text-sm font-bold rounded-xl hover:bg-red-600 animate-pulse transition-all shadow-[0_3px_0_rgba(180,0,0,0.3)] active:translate-y-[3px] active:shadow-none cursor-pointer">
                       <Square className="w-4 h-4" /> Stop
                     </button>
                     <span className="text-xs text-[var(--foreground)]/40">Recording… {recSeconds}s</span>
@@ -584,7 +586,7 @@ export default function VocabularyPage() {
                           const qIdx = queue.findIndex((w) => w.word === item.word);
                           openWord(qIdx !== -1 ? qIdx : 0);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 bg-primary-600 text-white text-xs font-bold rounded-lg hover:bg-primary-700 transition-all shadow-[0_2px_0_rgba(0,0,0,0.25)] active:translate-y-[2px] active:shadow-none cursor-pointer"
                       >
                         <Mic className="w-3.5 h-3.5" /> Practice
                       </button>
@@ -607,7 +609,7 @@ export default function VocabularyPage() {
             <p className="text-sm text-[var(--foreground)]/55">{vocab.length} saved words</p>
             <button
               onClick={() => setShowAdd(!showAdd)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-xl hover:bg-primary-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white text-sm font-bold rounded-xl hover:bg-primary-700 transition-all shadow-[0_2px_0_rgba(0,0,0,0.25)] active:translate-y-[2px] active:shadow-none cursor-pointer"
             >
               {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
               {showAdd ? "Cancel" : "Add word"}
@@ -629,7 +631,7 @@ export default function VocabularyPage() {
                 <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence (optional)" className="px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
               </div>
               <div className="flex justify-end">
-                <button type="submit" disabled={add.isPending} className="flex items-center gap-2 px-5 py-2 bg-primary-600 text-white rounded-xl text-sm font-semibold hover:bg-primary-700 disabled:opacity-50">
+                <button type="submit" disabled={add.isPending} className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl text-sm font-bold hover:bg-primary-700 disabled:opacity-50 transition-all shadow-[0_2px_0_rgba(0,0,0,0.25)] active:translate-y-[2px] active:shadow-none cursor-pointer">
                   {add.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…</> : "Save word"}
                 </button>
               </div>

@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
                 </p>
                 <Link
                   href="/login"
-                  className="inline-block mt-4 px-6 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-bold rounded-full transition-all shadow-sm active:scale-95"
+                  className="inline-block mt-4 px-6 py-3 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-bold rounded-xl transition-all shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[3px] active:shadow-none"
                 >
                   Back to Sign In
                 </Link>
@@ -118,7 +118,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-semibold rounded-full border border-[#1f1d19] transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+                  className="w-full py-4 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-extrabold tracking-wide rounded-xl border border-[#1f1d19] transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? "Sending…" : "Send Reset Link"}
                 </button>

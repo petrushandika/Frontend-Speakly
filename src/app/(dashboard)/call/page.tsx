@@ -65,8 +65,8 @@ function MicButton({
       onClick={isBusy ? onInterrupt : isListening ? onStop : onStart}
       className={`
         relative w-20 h-20 rounded-full flex items-center justify-center
-        shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2
-        transition-all duration-200 cursor-pointer active:scale-95
+        focus:outline-none focus:ring-4 focus:ring-offset-2
+        transition-all duration-200 cursor-pointer shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[4px] active:shadow-none
         ${isListening
           ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 scale-110"
           : isBusy
@@ -153,7 +153,7 @@ function HistorySidebar({
         <button
           onClick={onNew}
           title="New session"
-          className="w-7 h-7 rounded-lg bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+          className="w-7 h-7 rounded-lg bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 flex items-center justify-center transition-all cursor-pointer shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none"
         >
           <Plus className="w-3.5 h-3.5" />
         </button>
@@ -286,7 +286,7 @@ export default function VoiceCallPage() {
             <button
               onClick={() => setShowHistory(!showHistory)}
               title="Toggle history"
-              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+              className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                 showHistory
                   ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400"
                   : "bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70"
@@ -311,7 +311,7 @@ export default function VoiceCallPage() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={newSession}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 border border-transparent hover:border-primary-100 dark:hover:border-primary-800 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 border border-[var(--line)] hover:border-primary-100 dark:hover:border-primary-800 px-3 py-1.5 rounded-xl transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none"
             >
               <Plus className="w-3.5 h-3.5" /> New
             </button>
@@ -333,7 +333,7 @@ export default function VoiceCallPage() {
               </div>
               <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-[var(--foreground)]/40">
                 {["Speech-to-Speech", "Auto grammar tips", "Native accent"].map((t) => (
-                  <span key={t} className="px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] rounded-full">{t}</span>
+                  <span key={t} className="px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] rounded-full shadow-[0_2px_0_var(--line-soft)]">{t}</span>
                 ))}
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function VoiceCallPage() {
         )}
 
         {/* Mic controls — bottom panel */}
-        <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] shadow-sm px-6 py-5 flex flex-col items-center gap-4 shrink-0">
+        <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] shadow-[0_3px_0_var(--line)] px-6 py-5 flex flex-col items-center gap-4 shrink-0">
           <StateIndicator state={voiceState} />
 
           <MicButton

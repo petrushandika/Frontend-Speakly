@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-semibold rounded-full border border-[#1f1d19] transition-all shadow-sm active:scale-[0.98] disabled:opacity-50"
+                className="w-full py-4 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-extrabold tracking-wide rounded-xl border border-[#1f1d19] transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 cursor-pointer"
               >
                 {loading ? "Saving…" : "Set Password"}
               </button>

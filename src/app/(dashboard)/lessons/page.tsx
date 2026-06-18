@@ -48,38 +48,38 @@ const STATUS_LABEL: Record<string, string> = {
 export default function LessonsPage() {
   const { data: lessons = [], isLoading } = trpc.lessons.getAll.useQuery();
 
-  const completed   = lessons.filter((l) => l.progress?.status === "completed").length;
-  const totalCount  = lessons.length;
-  const percentage  = totalCount > 0 ? Math.round((completed / totalCount) * 100) : 0;
+  const completed  = lessons.filter((l) => l.progress?.status === "completed").length;
+  const totalCount = lessons.length;
+  const percentage = totalCount > 0 ? Math.round((completed / totalCount) * 100) : 0;
 
   return (
-    <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
+    <div className="w-full p-4 md:p-8 space-y-5 md:space-y-8">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-800">
           <BookOpen className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">Lessons</h1>
-          <p className="text-sm text-[var(--foreground)]/55">Structured bite-sized learning</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">Lessons</h1>
+          <p className="text-sm text-[var(--foreground)]/55 mt-0.5 leading-relaxed">Structured bite-sized learning</p>
         </div>
       </div>
 
       {totalCount > 0 && (
-        <div className="flex items-center gap-3 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] px-4 py-3 shadow-sm w-full">
-          <div className="flex-1 space-y-1 min-w-0">
+        <div className="flex items-center gap-4 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] px-5 py-4 shadow-[0_2px_0_var(--line)] w-full">
+          <div className="flex-1 space-y-2 min-w-0">
             <div className="flex justify-between text-xs font-semibold text-[var(--foreground)]/40">
               <span>Progress</span>
               <span className="text-primary-600 font-bold">{percentage}%</span>
             </div>
-            <div className="w-full h-2 bg-[var(--line-soft)] rounded-full overflow-hidden">
+            <div className="w-full h-2.5 bg-[var(--line-soft)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary-500 rounded-full transition-all duration-500"
                 style={{ width: `${percentage}%` }}
               />
             </div>
           </div>
-          <span className="text-xs text-[var(--foreground)]/40 whitespace-nowrap shrink-0">{completed}/{totalCount} done</span>
+          <span className="text-xs text-[var(--foreground)]/40 whitespace-nowrap shrink-0 font-semibold">{completed}/{totalCount} done</span>
         </div>
       )}
 
@@ -94,12 +94,14 @@ export default function LessonsPage() {
 
       {/* Empty State */}
       {!isLoading && lessons.length === 0 && (
-        <div className="flex flex-col items-center gap-3 py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm text-center">
-          <div className="w-12 h-12 rounded-[18px] bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-primary-400" />
+        <div className="flex flex-col items-center gap-4 py-20 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm text-center">
+          <div className="w-14 h-14 rounded-[18px] bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center border border-primary-100 dark:border-primary-800">
+            <BookOpen className="w-7 h-7 text-primary-400" />
           </div>
-          <h3 className="font-bold text-[var(--foreground)]">No Lessons Available Yet</h3>
-          <p className="text-[var(--foreground)]/40 text-sm">Please check back later, we are preparing new lessons for you.</p>
+          <div className="space-y-1">
+            <h3 className="font-bold text-[var(--foreground)]">No Lessons Available Yet</h3>
+            <p className="text-[var(--foreground)]/40 text-sm leading-relaxed max-w-xs">Please check back later, we are preparing new lessons for you.</p>
+          </div>
         </div>
       )}
 
@@ -115,28 +117,28 @@ export default function LessonsPage() {
             <Link
               key={lesson.id}
               href={`/lessons/${lesson.id}`}
-              className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 bg-[var(--surface-strong)] rounded-[18px] border border-[var(--line)] hover:border-primary-200 dark:hover:border-primary-700 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+              className="flex items-center gap-3 sm:gap-4 p-4 sm:p-5 bg-[var(--surface-strong)] rounded-[18px] border border-[var(--line)] hover:border-primary-200 dark:hover:border-primary-700 hover:-translate-y-0.5 hover:shadow-md shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none transition-all duration-150 group"
             >
-              <div className={`w-9 h-9 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 border ${color} group-hover:scale-105 transition-transform`}>
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 border ${color} group-hover:scale-105 transition-transform`}>
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
-              <div className="flex-1 min-w-0 space-y-0.5">
-                <div className="flex items-center gap-1.5">
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold text-[var(--foreground)]/40">#{i + 1}</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-[var(--surface-strong)] border border-[var(--line-soft)]/40 text-[var(--foreground)]/55 rounded">
                     {lesson.cefrLevel}
                   </span>
                 </div>
-                <p className="font-bold text-[var(--foreground)] text-sm group-hover:text-primary-600 transition-colors truncate">
+                <p className="font-bold text-[var(--foreground)] text-sm group-hover:text-primary-600 transition-colors truncate leading-snug">
                   {lesson.title}
                 </p>
                 {lesson.description && (
-                  <p className="text-[10px] sm:text-xs text-[var(--foreground)]/40 truncate">{lesson.description}</p>
+                  <p className="text-xs text-[var(--foreground)]/40 truncate leading-relaxed">{lesson.description}</p>
                 )}
               </div>
 
-              <span className={`flex items-center gap-1 sm:gap-1.5 text-xs px-2 sm:px-3 py-1.5 border rounded-xl font-bold shrink-0 ${STATUS_STYLE[status]}`}>
+              <span className={`flex items-center gap-1.5 text-xs px-2.5 sm:px-3 py-1.5 border rounded-xl font-bold shrink-0 ${STATUS_STYLE[status]}`}>
                 <StatusIcon className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">{STATUS_LABEL[status]}</span>
               </span>

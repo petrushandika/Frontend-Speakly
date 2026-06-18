@@ -225,7 +225,7 @@ function WordChip({ word, onSaved }: { word: string; onSaved: () => void }) {
     <button
       onClick={handleTap}
       disabled={state === "saving"}
-      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[var(--foreground)]/70 hover:text-primary-600 text-[10px] font-semibold rounded-lg transition-all disabled:opacity-60"
+      className="inline-flex items-center gap-1 px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-[var(--foreground)]/70 hover:text-primary-600 text-[10px] font-semibold rounded-lg transition-all disabled:opacity-60 shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer"
     >
       {state === "saving"
         ? <Loader2 className="w-3 h-3 animate-spin" />

@@ -137,13 +137,13 @@ function SelectStep({
   return (
     <div className="w-full space-y-5 sm:space-y-8 py-4">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 flex items-center justify-center shrink-0">
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 flex items-center justify-center shrink-0">
           <BookOpen className="w-5 h-5 text-primary-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg sm:text-xl font-bold text-[var(--foreground)]">Reading Aloud Practice</h1>
-          <p className="text-xs sm:text-sm text-[var(--foreground)]/55 line-clamp-2">AI generates a passage — you read it aloud, we score your pronunciation</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">Reading Aloud</h1>
+          <p className="text-xs sm:text-sm text-[var(--foreground)]/55 mt-0.5">AI generates a passage — read it aloud, we score your pronunciation</p>
         </div>
       </div>
 
@@ -158,10 +158,10 @@ function SelectStep({
               <button
                 key={t.id}
                 onClick={() => setTheme(t.id)}
-                className={`flex items-start gap-2.5 p-3 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                className={`flex items-start gap-2.5 p-3 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none ${
                   active
-                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 shadow-sm"
-                    : "border-transparent bg-[var(--surface-strong)] hover:border-[var(--line)] hover:shadow-sm"
+                    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
+                    : "border-transparent bg-[var(--surface-strong)] hover:border-[var(--line)]"
                 }`}
               >
                 <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center shrink-0 border ${t.color}`}>
@@ -183,7 +183,7 @@ function SelectStep({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setGenre("")}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
               genre === "" ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "border-[var(--line)] bg-[var(--surface-strong)] text-[var(--foreground)]/60 hover:border-primary-300"
             }`}
           >
@@ -193,7 +193,7 @@ function SelectStep({
             <button
               key={g.id}
               onClick={() => setGenre(g.id)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                 genre === g.id ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300" : "border-[var(--line)] bg-[var(--surface-strong)] text-[var(--foreground)]/60 hover:border-primary-300"
               }`}
             >
@@ -213,7 +213,7 @@ function SelectStep({
               <button
                 key={opt.value}
                 onClick={() => setParagraphs(opt.value)}
-                className={`px-4 py-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer ${
+                className={`px-4 py-3.5 rounded-2xl border-2 text-left transition-all cursor-pointer shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none ${
                   active
                     ? "border-primary-500 bg-primary-50 dark:bg-primary-900/30"
                     : "border-transparent bg-[var(--surface-strong)] hover:border-[var(--line)]"
@@ -231,7 +231,7 @@ function SelectStep({
       <button
         onClick={onGenerate}
         disabled={isGenerating}
-        className="w-full py-4 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl shadow-md shadow-primary-500/20 transition-all active:scale-[0.99]"
+        className="w-full py-4 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold rounded-2xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[4px] active:shadow-none cursor-pointer"
       >
         {isGenerating ? "Generating…" : "Generate"}
       </button>
@@ -624,13 +624,13 @@ function ResultStep({
       <div className="flex gap-3">
         <button
           onClick={onTryAgain}
-          className="flex-1 py-3.5 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 dark:bg-primary-900/30 text-[var(--foreground)]/80 hover:text-primary-700 dark:hover:text-primary-300 dark:text-primary-300 font-bold rounded-2xl transition-all"
+          className="flex-1 py-3.5 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 text-[var(--foreground)]/80 hover:text-primary-700 dark:hover:text-primary-300 font-bold rounded-2xl transition-all shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none cursor-pointer"
         >
           Retry
         </button>
         <button
           onClick={onNewText}
-          className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-md shadow-primary-500/15 transition-all"
+          className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl transition-all shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[3px] active:shadow-none cursor-pointer"
         >
           New
         </button>
@@ -679,7 +679,7 @@ export default function SpeakingPage() {
   }
 
   return (
-    <div className="w-full p-3 md:p-8">
+    <div className="w-full p-4 md:p-8">
       {/* Progress indicator */}
       <div className="flex items-center gap-2 mb-5 sm:mb-8">
         {(["select", "read", "result"] as Step[]).map((s, i) => {

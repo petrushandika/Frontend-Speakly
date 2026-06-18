@@ -54,7 +54,7 @@ export default function VerifyEmailPage() {
             </div>
             <Link
               href="/login"
-              className="inline-block w-full py-3 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-bold rounded-full transition-all shadow-sm active:scale-95"
+              className="inline-block w-full py-4 bg-[#1f1d19] hover:bg-[#171511] text-white text-sm font-extrabold rounded-xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none"
             >
               Back to Sign In
             </Link>

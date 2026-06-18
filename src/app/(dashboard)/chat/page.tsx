@@ -116,7 +116,6 @@ export default function ChatPage() {
   const updateStreak = trpc.progress.updateStreak.useMutation({
     onSuccess: () => utils.progress.getSummary.invalidate(),
   });
-  // Track last message count so we award XP exactly once per AI reply
   const lastAiCountRef = useRef(0);
 
   const {
@@ -141,9 +140,9 @@ export default function ChatPage() {
       onError: (e) => setError(e),
     });
 
-  const [input, setInput]         = useState("");
-  const [error, setError]         = useState<string | null>(null);
-  const [ttsEnabled, setTtsEnabled] = useState(false);
+  const [input, setInput]             = useState("");
+  const [error, setError]             = useState<string | null>(null);
+  const [ttsEnabled, setTtsEnabled]   = useState(false);
   const [showHistory, setShowHistory] = useState(true);
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -153,7 +152,6 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Award XP once per completed AI reply (5 XP per reply, streak on first reply)
   useEffect(() => {
     const aiReplies = messages.filter((m) => m.role === "assistant" && !m.isStreaming).length;
     if (aiReplies > lastAiCountRef.current) {
@@ -164,7 +162,6 @@ export default function ChatPage() {
     }
   }, [messages]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-speak last AI message when TTS is enabled
   const lastMsg = messages[messages.length - 1];
   const prevLastRef = useRef<string | null>(null);
   useEffect(() => {
@@ -180,7 +177,6 @@ export default function ChatPage() {
     }
   }, [lastMsg, ttsEnabled, accent, speak]);
 
-  // Contextual suggestions
   const suggestions = useMemo(() => {
     if (isLoading) return [];
     const last = messages[messages.length - 1];
@@ -191,7 +187,6 @@ export default function ChatPage() {
 
   function handleModeChange(newMode: ConversationMode) {
     if (newMode === mode) { setShowModeMenu(false); return; }
-    // Clear conversation context so AI starts fresh in new mode
     newSession();
     setMode(newMode);
     setShowModeMenu(false);
@@ -224,7 +219,6 @@ export default function ChatPage() {
 
   const isEmpty = messages.length === 0;
 
-  // Sort sessions newest-first for display
   const sortedSessions = [...sessions].sort((a, b) => b.updatedAt - a.updatedAt);
 
   return (
@@ -255,7 +249,7 @@ export default function ChatPage() {
             <button
               onClick={newSession}
               title="New session"
-              className="w-7 h-7 rounded-lg bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+              className="w-7 h-7 rounded-lg bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] flex items-center justify-center transition-all cursor-pointer shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
@@ -271,7 +265,7 @@ export default function ChatPage() {
                   key={s.id}
                   onMouseEnter={() => setHoveredSession(s.id)}
                   onMouseLeave={() => setHoveredSession(null)}
-                  className={`group relative flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+                  className={`group relative flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition-all select-none active:scale-[0.98] active:opacity-80 ${
                     isActive
                       ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-100 dark:border-primary-800"
                       : "hover:bg-[var(--surface)] border border-transparent hover:border-[var(--line)]"
@@ -293,7 +287,7 @@ export default function ChatPage() {
                         e.stopPropagation();
                         deleteSession(s.id);
                       }}
-                      className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[var(--foreground)]/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                      className="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-[var(--foreground)]/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all active:scale-90"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
@@ -306,15 +300,15 @@ export default function ChatPage() {
       </aside>
 
       {/* ── Main Chat Area ── */}
-      <div className="flex flex-col flex-1 p-3 md:p-8 min-w-0 overflow-hidden">
+      <div className="flex flex-col flex-1 p-3 md:p-6 min-w-0 overflow-hidden gap-3">
         {/* Header */}
-        <div className="flex flex-col gap-1.5 mb-2 shrink-0">
-          <div className="flex items-center justify-between px-3 py-2.5 border-[1.5px] border-[var(--line)] bg-[var(--surface-strong)] rounded-[18px] shadow-sm gap-3">
+        <div className="shrink-0">
+          <div className="flex items-center justify-between px-3 py-2.5 border-[1.5px] border-[var(--line)] bg-[var(--surface-strong)] rounded-[18px] shadow-[0_2px_0_var(--line)] gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={() => setShowHistory(!showHistory)}
                 title="Toggle history"
-                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                   showHistory
                     ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400"
                     : "bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70"
@@ -340,17 +334,17 @@ export default function ChatPage() {
               <button
                 onClick={newSession}
                 title="New session"
-                className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 border border-transparent hover:border-primary-100 dark:hover:border-primary-800 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 border border-transparent hover:border-primary-100 dark:hover:border-primary-800 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer active:scale-95 active:opacity-70"
               >
                 <Plus className="w-3.5 h-3.5" /><span className="hidden sm:inline">New</span>
               </button>
 
-              {/* Mode dropdown — next to voice button */}
+              {/* Mode dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setShowModeMenu((v) => !v)}
                   title="Conversation mode"
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 active:opacity-70 ${
                     mode !== "free_talk"
                       ? "bg-primary-50 dark:bg-primary-900/40 border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400"
                       : "bg-[var(--surface)] border-[var(--line)] text-[var(--foreground)]/50 hover:text-[var(--foreground)]/80 hover:border-[var(--line-soft)]"
@@ -372,7 +366,7 @@ export default function ChatPage() {
                           <button
                             key={m.id}
                             onClick={() => handleModeChange(m.id)}
-                            className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition-colors cursor-pointer ${
+                            className={`flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition-colors cursor-pointer active:opacity-60 ${
                               isActive
                                 ? "bg-primary-50 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 font-bold"
                                 : "text-[var(--foreground)]/70 hover:bg-[var(--surface)] font-medium"
@@ -395,9 +389,9 @@ export default function ChatPage() {
               <button
                 onClick={() => { setTtsEnabled(!ttsEnabled); if (isSpeaking) stopSpeaking(); }}
                 title={ttsEnabled ? "Disable voice" : "Enable voice"}
-                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                   ttsEnabled
-                    ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400 shadow-sm"
+                    ? "bg-primary-50 dark:bg-primary-900/40 border border-primary-200 dark:border-primary-700 text-primary-600 dark:text-primary-400"
                     : "bg-[var(--surface)] border border-[var(--line)] text-[var(--foreground)]/40 hover:text-[var(--foreground)]/70"
                 }`}
               >
@@ -407,7 +401,7 @@ export default function ChatPage() {
                 <button
                   onClick={clearChat}
                   title="Clear this session"
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-100 dark:hover:border-red-900 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/40 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-transparent hover:border-red-100 dark:hover:border-red-900 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer active:scale-95 active:opacity-70"
                 >
                   <X className="w-3.5 h-3.5" /><span className="hidden sm:inline">Clear</span>
                 </button>
@@ -417,19 +411,21 @@ export default function ChatPage() {
         </div>
 
         {/* Messages Window */}
-        <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-5 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] shadow-sm min-h-0">
+        <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-5 sm:py-6 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] shadow-[0_2px_0_var(--line)] min-h-0">
           {isEmpty ? (
-            <div className="flex flex-col items-center justify-center h-full gap-6 text-center max-w-md mx-auto py-8">
-              <div className="space-y-3">
-                <div className="w-14 h-14 rounded-[18px] bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 flex items-center justify-center mx-auto">
-                  <MessageSquare className="w-7 h-7 text-primary-400" />
+            <div className="flex flex-col items-center justify-center h-full gap-7 text-center max-w-md mx-auto py-8">
+              <div className="space-y-4">
+                <div className="w-16 h-16 rounded-[20px] bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 flex items-center justify-center mx-auto shadow-[0_3px_0_var(--line)]">
+                  <MessageSquare className="w-8 h-8 text-primary-400" />
                 </div>
-                <h2 className="text-lg font-bold text-[var(--foreground)]">Chat with Aria</h2>
-                <p className="text-sm text-[var(--foreground)]/60 leading-relaxed">
-                  Practice English conversation. Aria will reply naturally and give grammar tips inline.
-                </p>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-[var(--foreground)]">Chat with Aria</h2>
+                  <p className="text-sm text-[var(--foreground)]/60 leading-relaxed">
+                    Practice English conversation. Aria will reply naturally and give grammar tips inline.
+                  </p>
+                </div>
               </div>
-              <div className="w-full space-y-2">
+              <div className="w-full space-y-2.5">
                 <p className="text-[10px] font-bold text-[var(--foreground)]/40 uppercase tracking-widest text-left">
                   Suggested topics
                 </p>
@@ -438,7 +434,7 @@ export default function ChatPage() {
                     <button
                       key={s.text}
                       onClick={() => handleSend(s.text)}
-                      className="w-full text-left px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--line)] text-sm text-[var(--foreground)]/80 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-[var(--surface-strong)] hover:text-primary-600 dark:hover:text-primary-400 hover:shadow-sm transition-all flex items-center gap-3 cursor-pointer"
+                      className="w-full text-left px-4 py-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] text-sm text-[var(--foreground)]/80 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-[var(--surface-strong)] hover:text-primary-600 dark:hover:text-primary-400 hover:shadow-sm shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none transition-all duration-150 flex items-center gap-3 cursor-pointer"
                     >
                       <s.Icon className="w-4 h-4 shrink-0 text-[var(--foreground)]/40" />
                       <span className="font-medium truncate">{s.text}</span>
@@ -459,9 +455,9 @@ export default function ChatPage() {
 
         {/* Error banner */}
         {error && (
-          <div className="mt-3 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 flex justify-between items-center shrink-0">
+          <div className="shrink-0 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 flex justify-between items-center">
             <span className="font-semibold">{error}</span>
-            <button onClick={() => setError(null)} className="ml-2 p-0.5 hover:text-red-800">
+            <button onClick={() => setError(null)} className="ml-2 p-0.5 hover:text-red-800 active:scale-90">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -469,12 +465,12 @@ export default function ChatPage() {
 
         {/* Contextual suggestions */}
         {suggestions.length > 0 && (
-          <div className="flex gap-1.5 pt-2 flex-wrap shrink-0">
+          <div className="flex gap-2 flex-wrap shrink-0">
             {suggestions.map((s) => (
               <button
                 key={s}
                 onClick={() => handleSend(s)}
-                className="px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] text-[var(--foreground)]/70 text-xs font-semibold rounded-xl hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all cursor-pointer"
+                className="px-3 py-1.5 bg-[var(--surface-strong)] border border-[var(--line)] text-[var(--foreground)]/70 text-xs font-semibold rounded-xl hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none transition-all duration-150 cursor-pointer"
               >
                 {s}
               </button>
@@ -483,14 +479,14 @@ export default function ChatPage() {
         )}
 
         {/* Input area */}
-        <div className="pt-2 shrink-0">
-          <div className="flex gap-2 items-end bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] p-2.5 rounded-[18px] shadow-sm">
+        <div className="shrink-0">
+          <div className="flex gap-2 items-end bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] p-2.5 rounded-[18px] shadow-[0_2px_0_var(--line)]">
             <button
               onClick={handleMic}
               title={isRecording ? "Stop recording" : "Record voice"}
-              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer ${
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all cursor-pointer shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none ${
                 isRecording
-                  ? "bg-red-500 text-white animate-pulse shadow-sm shadow-red-500/30"
+                  ? "bg-red-500 text-white animate-pulse shadow-[0_2px_0_rgba(200,50,50,0.5)]"
                   : "bg-[var(--surface)] hover:bg-[var(--surface-strong)] border border-[var(--line)] text-[var(--foreground)]/50"
               }`}
             >
@@ -516,7 +512,7 @@ export default function ChatPage() {
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || isLoading}
-              className="w-10 h-10 rounded-xl bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 cursor-pointer active:scale-95"
+              className="w-10 h-10 rounded-xl bg-stone-900 dark:bg-[var(--surface-strong)] hover:bg-stone-800 dark:hover:bg-[var(--line)] text-white dark:text-[var(--foreground)] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed shrink-0 cursor-pointer shadow-[0_2px_0_rgba(0,0,0,0.4)] active:translate-y-[2px] active:shadow-none"
             >
               {isLoading
                 ? <Loader2 className="w-4 h-4 animate-spin" />

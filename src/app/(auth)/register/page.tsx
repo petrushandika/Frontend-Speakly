@@ -250,7 +250,7 @@ export default function RegisterPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98]"
+                  className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none cursor-pointer"
                 >
                   Continue
                 </button>
@@ -267,9 +267,9 @@ export default function RegisterPage() {
                         key={level}
                         type="button"
                         onClick={() => setCefrLevel(level)}
-                        className={`py-2.5 rounded-xl text-sm font-semibold border transition-all active:scale-95 ${
+                        className={`py-2.5 rounded-xl text-sm font-bold border transition-all shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none cursor-pointer ${
                           cefrLevel === level
-                            ? "bg-primary-600 text-white border-primary-600 shadow-sm"
+                            ? "bg-primary-600 text-white border-primary-600"
                             : "border-[var(--line)] bg-[var(--surface)]/50 text-[var(--foreground)]/70 hover:border-primary-400 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
@@ -289,9 +289,9 @@ export default function RegisterPage() {
                         key={g.value}
                         type="button"
                         onClick={() => setGoal(g.value)}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs border transition-all active:scale-[0.99] font-semibold ${
+                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs border transition-all font-bold shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer ${
                           goal === g.value
-                            ? "bg-primary-50 dark:bg-primary-900/30/50 border-primary-500 text-primary-700 dark:text-primary-300 shadow-sm"
+                            ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300"
                             : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
@@ -312,9 +312,9 @@ export default function RegisterPage() {
                         key={a.value}
                         type="button"
                         onClick={() => setAccentPreference(a.value)}
-                        className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-xs border transition-all active:scale-95 font-semibold ${
+                        className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-xs border transition-all font-bold shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer ${
                           accentPreference === a.value
-                            ? "bg-primary-50 dark:bg-primary-900/30/50 border-primary-500 text-primary-700 dark:text-primary-300 shadow-sm"
+                            ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300"
                             : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
@@ -335,14 +335,14 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-3 border border-[var(--line)] text-sm text-[var(--foreground)]/70 font-semibold rounded-xl hover:bg-[var(--surface)] transition-all active:scale-95"
+                    className="flex-1 py-3.5 border border-[var(--line)] text-sm text-[var(--foreground)]/70 font-bold rounded-xl hover:bg-[var(--surface)] transition-all shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {loading ? "Creating account…" : "Start Learning"}
                   </button>

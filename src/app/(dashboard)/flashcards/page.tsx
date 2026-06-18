@@ -20,37 +20,32 @@ const QUALITY_BUTTONS = [
 
 export default function FlashcardsPage() {
   const utils = trpc.useUtils();
-  const [state, setState] = useState<ReviewState>("idle");
+  const [state, setState]           = useState<ReviewState>("idle");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [correct, setCorrect] = useState(0);
-  const [incorrect, setIncorrect] = useState(0);
+  const [flipped, setFlipped]       = useState(false);
+  const [correct, setCorrect]       = useState(0);
+  const [incorrect, setIncorrect]   = useState(0);
 
   const { data: dueCards = [], isLoading } = trpc.srs.getDue.useQuery();
   const submitReview = trpc.srs.submitReview.useMutation();
   const awardXP = trpc.progress.awardXP.useMutation({
-    onSuccess: () => {
-      utils.progress.getSummary.invalidate();
-    },
+    onSuccess: () => { utils.progress.getSummary.invalidate(); },
   });
   const updateStreak = trpc.progress.updateStreak.useMutation({
     onSuccess: () => utils.progress.getSummary.invalidate(),
   });
   const addCard = trpc.srs.addCard.useMutation({
-    onSuccess: () => {
-      utils.srs.getDue.invalidate();
-      toast.success("Card added!");
-    },
-    onError: () => toast.error("Failed to add card"),
+    onSuccess: () => { utils.srs.getDue.invalidate(); toast.success("Card added!"); },
+    onError:   () => toast.error("Failed to add card"),
   });
 
   const [showAdd, setShowAdd] = useState(false);
-  const [front, setFront] = useState("");
-  const [back, setBack] = useState("");
+  const [front, setFront]     = useState("");
+  const [back, setBack]       = useState("");
   const [example, setExample] = useState("");
 
   const current = dueCards[currentIndex];
-  const total = dueCards.length;
+  const total   = dueCards.length;
 
   function startReview() {
     setCurrentIndex(0);
@@ -76,7 +71,6 @@ export default function FlashcardsPage() {
       setState("done");
       utils.srs.getDue.invalidate();
       utils.progress.getDueFlashcardsCount.invalidate();
-      // Award XP: 5 per card reviewed (min 5, max 100 per session)
       const reviewedCount = currentIndex + 1;
       const xpAmount = Math.min(reviewedCount * 5, 100);
       awardXP.mutate({ amount: xpAmount });
@@ -96,52 +90,49 @@ export default function FlashcardsPage() {
 
   // ── Done state ──
   if (state === "done") {
-    const accuracy = total > 0 ? Math.round(((correct) / total) * 100) : 0;
+    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
     const xpEarned = Math.min(total * 5, 100);
     return (
-      <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
-        <div className="w-full bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 shadow-sm space-y-6">
-          {/* Title */}
-          <div className="text-center space-y-1">
-            <div className="w-14 h-14 rounded-[18px] bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-              <CheckCircle2 className="w-7 h-7 text-emerald-500" />
+      <div className="w-full p-4 md:p-8 space-y-6 md:space-y-8">
+        <div className="w-full bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 shadow-[0_3px_0_var(--line)] space-y-7">
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 rounded-[20px] bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center mx-auto border border-emerald-100 dark:border-emerald-800 shadow-[0_3px_0_var(--line)]">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">Session Complete!</h1>
-            <p className="text-sm text-[var(--foreground)]/55">You reviewed all {total} due cards.</p>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400 rounded-full text-xs font-bold mt-1">
+            <h1 className="text-2xl font-extrabold text-[var(--foreground)] tracking-tight">Session Complete!</h1>
+            <p className="text-sm text-[var(--foreground)]/55 leading-relaxed">You reviewed all {total} due cards.</p>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-400 rounded-full text-xs font-bold">
               ⚡ +{xpEarned} XP earned
             </span>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col items-center gap-1 p-4 bg-[var(--surface)] border border-[var(--line)] rounded-[18px]">
-              <span className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">{total}</span>
+            <div className="flex flex-col items-center gap-1.5 p-4 bg-[var(--surface)] border border-[var(--line)] rounded-[18px] shadow-[0_2px_0_var(--line)]">
+              <span className="text-2xl font-extrabold text-[var(--foreground)]">{total}</span>
               <span className="text-xs text-[var(--foreground)]/40 font-medium text-center">Cards reviewed</span>
             </div>
-            <div className="flex flex-col items-center gap-1 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-[18px]">
-              <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{correct}</span>
+            <div className="flex flex-col items-center gap-1.5 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-[18px] shadow-[0_2px_0_rgba(0,120,80,0.15)]">
+              <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{correct}</span>
               <span className="text-xs text-emerald-500 font-medium text-center">Correct</span>
             </div>
-            <div className="flex flex-col items-center gap-1 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-[18px]">
-              <span className="text-2xl font-bold text-red-500">{incorrect}</span>
+            <div className="flex flex-col items-center gap-1.5 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-[18px] shadow-[0_2px_0_rgba(200,0,0,0.1)]">
+              <span className="text-2xl font-extrabold text-red-500">{incorrect}</span>
               <span className="text-xs text-red-400 font-medium text-center">To retry</span>
             </div>
           </div>
 
-          {/* Accuracy bar */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="flex justify-between text-xs font-semibold text-[var(--foreground)]/55">
               <span>Accuracy</span>
               <span className={accuracy >= 70 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>{accuracy}%</span>
             </div>
-            <div className="w-full h-2.5 bg-[var(--surface-strong)] rounded-full overflow-hidden">
+            <div className="w-full h-3 bg-[var(--surface-strong)] rounded-full overflow-hidden border border-[var(--line-soft)]">
               <div
                 className={`h-full rounded-full transition-all duration-500 ${accuracy >= 70 ? "bg-emerald-500" : "bg-amber-400"}`}
                 style={{ width: `${accuracy}%` }}
               />
             </div>
-            <p className="text-xs text-[var(--foreground)]/40">
+            <p className="text-xs text-[var(--foreground)]/40 leading-relaxed">
               {accuracy >= 80
                 ? "Excellent retention! Keep it up."
                 : accuracy >= 60
@@ -152,7 +143,7 @@ export default function FlashcardsPage() {
 
           <button
             onClick={() => setState("idle")}
-            className="w-full py-3 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-bold rounded-xl text-sm transition-all shadow-sm active:scale-95"
+            className="w-full py-4 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-extrabold rounded-xl text-sm transition-all shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[4px] active:shadow-none cursor-pointer"
           >
             Done
           </button>
@@ -165,11 +156,11 @@ export default function FlashcardsPage() {
   if (state === "reviewing" && current) {
     const progressPercent = Math.round((currentIndex / total) * 100);
     return (
-      <div className="w-full p-3 md:p-8 space-y-5">
+      <div className="w-full p-4 md:p-8 space-y-5 md:space-y-6">
         <div className="w-full space-y-5">
           {/* Progress bar */}
-          <div className="flex items-center gap-3 bg-[var(--surface-strong)] px-4 py-3 border border-[var(--line)] rounded-[18px] shadow-sm">
-            <div className="flex-1 h-2 bg-[var(--surface-strong)] rounded-full overflow-hidden">
+          <div className="flex items-center gap-3 bg-[var(--surface-strong)] px-4 py-3.5 border border-[var(--line)] rounded-[18px] shadow-[0_2px_0_var(--line)]">
+            <div className="flex-1 h-2.5 bg-[var(--surface)] rounded-full overflow-hidden border border-[var(--line-soft)]">
               <div
                 className="h-full bg-primary-500 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
@@ -188,27 +179,27 @@ export default function FlashcardsPage() {
           {/* Card */}
           <div
             onClick={() => setFlipped(!flipped)}
-            className="cursor-pointer select-none min-h-[240px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 flex flex-col items-center justify-center gap-4 shadow-md hover:shadow-lg transition-all duration-200 group"
+            className="cursor-pointer select-none min-h-[260px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] p-8 flex flex-col items-center justify-center gap-5 shadow-[0_4px_0_var(--line)] active:translate-y-[4px] active:shadow-none transition-all duration-150 group"
           >
             {!flipped ? (
               <>
-                <span className="text-[10px] font-bold text-[var(--foreground)]/40 uppercase tracking-widest px-2.5 py-1 bg-[var(--surface)] border border-[var(--line)] rounded-full">
+                <span className="text-[10px] font-bold text-[var(--foreground)]/40 uppercase tracking-widest px-3 py-1.5 bg-[var(--surface)] border border-[var(--line)] rounded-full">
                   Tap to reveal answer
                 </span>
-                <p className="text-3xl font-bold text-[var(--foreground)] text-center leading-snug">
+                <p className="text-3xl md:text-4xl font-extrabold text-[var(--foreground)] text-center leading-snug">
                   {current.front}
                 </p>
               </>
             ) : (
               <>
-                <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest px-2.5 py-1 bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-full">
+                <span className="text-[10px] font-bold text-primary-600 uppercase tracking-widest px-3 py-1.5 bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-full">
                   Answer
                 </span>
-                <p className="text-xl sm:text-2xl font-bold text-[var(--foreground)] text-center leading-snug">
+                <p className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] text-center leading-snug">
                   {current.back}
                 </p>
                 {current.example && (
-                  <p className="text-xs text-[var(--foreground)]/40 italic text-center border-t border-[var(--line)] pt-3 max-w-sm">
+                  <p className="text-xs text-[var(--foreground)]/40 italic text-center border-t border-[var(--line)] pt-4 max-w-sm leading-relaxed">
                     &quot;{current.example}&quot;
                   </p>
                 )}
@@ -218,17 +209,17 @@ export default function FlashcardsPage() {
 
           {/* Action buttons */}
           {flipped ? (
-            <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-4 space-y-3 shadow-sm">
+            <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-5 space-y-4 shadow-[0_2px_0_var(--line)]">
               <p className="text-xs font-bold uppercase tracking-widest text-[var(--foreground)]/40 text-center">
                 How well did you recall?
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {QUALITY_BUTTONS.map((b) => (
                   <button
                     key={b.quality}
                     onClick={() => handleQuality(b.quality)}
                     disabled={submitReview.isPending}
-                    className={`py-3 border rounded-xl text-xs font-bold transition-all disabled:opacity-50 active:scale-95 cursor-pointer ${b.color}`}
+                    className={`py-3.5 border rounded-xl text-sm font-bold transition-all disabled:opacity-50 cursor-pointer shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none ${b.color}`}
                   >
                     {b.label}
                   </button>
@@ -238,7 +229,7 @@ export default function FlashcardsPage() {
           ) : (
             <button
               onClick={() => setFlipped(true)}
-              className="w-full py-4 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-bold text-sm rounded-[18px] transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] cursor-pointer"
+              className="w-full py-4 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 font-extrabold text-sm rounded-[18px] transition-all shadow-[0_4px_0_rgba(0,0,0,0.3)] active:translate-y-[4px] active:shadow-none cursor-pointer"
             >
               Reveal Answer
             </button>
@@ -250,21 +241,21 @@ export default function FlashcardsPage() {
 
   // ── Idle state ──
   return (
-    <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
+    <div className="w-full p-4 md:p-8 space-y-5 md:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center shrink-0 border border-primary-100 dark:border-primary-800">
             <Layers className="w-5 h-5 text-primary-600" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">Flashcard Deck</h1>
-            <p className="text-sm text-[var(--foreground)]/55">SM-2 spaced repetition system</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] tracking-tight">Flashcards</h1>
+            <p className="text-sm text-[var(--foreground)]/55 mt-0.5">SM-2 spaced repetition system</p>
           </div>
         </div>
         <button
           onClick={() => setShowAdd(!showAdd)}
-          className="px-4 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95"
+          className="px-4 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-sm font-bold rounded-xl transition-all shadow-[0_3px_0_rgba(0,0,0,0.3)] active:translate-y-[3px] active:shadow-none cursor-pointer"
         >
           {showAdd ? "Cancel" : "+ Card"}
         </button>
@@ -272,26 +263,26 @@ export default function FlashcardsPage() {
 
       {/* Add card form */}
       {showAdd && (
-        <form onSubmit={handleAddCard} className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-5 space-y-4 shadow-sm">
+        <form onSubmit={handleAddCard} className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] p-5 space-y-4 shadow-[0_2px_0_var(--line)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Front</label>
-              <input value={front} onChange={(e) => setFront(e.target.value)} placeholder="Question or word" required className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+              <input value={front} onChange={(e) => setFront(e.target.value)} placeholder="Question or word" required className="w-full px-3.5 py-3 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Back</label>
-              <input value={back} onChange={(e) => setBack(e.target.value)} placeholder="Answer or definition" required className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+              <input value={back} onChange={(e) => setBack(e.target.value)} placeholder="Answer or definition" required className="w-full px-3.5 py-3 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--foreground)]/40">Example (optional)</label>
-              <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence" className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+              <input value={example} onChange={(e) => setExample(e.target.value)} placeholder="Example sentence" className="w-full px-3.5 py-3 rounded-xl border border-[var(--line-soft)] bg-[var(--surface-strong)] text-[var(--foreground)] placeholder:text-[var(--foreground)]/40 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-[var(--foreground)]/55 hover:bg-[var(--surface)] transition-all active:scale-95">
+            <button type="button" onClick={() => setShowAdd(false)} className="px-4 py-2.5 border border-[var(--line-soft)] rounded-xl text-xs font-bold text-[var(--foreground)]/55 hover:bg-[var(--surface)] transition-all shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer">
               Cancel
             </button>
-            <button type="submit" disabled={addCard.isPending} className="px-5 py-2 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-xl text-xs font-bold disabled:opacity-50 transition-all active:scale-95 shadow-sm">
+            <button type="submit" disabled={addCard.isPending} className="px-5 py-2.5 bg-stone-900 dark:bg-stone-100 hover:bg-stone-800 dark:hover:bg-stone-200 text-white dark:text-stone-900 rounded-xl text-xs font-bold disabled:opacity-50 transition-all shadow-[0_2px_0_rgba(0,0,0,0.3)] active:translate-y-[2px] active:shadow-none cursor-pointer">
               {addCard.isPending ? "Saving…" : "Add"}
             </button>
           </div>
@@ -300,32 +291,34 @@ export default function FlashcardsPage() {
 
       {/* CTA / status */}
       {isLoading ? (
-        <div className="h-32 rounded-[22px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
+        <div className="h-36 rounded-[22px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
       ) : dueCards.length > 0 ? (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-[22px] p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
-              <Layers className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-[22px] p-6 flex flex-col sm:flex-row sm:items-center gap-5 shadow-[0_3px_0_rgba(180,130,0,0.2)]">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-700">
+              <Layers className="w-6 h-6 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <p className="font-bold text-amber-900 dark:text-amber-200">{dueCards.length} card{dueCards.length !== 1 ? "s" : ""} due for review</p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Regular review keeps your memory strong.</p>
+              <p className="font-extrabold text-amber-900 dark:text-amber-200">{dueCards.length} card{dueCards.length !== 1 ? "s" : ""} due for review</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">Regular review keeps your memory strong.</p>
             </div>
           </div>
           <button
             onClick={startReview}
-            className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm transition-all shadow-sm active:scale-95 shrink-0"
+            className="px-7 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-extrabold rounded-xl text-sm transition-all shadow-[0_3px_0_rgba(150,90,0,0.3)] active:translate-y-[3px] active:shadow-none shrink-0 cursor-pointer"
           >
             Start Session
           </button>
         </div>
       ) : (
-        <div className="text-center py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-[18px] bg-emerald-50 flex items-center justify-center">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+        <div className="text-center py-20 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-[0_2px_0_var(--line)] flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-[20px] bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center border border-emerald-100 dark:border-emerald-800 shadow-[0_3px_0_var(--line)]">
+            <CheckCircle2 className="w-7 h-7 text-emerald-500" />
           </div>
-          <h3 className="font-bold text-[var(--foreground)]">All caught up!</h3>
-          <p className="text-[var(--foreground)]/40 text-sm max-w-xs">No cards due today. Come back tomorrow or add new cards.</p>
+          <div className="space-y-1">
+            <h3 className="font-extrabold text-[var(--foreground)]">All caught up!</h3>
+            <p className="text-[var(--foreground)]/40 text-sm leading-relaxed max-w-xs">No cards due today. Come back tomorrow or add new cards.</p>
+          </div>
         </div>
       )}
     </div>

@@ -30,31 +30,31 @@ const NAV_SECTIONS = [
   {
     label: "Learn",
     items: [
-      { href: "/home",      label: "Home",         icon: LayoutDashboard },
+      { href: "/home",      label: "Home",           icon: LayoutDashboard },
       { href: "/chat",      label: "Chat with Aria", icon: MessageSquare },
-      { href: "/call",      label: "Voice Call",   icon: PhoneCall },
-      { href: "/speaking",  label: "Reading Aloud", icon: BookOpen },
+      { href: "/call",      label: "Voice Call",     icon: PhoneCall },
+      { href: "/speaking",  label: "Reading Aloud",  icon: BookOpen },
     ],
   },
   {
     label: "Library",
     items: [
-      { href: "/lessons",   label: "Lessons",      icon: BookOpen },
-      { href: "/vocabulary",label: "Vocabulary",   icon: BookMarked },
-      { href: "/flashcards",label: "Flashcards",   icon: Layers },
+      { href: "/lessons",    label: "Lessons",      icon: BookOpen },
+      { href: "/vocabulary", label: "Vocabulary",   icon: BookMarked },
+      { href: "/flashcards", label: "Flashcards",   icon: Layers },
     ],
   },
   {
     label: "Community",
     items: [
-      { href: "/rooms",     label: "Speaking Rooms", icon: Mic2 },
+      { href: "/rooms", label: "Speaking Rooms", icon: Mic2 },
     ],
   },
   {
     label: "Account",
     items: [
-      { href: "/progress",  label: "Progress",     icon: BarChart2 },
-      { href: "/settings",  label: "Settings",     icon: Settings },
+      { href: "/progress", label: "Progress", icon: BarChart2 },
+      { href: "/settings", label: "Settings", icon: Settings },
     ],
   },
 ] as const;
@@ -88,7 +88,7 @@ function TopBar() {
       <div className="relative">
         <button
           onClick={() => setDropdownOpen((v) => !v)}
-          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-[var(--surface)] transition-colors border border-transparent hover:border-[var(--line)]"
+          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-[var(--surface)] transition-colors border border-transparent hover:border-[var(--line)] active:scale-[0.97] active:opacity-80"
         >
           <div className="w-7 h-7 rounded-full overflow-hidden bg-primary-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
             {profile?.avatarUrl
@@ -105,14 +105,14 @@ function TopBar() {
           <>
             <div className="fixed inset-0 z-10" onClick={() => setDropdownOpen(false)} />
             <div className="absolute right-0 top-full mt-2 w-52 bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl shadow-xl z-20 py-1.5 overflow-hidden">
-              <div className="px-4 py-2.5 border-b border-[var(--line)]">
+              <div className="px-4 py-3 border-b border-[var(--line)]">
                 <p className="text-xs font-bold text-[var(--foreground)] truncate">{profile?.displayName}</p>
                 <p className="text-[10px] text-[var(--foreground)]/50 mt-0.5">{profile?.cefrLevel ?? "—"} · {profile?.goal ?? "—"}</p>
               </div>
               <Link
                 href="/settings"
                 onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--foreground)]/70 hover:bg-[var(--surface)] transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--foreground)]/70 hover:bg-[var(--surface)] transition-colors"
               >
                 <Settings className="w-4 h-4" /> Settings
               </Link>
@@ -133,22 +133,22 @@ function SidebarStats() {
   const { data: profile } = trpc.users.getProfile.useQuery();
   const { data: dueCount } = trpc.progress.getDueFlashcardsCount.useQuery();
   return (
-    <div className="px-3 py-3 border-t border-[var(--line)]">
-      <div className="grid grid-cols-3 gap-1.5">
-        <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--highlight)]/45 rounded-xl border border-[var(--line)]">
+    <div className="px-3 py-4 border-t border-[var(--line)]">
+      <div className="grid grid-cols-3 gap-2">
+        <div className="flex flex-col items-center gap-1 py-3 bg-[var(--highlight)]/45 rounded-xl border border-[var(--line)]">
           <Zap className="w-3.5 h-3.5 text-amber-500" />
           <p className="text-xs font-black text-[var(--foreground)]">{profile?.xpTotal?.toLocaleString() ?? 0}</p>
-          <p className="text-[9px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">XP</p>
+          <p className="text-[10px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">XP</p>
         </div>
-        <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--pink)]/35 rounded-xl border border-[var(--line)]">
+        <div className="flex flex-col items-center gap-1 py-3 bg-[var(--pink)]/35 rounded-xl border border-[var(--line)]">
           <Flame className="w-3.5 h-3.5 text-orange-400" />
           <p className="text-xs font-black text-[var(--foreground)]">{profile?.streakDays ?? 0}</p>
-          <p className="text-[9px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">Streak</p>
+          <p className="text-[10px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">Streak</p>
         </div>
-        <div className="flex flex-col items-center gap-0.5 py-2.5 bg-[var(--yellow)]/40 rounded-xl border border-[var(--line)]">
+        <div className="flex flex-col items-center gap-1 py-3 bg-[var(--yellow)]/40 rounded-xl border border-[var(--line)]">
           <Layers className="w-3.5 h-3.5 text-primary-500" />
           <p className="text-xs font-black text-[var(--foreground)]">{dueCount?.count ?? 0}</p>
-          <p className="text-[9px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">Due</p>
+          <p className="text-[10px] text-[var(--foreground)]/50 font-semibold uppercase tracking-wider">Due</p>
         </div>
       </div>
     </div>
@@ -159,10 +159,10 @@ function SidebarStats() {
 
 function NavItems({ pathname, onClick }: { pathname: string; onClick?: () => void }) {
   return (
-    <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+    <nav className="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
       {NAV_SECTIONS.map((section) => (
         <div key={section.label} className="space-y-0.5">
-          <p className="text-[9px] font-black uppercase tracking-widest text-[var(--foreground)]/40 px-3 pb-1">
+          <p className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]/35 px-3 pb-1.5">
             {section.label}
           </p>
           {section.items.map((item) => {
@@ -173,10 +173,10 @@ function NavItems({ pathname, onClick }: { pathname: string; onClick?: () => voi
                 key={item.href}
                 href={item.href}
                 onClick={onClick}
-                className={`flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-150 ${
+                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 select-none ${
                   active
-                    ? "bg-primary-100 dark:bg-primary-900/40 border border-[var(--line)] text-primary-800 dark:text-primary-300"
-                    : "text-[var(--foreground)]/60 hover:bg-[var(--surface)] hover:text-[var(--foreground)] border border-transparent"
+                    ? "bg-primary-100 dark:bg-primary-900/40 border border-[var(--line)] text-primary-800 dark:text-primary-300 shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none"
+                    : "text-[var(--foreground)]/60 hover:bg-[var(--surface)] hover:text-[var(--foreground)] border border-transparent hover:border-[var(--line)] active:translate-y-[1px] active:opacity-70"
                 }`}
               >
                 <Icon className={`w-4 h-4 shrink-0 ${active ? "text-primary-600" : "text-[var(--foreground)]/40"}`} />
@@ -206,10 +206,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--background)] paper-grid">
       {/* ── Desktop sidebar ── */}
-      <aside className="hidden md:flex w-56 shrink-0 bg-[var(--surface-strong)] border-r border-[var(--line)] flex-col h-full overflow-y-auto relative z-20">
+      <aside className="hidden md:flex w-60 shrink-0 bg-[var(--surface-strong)] border-r border-[var(--line)] flex-col h-full overflow-y-auto relative z-20">
         {/* Logo */}
-        <div className="px-5 h-14 border-b border-[var(--line)] flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center border border-[var(--line)]">
+        <div className="px-5 h-14 border-b border-[var(--line)] flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center border border-[var(--line)] shadow-[0_2px_0_rgba(0,0,0,0.25)]">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -239,8 +239,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }`}
       >
         <div className="px-5 py-4 border-b border-[var(--line)] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-primary-600 flex items-center justify-center border border-[var(--line)]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center border border-[var(--line)]">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -249,7 +249,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--foreground)]/50 hover:bg-[var(--surface)]"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--foreground)]/50 hover:bg-[var(--surface)] transition-colors active:scale-90"
           >
             <X className="w-4 h-4" />
           </button>
@@ -270,7 +270,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOpen(true)}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--foreground)]/50 hover:bg-[var(--surface)]"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--foreground)]/50 hover:bg-[var(--surface)] transition-colors active:scale-90"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -286,11 +286,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Mobile bottom nav */}
         <nav className="md:hidden sticky bottom-0 z-10 bg-[var(--surface-strong)] border-t border-[var(--line)] flex items-center justify-around px-2 h-16 shrink-0">
           {[
-            { href: "/home",      icon: LayoutDashboard, label: "Home" },
-            { href: "/chat",      icon: MessageSquare,   label: "Chat" },
-            { href: "/call",      icon: PhoneCall,       label: "Call" },
-            { href: "/lessons",   icon: BookOpen,        label: "Lessons" },
-            { href: "/progress",  icon: BarChart2,       label: "Stats" },
+            { href: "/home",     icon: LayoutDashboard, label: "Home" },
+            { href: "/chat",     icon: MessageSquare,   label: "Chat" },
+            { href: "/call",     icon: PhoneCall,       label: "Call" },
+            { href: "/lessons",  icon: BookOpen,        label: "Lessons" },
+            { href: "/progress", icon: BarChart2,       label: "Stats" },
           ].map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             const Icon = item.icon;
@@ -298,7 +298,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all ${
+                className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all active:scale-90 ${
                   active ? "text-primary-600" : "text-[var(--foreground)]/40 hover:text-[var(--foreground)]/80"
                 }`}
               >

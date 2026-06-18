@@ -331,7 +331,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
   const exercises = content.exercises ?? [];
 
   return (
-    <div className="w-full p-3 md:p-8 space-y-4 md:space-y-6">
+    <div className="w-full p-4 md:p-8 space-y-5 md:space-y-7">
       {/* Top Navigation & Header */}
       <div className="space-y-4">
         {/* Breadcrumbs */}
@@ -581,7 +581,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
                   complete.mutate({ lessonId: id, score: finalScore, xpEarned });
                 }}
                 disabled={Object.keys(answers).length < exercises.length || complete.isPending}
-                className="w-full py-3 bg-stone-900 hover:bg-stone-800 text-white font-bold text-sm rounded-2xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-4 bg-stone-900 hover:bg-stone-800 text-white font-extrabold text-sm rounded-2xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {complete.isPending ? "Saving…" : "Check Answers"}
               </button>
@@ -607,7 +607,7 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
             <button
               onClick={() => complete.mutate({ lessonId: id, score: 100, xpEarned: 20 })}
               disabled={complete.isPending}
-              className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white font-extrabold text-sm rounded-2xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {complete.isPending ? "Saving…" : "Mark as Complete"}
             </button>
@@ -616,13 +616,13 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
             <div className="flex gap-3">
               <button
                 onClick={() => { setAnswers({}); setSubmitted(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                className="flex-1 py-3.5 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-primary-400 text-[var(--foreground)] font-bold text-sm rounded-2xl transition-all active:scale-[0.98] cursor-pointer"
+                className="flex-1 py-3.5 bg-[var(--surface-strong)] border border-[var(--line)] hover:border-primary-400 text-[var(--foreground)] font-bold text-sm rounded-2xl transition-all shadow-[0_3px_0_var(--line)] active:translate-y-[3px] active:shadow-none cursor-pointer"
               >
                 Try Again
               </button>
               <button
                 onClick={() => router.push("/lessons")}
-                className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-md shadow-primary-500/10 active:scale-[0.98] cursor-pointer"
+                className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-2xl transition-all shadow-[0_3px_0_rgba(0,0,0,0.25)] active:translate-y-[3px] active:shadow-none cursor-pointer"
               >
                 Back to Lessons
               </button>
