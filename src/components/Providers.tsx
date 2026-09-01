@@ -6,6 +6,7 @@ import { httpBatchLink } from "@trpc/client";
 import { Toaster } from "sonner";
 import { trpc } from "@/lib/trpc";
 import { createClient } from "@/lib/supabase/client";
+import { notifyError } from "@/lib/errorMessage";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() =>
@@ -14,8 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: true },
         mutations: {
           onError: (err) => {
-            const message = err instanceof Error ? err.message : "Something went wrong";
-            import("sonner").then(({ toast }) => toast.error(message));
+            notifyError(err);
           },
         },
       },
@@ -56,7 +56,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {children}
-        <Toaster position="top-center" richColors closeButton />
+        <Toaster position="top-center" richColors closeButton offset="72px" />
       </QueryClientProvider>
     </trpc.Provider>
   );

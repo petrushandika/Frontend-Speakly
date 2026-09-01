@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
+import { friendlyError } from "@/lib/errorMessage";
 
 export type VoiceState = "idle" | "listening" | "thinking" | "speaking";
 
@@ -387,7 +388,7 @@ export function useVoiceChat({ accent = "american", onError, mode = "free_talk" 
       if (err instanceof Error && err.name === "AbortError") {
         setVoiceState("idle"); setStreamingText(""); return;
       }
-      onError?.(err instanceof Error ? err.message : "Voice error");
+      onError?.(friendlyError(err));
       setVoiceState("idle"); setStreamingText("");
     }
   }

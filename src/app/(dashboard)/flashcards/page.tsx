@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { Skeleton } from "@/components/Skeleton";
 import { toast } from "sonner";
 import {
   Layers,
@@ -291,7 +292,7 @@ export default function FlashcardsPage() {
 
       {/* CTA / status */}
       {isLoading ? (
-        <div className="h-36 rounded-[22px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
+        <Skeleton className="h-36 rounded-[22px]" />
       ) : dueCards.length > 0 ? (
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-[22px] p-6 flex flex-col sm:flex-row sm:items-center gap-5 shadow-[0_3px_0_rgba(180,130,0,0.2)]">
           <div className="flex items-center gap-4 flex-1">

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { trpcClient } from "@/lib/trpc";
+import { friendlyError } from "@/lib/errorMessage";
 
 export interface Message {
   id: string;
@@ -304,8 +305,7 @@ export function useAIChat({ onError }: UseAIChatOptions = {}) {
           }
         }
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Connection error";
-        onError?.(message);
+        onError?.(friendlyError(err));
         setSessions((prev) =>
           prev.map((s) =>
             s.id !== activeId

@@ -5,6 +5,7 @@ import { useAIChat } from "@/hooks/useAIChat";
 import { useSpeech } from "@/hooks/useSpeech";
 import { ChatBubble } from "@/components/learning/ChatBubble";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 import {
   Send, Mic, Square, Volume2, VolumeX, Volume1,
   Briefcase, Calendar, PenLine, Users, Lightbulb,
@@ -130,18 +131,17 @@ export default function ChatPage() {
     switchSession,
     deleteSession,
     clearChat,
-  } = useAIChat({ onError: (e) => setError(e) });
+  } = useAIChat({ onError: (e) => toast.error(e, { id: e }) });
 
   const [showModeMenu, setShowModeMenu] = useState(false);
 
   const { isRecording, isSpeaking, startRecording, stopRecording, speak, stopSpeaking } =
     useSpeech({
       onTranscript: (text) => setInput(text),
-      onError: (e) => setError(e),
+      onError: (e) => toast.error(e, { id: e }),
     });
 
   const [input, setInput]             = useState("");
-  const [error, setError]             = useState<string | null>(null);
   const [ttsEnabled, setTtsEnabled]   = useState(false);
   const [showHistory, setShowHistory] = useState(true);
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
@@ -199,7 +199,6 @@ export default function ChatPage() {
   function handleSend(text?: string) {
     const msg = (text ?? input).trim();
     if (!msg || isLoading) return;
-    setError(null);
     sendMessage(msg);
     setInput("");
     inputRef.current?.focus();
@@ -452,16 +451,6 @@ export default function ChatPage() {
             </>
           )}
         </div>
-
-        {/* Error banner */}
-        {error && (
-          <div className="shrink-0 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 flex justify-between items-center">
-            <span className="font-semibold">{error}</span>
-            <button onClick={() => setError(null)} className="ml-2 p-0.5 hover:text-red-800 active:scale-90">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
 
         {/* Contextual suggestions */}
         {suggestions.length > 0 && (

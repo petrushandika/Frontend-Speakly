@@ -82,7 +82,7 @@ export default function RegisterPage() {
     }
 
     if (!data.session) {
-      router.push("/verify-email");
+      router.push("/verify");
       return;
     }
 

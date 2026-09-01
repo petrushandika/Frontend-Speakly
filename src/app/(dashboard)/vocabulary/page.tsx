@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc, trpcClient } from "@/lib/trpc";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 import { useSpeak } from "@/hooks/useSpeak";
 import {
@@ -650,11 +651,9 @@ export default function VocabularyPage() {
           </div>
 
           {isLoading && (
-            <div className="space-y-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-16 rounded-[18px] bg-[var(--surface-strong)] animate-pulse" />
-              ))}
-            </div>
+            <SkeletonGroup className="space-y-2">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16" />)}
+            </SkeletonGroup>
           )}
 
           {!isLoading && displayed.length === 0 && (

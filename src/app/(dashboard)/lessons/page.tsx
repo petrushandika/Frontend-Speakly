@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 import {
   BookOpen,
   BookMarked,
@@ -85,11 +86,9 @@ export default function LessonsPage() {
 
       {/* Loading Skeleton */}
       {isLoading && (
-        <div className="grid grid-cols-1 gap-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-20 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
-          ))}
-        </div>
+        <SkeletonGroup className="grid grid-cols-1 gap-3">
+          {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20" />)}
+        </SkeletonGroup>
       )}
 
       {/* Empty State */}

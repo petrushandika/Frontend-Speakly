@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 import {
   Zap,
   Flame,
@@ -24,8 +25,8 @@ const QUICK_ACTIONS = [
 ];
 
 export default function HomePage() {
-  const { data: profile } = trpc.users.getProfile.useQuery();
-  const { data: summary, refetch: refetchSummary } = trpc.progress.getSummary.useQuery();
+  const { data: profile, isLoading: loadingProfile } = trpc.users.getProfile.useQuery();
+  const { data: summary, refetch: refetchSummary, isLoading: loadingSummary } = trpc.progress.getSummary.useQuery();
   const { data: dueCount } = trpc.progress.getDueFlashcardsCount.useQuery();
   const { data: recent = [] } = trpc.progress.getRecentProgress.useQuery();
   const updateStreak = trpc.progress.updateStreak.useMutation({
@@ -46,6 +47,24 @@ export default function HomePage() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
+  // Tanpa ini halaman sempat menampilkan "Learner" dan 0 XP sebelum data tiba
+  if (loadingProfile || loadingSummary) {
+    return (
+      <SkeletonGroup className="w-full p-4 md:p-8 space-y-5 md:space-y-8">
+        <Skeleton className="h-44 md:h-56 rounded-[22px]" />
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
+          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-28 sm:h-32" />)}
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-3.5 w-28 rounded-full" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />)}
+          </div>
+        </div>
+      </SkeletonGroup>
+    );
+  }
 
   return (
     <div className="w-full p-4 md:p-8 space-y-5 md:space-y-8">

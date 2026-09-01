@@ -4,13 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 import { createClient } from "@/lib/supabase/client";
 import {
   User, Target, Globe, Briefcase, Cpu,
   GraduationCap, Plane, BookOpen, Volume2,
   Camera, Loader2, X,
   HeartPulse, TrendingUp, Palette, School,
-  Coffee, Scale, Play, Square,
+  Coffee, Scale, Play, Square, ChevronDown,
 } from "lucide-react";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -166,15 +167,20 @@ function SelectField({
   children: React.ReactNode;
   placeholder?: string;
 }) {
+  // appearance-none: panah bawaan OS menempel di border dan tidak bisa diatur
+  // jaraknya, jadi diganti chevron sendiri dengan padding kanan yang cukup.
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full px-4 py-3 rounded-xl border border-[var(--line)] bg-[var(--surface)]/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-[var(--foreground)]/80 cursor-pointer"
-    >
-      {placeholder && <option value="">{placeholder}</option>}
-      {children}
-    </select>
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full appearance-none pl-4 pr-11 py-3 rounded-xl border border-[var(--line)] bg-[var(--surface)]/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-[var(--foreground)]/80 cursor-pointer"
+      >
+        {placeholder && <option value="">{placeholder}</option>}
+        {children}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--foreground)]/40" />
+    </div>
   );
 }
 
@@ -285,12 +291,13 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="w-full p-4 md:p-8 space-y-5">
-        <div className="h-8 w-32 bg-[var(--surface-strong)] border border-[var(--line)] rounded-xl animate-pulse" />
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-44 rounded-3xl bg-[var(--surface-strong)] border border-[var(--line)] animate-pulse" />
-        ))}
-      </div>
+      <SkeletonGroup className="w-full p-4 md:p-8 space-y-5">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-36 rounded-xl" />
+          <Skeleton className="h-3.5 w-80 max-w-full rounded-full" />
+        </div>
+        {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-44 rounded-3xl" />)}
+      </SkeletonGroup>
     );
   }
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 import {
@@ -135,7 +137,7 @@ function SelectStep({
   isGenerating: boolean;
 }) {
   return (
-    <div className="w-full space-y-5 sm:space-y-8 py-4">
+    <div className="w-full space-y-5 sm:space-y-8">
       {/* Header */}
       <div className="flex items-center gap-4">
         <div className="w-11 h-11 rounded-xl bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 flex items-center justify-center shrink-0">
@@ -252,7 +254,6 @@ function ReadingStep({
 }) {
   const [isRecording, setIsRecording]   = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError]               = useState<string | null>(null);
   const [recSeconds, setRecSeconds]     = useState(0);
   const mediaRef    = useRef<MediaRecorder | null>(null);
   const chunksRef   = useRef<Blob[]>([]);
@@ -288,7 +289,7 @@ function ReadingStep({
           // Always proceed to results — even empty transcript shows which words were missed
           onRecordingDone(data.transcript ?? "");
         } catch {
-          setError("Transcription failed. Check your connection and try again.");
+          toast.error("Transcription failed. Check your connection and try again.");
         } finally {
           setIsProcessing(false);
           stream.getTracks().forEach((t) => t.stop());
@@ -298,10 +299,9 @@ function ReadingStep({
       mediaRef.current = recorder;
       setIsRecording(true);
       setRecSeconds(0);
-      setError(null);
       recTimerRef.current = setInterval(() => setRecSeconds((s) => s + 1), 1000);
     } catch {
-      setError("Microphone access denied. Please allow microphone access and try again.");
+      toast.error("Microphone access denied. Please allow microphone access and try again.");
     }
   }
 
@@ -311,8 +311,11 @@ function ReadingStep({
     setIsRecording(false);
   }
 
+  const timeLabel = `${Math.floor(recSeconds / 60)}:${String(recSeconds % 60).padStart(2, "0")}`;
+
   return (
-    <div className="w-full space-y-5">
+    // pb besar: memberi ruang untuk bar rekam yang sticky di bawah
+    <div className="w-full space-y-5 pb-28">
       {/* Text header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
@@ -337,17 +340,20 @@ function ReadingStep({
       {/* Passage */}
       <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-6 shadow-sm space-y-4">
         {text.paragraphs.map((p, i) => (
-          <p key={i} className="text-[var(--foreground)] leading-8 text-base tracking-wide">
+          <p key={i} className="text-[var(--foreground)] leading-9 text-lg sm:text-xl tracking-wide max-w-[68ch]">
             {p}
           </p>
         ))}
       </div>
 
-      {/* Key vocabulary */}
+      {/* Key vocabulary — tertutup secara default agar passage tetap jadi fokus */}
       {text.keyVocabulary.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Key Vocabulary</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <details className="group space-y-2">
+          <summary className="flex items-center gap-2 cursor-pointer list-none text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest hover:text-[var(--foreground)]/70 transition-colors">
+            <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />
+            Key Vocabulary ({text.keyVocabulary.length})
+          </summary>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
             {text.keyVocabulary.map((v) => (
               <div key={v.word} className="flex items-start gap-3 p-3 bg-[var(--surface-strong)] border border-[var(--line)] rounded-xl">
                 <BookMarked className="w-4 h-4 text-primary-400 shrink-0 mt-0.5" />
@@ -359,47 +365,48 @@ function ReadingStep({
               </div>
             ))}
           </div>
-        </div>
+        </details>
       )}
 
-      {/* Error */}
-      {error && (
-        <div className="px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-600">
-          {error}
-        </div>
-      )}
+      {/* Record controls — sticky supaya selalu terjangkau tanpa scroll */}
+      <div className="sticky bottom-0 -mx-1 px-1 pb-1 pt-3 bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent">
+        <div className="sk-panel px-4 py-3 flex items-center gap-4">
+          <button
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={isProcessing}
+            className={`relative w-14 h-14 rounded-full flex items-center justify-center shrink-0 transition-all focus:outline-none focus:ring-4 ${
+              isProcessing
+                ? "bg-[var(--surface)] cursor-not-allowed focus:ring-transparent"
+                : isRecording
+                  ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 cursor-pointer"
+                  : "bg-primary-600 hover:bg-primary-700 focus:ring-primary-300 cursor-pointer"
+            }`}
+          >
+            {isRecording && <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-40" />}
+            {isProcessing ? (
+              <Loader2 className="w-6 h-6 text-[var(--foreground)]/40 animate-spin" />
+            ) : isRecording ? (
+              <MicOff className="w-6 h-6 text-white relative" />
+            ) : (
+              <Mic className="w-6 h-6 text-white relative" />
+            )}
+          </button>
 
-      {/* Record controls */}
-      <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 flex flex-col items-center gap-4 shadow-sm">
-        <p className="text-sm font-semibold text-[var(--foreground)]/80">
-          {isProcessing ? "Processing your recording…" : isRecording ? "Recording — read the passage above" : "Press the mic and read the passage aloud"}
-        </p>
-        <button
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={isProcessing}
-          className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-lg focus:outline-none focus:ring-4 focus:ring-offset-2 ${
-            isProcessing
-              ? "bg-[var(--surface-strong)] cursor-not-allowed focus:ring-slate-200"
-              : isRecording
-                ? "bg-red-500 hover:bg-red-600 focus:ring-red-300 scale-110"
-                : "bg-primary-600 hover:bg-primary-700 focus:ring-primary-300"
-          }`}
-        >
-          {isRecording && <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-40" />}
-          {isProcessing ? (
-            <Loader2 className="w-8 h-8 text-[var(--foreground)]/40 animate-spin" />
-          ) : isRecording ? (
-            <MicOff className="w-8 h-8 text-white" />
-          ) : (
-            <Mic className="w-8 h-8 text-white" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-[var(--foreground)] truncate">
+              {isProcessing ? "Processing your recording…" : isRecording ? "Recording — read the passage aloud" : "Ready when you are"}
+            </p>
+            <p className="text-xs text-[var(--foreground)]/50 mt-0.5">
+              {isRecording ? "Tap the mic again when you finish" : isProcessing ? "Please wait…" : "Tap the mic to start reading"}
+            </p>
+          </div>
+
+          {isRecording && (
+            <span className="shrink-0 font-mono text-lg font-bold text-red-500 tabular-nums">{timeLabel}</span>
           )}
-        </button>
-        <p className="text-xs text-[var(--foreground)]/40">
-          {isRecording
-            ? `${Math.floor(recSeconds / 60)}:${String(recSeconds % 60).padStart(2, "0")} — tap to stop`
-            : isProcessing ? "Please wait…" : "Tap to start recording"}
-        </p>
+        </div>
       </div>
+
     </div>
   );
 }
@@ -518,7 +525,7 @@ function ResultStep({
         <p className="text-xs font-bold text-[var(--foreground)]/40 uppercase tracking-widest">Your reading</p>
         <div className="bg-[var(--surface-strong)] border border-[var(--line)] rounded-2xl p-5 space-y-4 shadow-sm">
           {paraResults.map((paraWords, pi) => (
-            <p key={pi} className="leading-8 text-base">
+            <p key={pi} className="leading-8 text-base max-w-[68ch]">
               {paraWords.map((r, wi) => (
                 <span key={wi}>
                   <span
@@ -559,9 +566,14 @@ function ResultStep({
           <Lightbulb className="w-3.5 h-3.5 text-amber-400" /> AI Coach Feedback
         </p>
         {analyze.isPending && (
-          <div className="flex items-center gap-2 px-4 py-3 bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl text-xs text-[var(--foreground)]/40">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analysing your pronunciation…
-          </div>
+          <SkeletonGroup className="bg-[var(--surface)] border border-[var(--line-soft)] rounded-xl p-4 space-y-3">
+            <p className="flex items-center gap-2 text-xs text-[var(--foreground)]/40">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analysing your pronunciation…
+            </p>
+            <Skeleton className="h-3 w-full rounded-full" />
+            <Skeleton className="h-3 w-11/12 rounded-full" />
+            <Skeleton className="h-3 w-8/12 rounded-full" />
+          </SkeletonGroup>
         )}
         {analyze.isError && (
           <div className="flex items-center justify-between px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 dark:text-red-400">
@@ -644,6 +656,7 @@ function ResultStep({
 type Step = "select" | "read" | "result";
 
 export default function SpeakingPage() {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [step, setStep]             = useState<Step>("select");
   const [theme, setTheme]           = useState<Theme>("business");
   const [paragraphs, setParagraphs] = useState(2);
@@ -678,8 +691,13 @@ export default function SpeakingPage() {
     setStep("select");
   }
 
+  // Tiap pindah step, kembalikan scroll ke atas — tanpa ini user mendarat di tengah halaman
+  useEffect(() => {
+    rootRef.current?.closest("main")?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
   return (
-    <div className="w-full p-4 md:p-8">
+    <div ref={rootRef} className="w-full p-4 md:p-8">
       {/* Progress indicator */}
       <div className="flex items-center gap-2 mb-5 sm:mb-8">
         {(["select", "read", "result"] as Step[]).map((s, i) => {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { trpc } from "@/lib/trpc";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 
 const ChartsSection = dynamic(() => import("./ChartsSection"), {
   ssr: false,
@@ -53,7 +54,7 @@ function TrendBadge({ trend }: { trend: "improving" | "stable" | "needs_attentio
 
 export default function ProgressPage() {
   const FIVE_MIN = 5 * 60 * 1000;
-  const { data: summary }              = trpc.progress.getSummary.useQuery();
+  const { data: summary, isLoading: loadingSummary } = trpc.progress.getSummary.useQuery();
   const { data: recent = [] }          = trpc.progress.getRecentProgress.useQuery();
   const { data: analytics }            = trpc.ai.getErrorAnalytics.useQuery(undefined, { staleTime: FIVE_MIN });
   const { data: recommendations = [] } = trpc.ai.getRecommendations.useQuery(undefined, { staleTime: FIVE_MIN });
@@ -96,6 +97,28 @@ export default function ProgressPage() {
   }));
 
   const hasTrendData = trendData.some((d) => d.count > 0);
+
+  if (loadingSummary) {
+    return (
+      <SkeletonGroup className="w-full p-4 md:p-8 space-y-5 md:space-y-8">
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-11 h-11 rounded-xl shrink-0" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-6 w-52 rounded-lg" />
+            <Skeleton className="h-3.5 w-72 max-w-full rounded-full" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-[76px] sm:h-20" />)}
+        </div>
+        <Skeleton className="h-56 rounded-[22px]" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5">
+          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-72 rounded-[22px]" />)}
+        </div>
+        <Skeleton className="h-44 rounded-[22px]" />
+      </SkeletonGroup>
+    );
+  }
 
   return (
     <div className="w-full p-4 md:p-8 space-y-5 md:space-y-8">

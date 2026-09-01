@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { Skeleton } from "@/components/Skeleton";
 import { getSupportedMimeType, blobType, blobFilename } from "@/lib/audio";
 import {
   Mic2, User, Send, MessageSquare, X, LogIn, LogOut, Mic, MicOff, Loader2, Plus,
@@ -382,7 +383,7 @@ export default function RoomsPage() {
         <div className={`flex flex-col min-h-0 overflow-y-auto space-y-2 ${openChatRoom ? "w-full md:w-72 lg:w-80 shrink-0" : "w-full"}`}>
           {isLoading ? (
             [...Array(3)].map((_, i) => (
-              <div key={i} className="shrink-0 h-24 rounded-[18px] bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] animate-pulse" />
+              <Skeleton key={i} className="shrink-0 h-24" />
             ))
           ) : rooms.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-16 bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[22px] shadow-sm text-center">

@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Mic, MicOff, Phone, PhoneOff, Volume2, Loader2,
-  Plus, PanelLeft, Trash2, X,
+  Plus, PanelLeft, Trash2,
 } from "lucide-react";
 import { useVoiceChat, type VoiceState, type VoiceMessage, type VoiceSession } from "@/hooks/useVoiceChat";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -218,7 +219,6 @@ export default function VoiceCallPage() {
     onSuccess: () => utils.progress.getSummary.invalidate(),
   });
 
-  const [error, setError]             = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   // Track XP awarded per session to avoid double-awarding
@@ -228,7 +228,7 @@ export default function VoiceCallPage() {
     voiceState, messages, sessions, activeSession,
     streamingText, startListening, stopListening,
     interrupt, newSession, switchSession, deleteSession,
-  } = useVoiceChat({ accent, onError: setError });
+  } = useVoiceChat({ accent, onError: (e) => toast.error(e, { id: e }) });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -358,16 +358,6 @@ export default function VoiceCallPage() {
             </>
           )}
         </div>
-
-        {/* Error banner */}
-        {error && (
-          <div className="mb-3 px-4 py-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 dark:text-red-400 flex justify-between items-center shrink-0">
-            <span className="font-semibold">{error}</span>
-            <button onClick={() => setError(null)} className="ml-2 p-0.5 hover:text-red-800 dark:hover:text-red-300">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
 
         {/* Mic controls — bottom panel */}
         <div className="bg-[var(--surface-strong)] border-[1.5px] border-[var(--line)] rounded-[18px] shadow-[0_3px_0_var(--line)] px-6 py-5 flex flex-col items-center gap-4 shrink-0">

@@ -181,3 +181,35 @@ input, textarea, select {
   50%       { transform: translateY(-8px); }
 }
 .animate-float { animation: float 6s ease-in-out infinite; }
+
+/* ── Skeleton loading ─────────────────────────────────────────────────────────
+   Satu kelas dipakai semua halaman supaya bentuk loading konsisten. Shimmer,
+   bukan animate-pulse, agar terbaca sebagai "sedang memuat" dan bukan elemen
+   yang berkedip. */
+.sk-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-strong);
+  border: 1.5px solid var(--line-soft);
+  border-radius: 18px;
+}
+.sk-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(45, 41, 34, 0.07), transparent);
+  animation: sk-shimmer 1.6s ease-in-out infinite;
+}
+.dark .sk-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(232, 226, 212, 0.06), transparent);
+}
+@keyframes sk-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Hormati preferensi sistem — animasi bergerak bisa mengganggu sebagian orang */
+@media (prefers-reduced-motion: reduce) {
+  .sk-skeleton::after { animation: none; }
+  .animate-float      { animation: none; }
+}

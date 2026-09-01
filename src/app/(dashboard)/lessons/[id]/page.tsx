@@ -4,6 +4,7 @@ import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { Skeleton, SkeletonGroup } from "@/components/Skeleton";
 import { toast } from "sonner";
 import { SearchX, Lightbulb, ChevronRight, Eye, EyeOff, Check, X, BookmarkPlus, BookmarkCheck } from "lucide-react";
 
@@ -300,11 +301,11 @@ export default function LessonDetailPage({ params }: { params: Promise<{ id: str
 
   if (isLoading) {
     return (
-      <div className="w-full p-3 md:p-8 space-y-4">
-        <div className="h-6 w-24 bg-[var(--surface)]/60 border border-[var(--line-soft)] rounded-xl animate-pulse" />
-        <div className="h-40 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl animate-pulse" />
-        <div className="h-64 bg-[var(--surface-strong)] border-2 border-[var(--line)] rounded-3xl animate-pulse" />
-      </div>
+      <SkeletonGroup className="w-full p-3 md:p-8 space-y-4">
+        <Skeleton className="h-6 w-24 rounded-xl" />
+        <Skeleton className="h-40 rounded-3xl" />
+        <Skeleton className="h-64 rounded-3xl" />
+      </SkeletonGroup>
     );
   }
 
