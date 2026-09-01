@@ -128,7 +128,7 @@ export default function RegisterPage() {
           <h1 className="text-4xl font-extrabold tracking-tight leading-tight">
             Start your journey to fluent English.
           </h1>
-          <p className="text-[var(--foreground)]/40 leading-relaxed text-base">
+          <p className="text-white/60 leading-relaxed text-base">
             Personalize your learning goals, practice speaking with AI, and master pronunciation with real-time feedback.
           </p>
 
@@ -150,14 +150,14 @@ export default function RegisterPage() {
         </div>
 
         {/* Bottom footer */}
-        <div className="text-[var(--foreground)]/70 text-xs z-10 font-medium">
+        <div className="text-white/50 text-xs z-10 font-medium">
           Speakly AI © 2026. Elevating language mastery.
         </div>
       </div>
 
       {/* Left Pane - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-[var(--background)]">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex-1 flex items-center justify-center p-6 bg-[var(--background)]">
+        <div className={`w-full ${step === 1 ? "max-w-md space-y-8" : "max-w-3xl space-y-4"}`}>
           {/* Mobile brand header (Visible only on mobile) */}
           <div className="text-center md:hidden mb-6">
             <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center mx-auto">
@@ -186,9 +186,9 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          <div className="sk-panel p-8 bg-[var(--surface-strong)]">
+          <div className={`sk-panel bg-[var(--surface-strong)] ${step === 1 ? "p-8" : "p-6"}`}>
             {/* Step indicators */}
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex items-center gap-2 mb-5">
               <div className="h-1.5 flex-1 rounded-full bg-primary-600" />
               <div className={`h-1.5 flex-1 rounded-full transition-colors ${step === 2 ? "bg-primary-600" : "bg-[var(--line)]"}`} />
             </div>
@@ -256,12 +256,12 @@ export default function RegisterPage() {
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Current English Level
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-6 gap-2">
                     {CEFR_LEVELS.map((level) => (
                       <button
                         key={level}
@@ -283,13 +283,13 @@ export default function RegisterPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Main Goal
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {GOALS.map((g) => (
                       <button
                         key={g.value}
                         type="button"
                         onClick={() => setGoal(g.value)}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs border transition-all font-bold shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer ${
+                        className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-[11px] border transition-all font-bold shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer ${
                           goal === g.value
                             ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300"
                             : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 hover:bg-[var(--surface-strong)]"
@@ -306,22 +306,20 @@ export default function RegisterPage() {
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]/55 mb-2">
                     Preferred Accent (Aria&apos;s Voice)
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-5 gap-2">
                     {ACCENTS.map((a) => (
                       <button
                         key={a.value}
                         type="button"
                         onClick={() => setAccentPreference(a.value)}
-                        className={`py-2.5 px-3 flex items-center gap-2 rounded-xl text-xs border transition-all font-bold shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer ${
+                        className={`py-2 px-2 flex flex-col items-center justify-center gap-0.5 rounded-xl border transition-all shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer ${
                           accentPreference === a.value
                             ? "bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-300"
                             : "border-[var(--line)] bg-[var(--surface)]/20 text-[var(--foreground)]/70 hover:border-primary-300 hover:bg-[var(--surface-strong)]"
                         }`}
                       >
-                        <span className="w-7 h-5 rounded text-[10px] font-black bg-[var(--line)] text-[var(--foreground)]/70 flex items-center justify-center shrink-0">
-                          {a.abbr}
-                        </span>
-                        {a.label}
+                        <span className="text-[10px] font-black tracking-widest opacity-60">{a.abbr}</span>
+                        <span className="text-[11px] font-bold leading-tight text-center">{a.label}</span>
                       </button>
                     ))}
                   </div>
@@ -331,18 +329,18 @@ export default function RegisterPage() {
                   <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">{error}</p>
                 )}
 
-                <div className="flex gap-3 pt-2">
+                <div className="flex gap-3 pt-1">
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 py-3.5 border border-[var(--line)] text-sm text-[var(--foreground)]/70 font-bold rounded-xl hover:bg-[var(--surface)] transition-all shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer"
+                    className="flex-1 py-3 border border-[var(--line)] text-sm text-[var(--foreground)]/70 font-bold rounded-xl hover:bg-[var(--surface)] transition-all shadow-[0_2px_0_var(--line)] active:translate-y-[2px] active:shadow-none cursor-pointer"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-3.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className="flex-1 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-extrabold rounded-xl transition-all shadow-[0_4px_0_rgba(0,0,0,0.25)] active:translate-y-[4px] active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {loading ? "Creating account…" : "Start Learning"}
                   </button>
